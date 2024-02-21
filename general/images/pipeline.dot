@@ -1,0 +1,4 @@
+digraph G {
+    "Sequence data" -> "Alignment" [label = " MAFFT "]
+    "Alignment" -> "Phylogenetic tree" [label = " IQTREE "]
+}
