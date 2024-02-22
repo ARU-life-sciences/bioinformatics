@@ -1,54 +1,17 @@
-// links are underlined
-#show link: underline
-// figure captions have reduced size
-#show figure.caption: it => [#text(size: 10pt, it)]
+#import "../typst/format.typ": conf, formatter, shell
 
-#set heading(numbering: "1.")
+#show: doc => conf(
+  title: [Some useful information for bioinformatics projects],
+  authors: (
+      (
+        name: "Max Carter-Brown",
+        affiliation: "Anglia Ruskin University, Wellcome Sanger Institute",
+        email: "max.carter-brown@aru.ac.uk"
+      ),
+    ),
+  doc)
 
-// add a bit to the top with my name and stuff
-#let conf(title: none, author: [], abstract: [], doc) = {
-  set align(center)
-  text(17pt, title)
-
-  grid(columns: (1fr,), row-gutter: 24pt, [
-    *#author.name* \
-    #author.affiliation \
-    #link("mailto:" + author.email)
-  ])
-
-  set align(left)
-  columns(1, doc)
-}
-
-// Display inline code in a small box
-// that retains the correct baseline.
-#show raw.where(block: false): box.with(
-  fill: luma(240),
-  inset: (x: 3pt, y: 0pt),
-  outset: (y: 3pt),
-  radius: 2pt,
-)
-
-// Display block code in a larger block
-// with more padding.
-#show raw.where(block: true): block.with(fill: luma(240), inset: 10pt, radius: 4pt)
-
-#show figure.where(kind: "Shell"): set figure.caption(position: top)
-
-#let shell(block, caption) = {
-  align(
-    right,
-    figure(block, caption: caption, kind: "Shell", supplement: "Shell"),
-  )
-}
-
-#show: doc => conf(title: [Some useful information for bioinformatics projects], author: (
-  name: "Max Carter-Brown",
-  affiliation: "Anglia Ruskin University, Wellcome Sanger Institute",
-  email: "max.carter-brown@aru.ac.uk",
-), abstract: "", doc)
-
-#outline(indent: auto)
+#show: doc => formatter(doc)
 
 = Outcomes
 
@@ -170,10 +133,10 @@ that is in the 'Name' column.
 
 #shell(
   ```bash
-            # these are the same
-            ls -t -h -o -r
-            # a friend of mine told me about these flags whilst doing my PhD
-            ls -thor```,
+  # these are the same
+  ls -t -h -o -r
+  # a friend of mine told me about these flags whilst doing my PhD
+  ls -thor```,
   [Adding flags to our `ls` command modifies its behaviour. Hashed lines are
   comments, not code to be executed.],
 )
@@ -206,11 +169,11 @@ There are actually two ways.
 
 #shell(
   ```bash
-            ls ..
-            ls /
-            # note you can also pass the flags like you did before
-            ls -thor ..
-            ```,
+  ls ..
+  ls /
+  # note you can also pass the flags like you did before
+  ls -thor ..
+  ```,
   [Two ways of doing the same thing. The `..` is a code for 'go up one level'. The
   `/` is the symbol for root. It so happens that when we go up one level from
   HOME, we reach the root! So these two lines of code do the same thing here. If
@@ -226,11 +189,11 @@ where we want to go to.
 
 #shell(
   ```bash
-            # change directory
-            cd
-            cd ..
-            cd Documents
-            ```,
+  # change directory
+  cd
+  cd ..
+  cd Documents
+  ```,
   [Changing directory. The first line takes us home. The second line takes us up
     one level, and the third line takes us in to the Documents folder (provided the
     Documents folder is in the directory you are currently in!)],
@@ -269,13 +232,13 @@ pass after this flag (which is 'OW119596.1.fa').
 
 #shell(
   ```bash
-            # first make a directory to store the data
-            mkdir genome_data
-            # go in to that folder
-            cd genome_data
-            # execute the curl command
-            curl -o OW119596.1.fa 'https://www.ebi.ac.uk/ena/browser/api/fasta/OW119596.1?download=true'
-            ```,
+  # first make a directory to store the data
+  mkdir genome_data
+  # go in to that folder
+  cd genome_data
+  # execute the curl command
+  curl -o OW119596.1.fa 'https://www.ebi.ac.uk/ena/browser/api/fasta/OW119596.1?download=true'
+  ```,
   [Make a directory, go in to that directory and then download chromosome 1 of _Arabidopsis thaliana_.],
 )
 
@@ -294,18 +257,18 @@ internet, which is what we do here.
 
 #shell(
   ```bash
-            # fetch the software
-            git clone https://github.com/lh3/seqtk.git
-            # go into the downloaded directory
-            cd seqtk
-            # compile the software before we can use it
-            make
-            # now list the files in the directory
-            # there should now be one called `seqtk`
-            ls
-            # go back up one directory
-            cd ..
-            ```,
+  # fetch the software
+  git clone https://github.com/lh3/seqtk.git
+  # go into the downloaded directory
+  cd seqtk
+  # compile the software before we can use it
+  make
+  # now list the files in the directory
+  # there should now be one called `seqtk`
+  ls
+  # go back up one directory
+  cd ..
+  ```,
   [`git` is a tool to version control files. We can use it to download 'repositories'.
   Here we are cloning (i.e. downloading from the internet) `seqtk`. By default it
   creates a directory called `seqtk`. We go in to that directory using `cd`. We
@@ -327,14 +290,14 @@ directory above the `seqtk` directory.
 
 #shell(
   ```bash
-            # the ./ means 'from the current directory'.
-            # . by itself means the current directory
-            # this command shows the help
-            ./seqtk/seqtk
+  # the ./ means 'from the current directory'.
+  # . by itself means the current directory
+  # this command shows the help
+  ./seqtk/seqtk
 
-            # and this runs our command
-            ./seqtk/seqtk size OW119596.1.fa
-            ```,
+  # and this runs our command
+  ./seqtk/seqtk size OW119596.1.fa
+  ```,
   [Run the executable we downloaded. The first command brings up the help. The
   second command runs the `size` module of the software which reports the sequence
   number, and the number of bases counted.],
