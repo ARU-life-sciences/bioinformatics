@@ -8,6 +8,7 @@ A resource for ARU students who wish to know more about bioinformatics.
   - filesystem
   - basic terminal commands
   - navigation: `ls`, `cd`, `pwd`
+  - help: `man`, `-h/--help`
   - filesystem: `mkdir`, `cp`, `mv`, `rm`, hidden files
   - viewing: `head`, `more/less`, `wc`
   - pipes and redirection: `|`, `>`, `>>` 
