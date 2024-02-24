@@ -1,4 +1,4 @@
-#import "../typst/format.typ": conf, formatter, shell
+#import "../../typst/format.typ": conf, formatter, shell
 
 #show: doc => conf(
   title: [Some useful information for bioinformatics projects],
