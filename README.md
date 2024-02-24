@@ -16,7 +16,26 @@ A resource for ARU students who wish to know more about bioinformatics.
   - fetching data: `curl`, `tar`, `gzip`, `unzip`, `gunzip`
   - the shell environment: aliases, `$PATH`
   - permissions: `chmod`
-- [ ] `stats` will contain statistics help, mainly in R
+- [ ] `R` topics in R
+  - STATS:
+    - descriptive stats: means, sd's, table, histogram
+    - describe data: error and confidence intervals
+    - categorical x categorical: chi squared analysis
+    - numerical x categorical: t test & anova
+    - numerical x numerical: correlation, regression analysis, `lm`
+    - meta-analysis in R
+    - ANCOVA?
+    - `glm`
+  - PROGRAMMING:
+    - variables, data types, classes    
+    - write a function
+    - reading and writing data
+    - data frames
+      - functions across
+      - indexing, filtering
+    - loops
+    - conditionals
+    - plotting
 - [ ] `scripting` will contain help in making scripts in BASH, R, python
   - running files: `./`
 - [ ] `git`
