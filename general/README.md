@@ -9,3 +9,7 @@ Then run:
 ```bash
 bash compile.bash
 ```
+
+You might also want to install `typstfmt`:
+
+https://github.com/astrale-sharp/typstfmt
