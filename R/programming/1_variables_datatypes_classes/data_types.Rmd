@@ -20,7 +20,7 @@ Typically this means we use:
 
 So the largest number represented is:
 
-````{r}
+```{r}
 exponent <- 2^11 - 2^10 - 1
 # roughly with some error
 2 ^ exponent
