@@ -1,0 +1,225 @@
+# Basic data types in R
+
+All languages have data types, so R is no exception. We will look at all of the 
+most common data types in this notebook.
+
+## Primitive types
+
+### Numbers
+
+These are the most simple data types, and are used very commonly throughout all 
+R code. First we have the numbers. All numbers in R without the `L` suffix are 
+floating point numbers - aka decimals. They are of a 64 bit precision. These are
+also known as `long` numbers or `double`s.
+
+Typically this means we use:
+
+* 53 bits for the coefficient (52 really)
+* 11 for exponent
+* 1 for sign (+/-)
+
+So the largest number represented is:
+
+````{r}
+exponent <- 2^11 - 2^10 - 1
+# roughly with some error
+2 ^ exponent
+```
+
+And then you can have 16 digits precision after the decimal point:
+
+```{r}
+2^52
+```
+
+Anyways, here are some numbers!
+
+```{r}
+# all plain numbers in R are floats
+x <- 1
+# same thing
+y <- 1.0
+# same thing
+z <- 1.
+
+```
+
+Integers are rarer in R. They are whole numbers. They can only be created by 
+appending `L` to a number. They are of 32 bit precision. This discrepancy with
+the above floats is actually quite annoying (see https://www.r-bloggers.com/2015/06/r-in-a-64-bit-world/).
+
+This means in R, we can only assign numbers as high as 2^31 - 1 and as low as -2^31 - 1.
+We take a bit for the +ve/-ve.
+
+```{r}
+# make the integer
+my_integer <- 2L
+# typeof is a function which shows the type of the object
+typeof(my_integer)
+```
+
+### Boolean
+
+Boolean types are true or false types. Internally they are treated as 1's or 0's.
+They are binary types, so there are only two you can have. R calls these `logical`.
+
+```{r}
+# all caps true or false are the values
+true <- TRUE
+false <- FALSE
+
+# you can short hand to T/F but I wouldn't
+true_again <- T
+not_true <- F
+
+```
+
+### Characters, or strings
+
+R has strings, which are letters stuck together. These can be thought of as 
+vectors of single letters, though R is rather annoying about strings. 
+
+```{r}
+a_string <- "hello, R"
+typeof(a_string)
+```
+
+## Compound types
+
+These types are a bit more complex than the primitive ones, and are composed of
+them in different formats.
+
+### Vectors
+
+#### Atomic vectors
+
+Vectors are extremely common in R, and you can't really be without them. They are
+created (confusingly) using the `c()` function. This stands for concatenate.
+
+```{r}
+vec <- c(1, 2, 3, 4)
+```
+
+Importantly, vectors must contain all the same types within them. If you try to 
+mix types up within a vector (which you can do), something called 'type coercion'
+will happen.
+
+```{r}
+# number, number, character(!!), number, number
+oops <- c(1, 2, "3", 4, 5)
+oops
+```
+
+All the values in `oops` are now characters, as character takes precedence over
+numbers. The full list of coercive precedence is here:
+
+`character > complex > numeric > integer > logical > raw`
+
+This means if I had a vector like this, the TRUE's will get changed into 1's.
+
+```{r}
+# uh oh mixing types again
+bools <- c(TRUE, TRUE, 0)
+bools
+```
+
+This behaviour is generally pretty undesirable, so try to avoid it if you can.
+There are a bunch of functions for forcing different data types. For example:
+
+```{r}
+# force 1 into a character
+char <- as.character(1)
+char
+
+# force the character "12" into an integer
+int <- as.integer("12")
+int
+```
+
+One of the powerful things about R is that many functions, such as `as.character()`
+are applied across vectors by default. This is known as vectorisation. We'll probably
+get to this later, as it's important.
+
+```{r}
+my_vector <- c(1, 2, 3, 4, 100)
+
+as.character(my_vector)
+```
+
+#### Lists
+
+Lists are different from vectors as they can contain elements of different types.
+This makes them much more flexible. They can also contain elements of different
+lengths - there are four 'slots' in this list below. The first three are of length
+three, and the last has a single element.
+
+```{r}
+x <- list(1:3, c("a", "b", "c"), c(TRUE, TRUE, FALSE), 1)
+x
+```
+
+You can even have nested lists. This makes them a bit like maps/hashmaps/associative arrays
+in other languages.
+
+```{r}
+x <- list(list(1), list(list(2)))
+x
+```
+
+Many more complicated data structures in R, like the fabled `data.frame` is actually
+just a fancy list.
+
+### Important special data types
+
+There are two other data types I want to highlight here, matrices and data frames.
+Data frames are perhaps the most widely used data types in R, so a good understanding
+of these will help you a lot in your R quest.
+
+#### Matrices
+
+These are two dimensional vectors essentially; think of a table of numbers.
+They can only be created with the `matrix` function.
+
+```{r}
+m <- matrix(1:6, ncol = 3, nrow = 2)
+m
+```
+
+Notice the `1:6` is shorthand for a range, in this case for 1 to 6, i.e `c(1, 2, 3, 4, 5, 6)`.
+Unless you are a maths/stats whiz, you probably won't come across these directly
+too much. It is worth noting that matrices do have their own special functions.
+
+```{r}
+m <- matrix(1:6, ncol = 3, nrow = 2)
+m2 <- matrix(1:6, ncol = 2, nrow = 3)
+
+# matrix multiplication uses this jazzy notation.
+m %*% m2
+```
+
+#### Data frames
+
+You can create data frames like so, using the `data.frame` function.
+
+```{r}
+# make a data frame
+d <- data.frame(x = 1:5, y = 4:8)
+# check out its structure
+str(d)
+
+cat("The type of the data frame is actually:\n")
+# the type of a data frame
+typeof(d)
+```
+
+A *very useful function* is `str`, which stands for structure. It gives an overview
+of the data structure, here we can see that there are two columns, both integers.
+
+Notice that we assigned names to each of the columns, and we can refer to these
+names later on. We'll look at this when we want to index into data frames.
+
+Data frames can have mixed types in the columns, but they all must be the same
+length.
+
+
+
