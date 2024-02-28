@@ -5,10 +5,8 @@ A resource for ARU students who wish to know more about bioinformatics, computin
 ## Directory structure
 
 - [x] `general` contains an overview of basic terminal practice
-  - [x] filesystem
-  - [x] basic terminal commands
-  - [x] navigation: `ls`, `cd`, `pwd`
-  - [ ] help: `man`, `-h/--help`
+  - [x] the filesystem overview and navigation: `ls`, `cd`, `pwd`
+  - [x] help: `man`, `-h/--help`
   - [ ] filesystem: `mkdir`, `cp`, `mv`, `rm`, hidden files
   - [ ] viewing: `head`, `more/less`, `wc`
   - [ ] pipes and redirection: `|`, `>`, `>>` 
@@ -26,8 +24,8 @@ A resource for ARU students who wish to know more about bioinformatics, computin
     - [ ] meta-analysis in R
     - [ ] ANCOVA?
     - [ ] `glm`
-  - [ ] general programming
-    - [ ] variables, data types, classes    
+  - [x] general programming
+    - [x] variables, data types, classes    
     - [ ] reading and writing data
     - [ ] data frames
       - [ ] functions on data frames

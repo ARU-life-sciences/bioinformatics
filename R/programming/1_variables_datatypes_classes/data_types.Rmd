@@ -190,6 +190,8 @@ Unless you are a maths/stats whiz, you probably won't come across these directly
 too much. It is worth noting that matrices do have their own special functions.
 
 ```{r}
+# you can specify the 'shape' of the matrix
+# with a combination of the ncol and nrow arguments.
 m <- matrix(1:6, ncol = 3, nrow = 2)
 m2 <- matrix(1:6, ncol = 2, nrow = 3)
 
@@ -221,5 +223,6 @@ names later on. We'll look at this when we want to index into data frames.
 Data frames can have mixed types in the columns, but they all must be the same
 length.
 
+## Questions
 
-
+...

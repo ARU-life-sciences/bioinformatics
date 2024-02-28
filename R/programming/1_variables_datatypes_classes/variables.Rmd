@@ -37,10 +37,15 @@ y <- 5
 z <- x * y
 
 # return z
-z
+# the cat function prints text to the terminal
+# functions are called with the function name
+# followed by parentheses with optional arguments inside
+cat("The value of z is:", z)
 ```
 
+## Questions
 
+...
 
 
 

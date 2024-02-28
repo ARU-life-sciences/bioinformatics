@@ -1,0 +1,35 @@
+# Indexing data
+
+What is indexing? In programming lingo it is the process of getting particular
+values out of the data. For example, we want to get the 5th row of our data frame.
+Or all the rows between 5 and 20. Or the third column. This may not be particularly
+useful by itself, but we can index using the results from expressions.
+
+## Indexing rows
+
+How do I get the 5th row?
+
+```{r}
+# let's get barley back
+# we can automatically convert strings to factors if we ask R to...
+# which is what we did by hand in `reading_and_viewing.Rmd`
+barley <- read.csv(file = "data/barley.csv", stringsAsFactors = TRUE)
+
+# get the 5th row
+barley[5,]
+
+```
+Even though that's a short amount of code, there is a bit to break down.
+
+
+
+
+
+
+
+
+
+
+
+
+
