@@ -1,9 +1,14 @@
 # Indexing data
 
+## Indexing introduction
+
 What is indexing? In programming lingo it is the process of getting particular
 values out of the data. For example, we want to get the 5th row of our data frame.
 Or all the rows between 5 and 20. Or the third column. This may not be particularly
 useful by itself, but we can index using the results from expressions.
+
+Indexing in R is very useful and necessary, but confusing. I'll stick to the very
+basics. If you need to go further, check ?\`[\`.
 
 ## Indexing rows
 
@@ -19,16 +24,104 @@ barley <- read.csv(file = "data/barley.csv", stringsAsFactors = TRUE)
 barley[5,]
 
 ```
-Even though that's a short amount of code, there is a bit to break down.
+Even though that's a short amount of code, there is a bit to break down. We index
+into data frames using `[`. Generally it works like this: `x[i, j]`, where `i` is
+the row index and `j` is the column index. These can be numbers, or characters if
+the rows or columns are named. The comma is necessary after the 5 in our example.
+Without it, we'd select the 5th column!
 
+Say we want the 5th row and 2nd column.
 
+```{r}
+barley[5, 2]
+```
 
+Will return the value. If we want to keep the data frame structure, you have to 
+specify that you don't want to drop the two dimensional structure.
 
+```{r}
+barley[5, 2, drop = FALSE]
+```
+See the difference? I don't know why R did not enable this by default but hey ho.
 
+One more important and common indexing rule is `$`. `$` gets the column by name, 
+not number.
 
+```{r}
+# extract yield, returning a vector
+yield <- barley$yield
 
+# this is equivalent to 
+yield <- barley[["yield"]]
+```
 
+The double `[[` extracts a single element from a list/data frame. These both return
+vectors of `yield`, so we can index those further.
 
+```{r}
+# should be equivalent to the above where we indexed into barley.
+yield[5]
+```
+
+I told you it was a bit confusing.
+
+## Useful indexing
+
+It's all very well indexing into certain things manually, but the true power of 
+indexing happens when we index based on the result from an expression. Using our
+new found indexing powers, we can start filtering usefully.
+
+Say we want to return all the rows where yield is greater than 50 bushels per acre.
+We want to create a logical vector of all the places where this is true first.
+
+```{r}
+yield_50 <- barley$yield > 50
+yield_50
+```
+So again, a bit to break down here. We first get the yield vector (`barley$yield`).
+We then use the greater than operator to ask for every element in the yield vector
+'is this element greater than 50?'. So `>` is a vectorised function - as we touched on
+in a previous tutorial.
+
+Now we can use this vector to subset our data frame!
+
+```{r}
+barley[yield_50, ]
+```
+
+We pass the logical vector into our square braces and remember to add a comma after
+as we are indexing into the rows.
+
+We might want to only extract rows of a certain variety. No problem, we know how 
+to do that now.
+
+```{r}
+# the variety I want
+variety_we_want <- "Trebi"
+
+# the column and logical test
+trebi <- barley$variety == variety_we_want
+
+# and index our data frame
+trebi_data <- barley[trebi, ]
+
+# return the data
+trebi_data
+```
+
+So there are the 12 rows which relate to yield for the `Trebi` variety. If we wanted
+the yields associated with `Trebi`, that's easy too.
+
+```{r}
+# using our prior knowledge
+trebi_data_yield_dollar <- trebi_data$yield
+
+# or
+trebi_data_yield_braces <- trebi_data[["yield"]]
+
+# test they are equal
+all.equal(trebi_data_yield_dollar, trebi_data_yield_braces)
+```
 
 
 
