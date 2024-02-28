@@ -123,7 +123,18 @@ trebi_data_yield_braces <- trebi_data[["yield"]]
 all.equal(trebi_data_yield_dollar, trebi_data_yield_braces)
 ```
 
-Lastly, we will do something a bit more complicated
+Lastly, we will do something a bit more complicated. We can combine multiple logical
+expressions to filter on multiple conditions. If we wanted to combine the selected
+variety and yield over 50 bushels per acre, we could do something like this.
+
+```{r}
+# the & operator performs element-wise AND
+# that is, it checks whether both are TRUE
+trebi_and_yield_50 <- trebi & yield_50
+
+barley[trebi_and_yield_50, ]
+```
+
 
 
 
