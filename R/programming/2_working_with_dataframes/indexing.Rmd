@@ -123,7 +123,7 @@ trebi_data_yield_braces <- trebi_data[["yield"]]
 all.equal(trebi_data_yield_dollar, trebi_data_yield_braces)
 ```
 
-Lastly, we will do something a bit more complicated. We can combine multiple logical
+Now to do something a bit more complicated. We can combine multiple logical
 expressions to filter on multiple conditions. If we wanted to combine the selected
 variety and yield over 50 bushels per acre, we could do something like this.
 
@@ -134,7 +134,54 @@ trebi_and_yield_50 <- trebi & yield_50
 
 barley[trebi_and_yield_50, ]
 ```
+Sometimes we want to sort our data. If you think about this problem it's a question
+of generating a vector of indices which describe how the data should be reordered.
+Luckily, R has good functions for achieving this.
 
+In this example, I want to sort the whole data frame by yield.
 
+```{r}
+# first generate a vector of indices on yield
+sorted_yield <- order(barley$yield)
+sorted_yield
+```
+This vector basically says the first element should be in position 71 in the 
+sorted data, the second element in position 113... and so on. Now we can index
+our data using this vector.
 
+```{r}
+# note we still need that comma! As we are sorting _rows_
+sorted_data_by_yield <- barley[sorted_yield, ]
 
+# just print the first few rows
+head(sorted_data_by_yield)
+```
+
+Notice that this sorts in increasing order. If we want the reverse, that's 
+surprisingly easy. We use a function called `rev`.
+
+```{r}
+# wrap `rev` around the sorted yield, reversing the order of the 
+# vector
+sorted_data_by_yield_rev <- barley[rev(sorted_yield), ]
+
+# peek the first few rows again
+head(sorted_data_by_yield_rev)
+```
+
+Lastly, there are specific functions to find the index of the maximum/minimum 
+values. These can sometimes be useful - but all they are doing are returning
+_indexes_.
+
+```{r}
+# which.max returns which index is the max value
+# which.min does the same thing for the minimum value
+m <- which.max(barley$yield)
+m
+```
+
+And index into the data frame.
+
+```{r}
+barley[m, ]
+```

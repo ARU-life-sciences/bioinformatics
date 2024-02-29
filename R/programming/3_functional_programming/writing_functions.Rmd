@@ -1,0 +1,80 @@
+# Writing functions
+
+Functions have three things:
+
+1. The body - the actual code inside
+2. The formals - the list of arguments given to the function
+3. The environment - the location of all of the functions variables
+
+We will talk about the body and the formals, but probably not the environment until
+later - that's a more complex subject.
+
+## How to write a function
+
+All functions are initiated with the `function` keyword. You can have functions
+on single lines - I don't recommend this syntax usually, but for very short 
+functions it is fine.
+
+```{r}
+# make a function which adds one to the input
+add_one <- function(x) x + 1
+
+add_one(100)
+```
+
+If your function is on more than one line, you will need curly braces to 'wrap'
+the whole function nicely.
+
+```{r}
+add_one_multiply_2 <- function(x) {
+  # add one
+  add_one <- x + 1
+  # multiply by two
+  # the last line of the function is the return value
+  add_one * 2
+}
+
+add_one_multiply_2(100)
+```
+
+Functions don't have to have any arguments.
+
+```{r}
+# create a function
+cat_dir <- function() {
+  # list.files() is a handy function
+  # to list all the files in the directory you are in
+  files <- list.files(".")
+  
+  # loop over the files - it's a vector of file names
+  for (file in files) {
+    # print them to the terminal
+    # and put a newline at the end
+    cat(file, "\n")
+  }
+}
+
+# call our function
+cat_dir()
+```
+On the other hand, functions can have default values in the arguments. See this 
+example.
+
+```{r}
+# create function - then pass 'key/value' pairs in arguments
+hello_name <- function(name = "Max") {
+  # paste is useful for merging strings
+  # there's a whole section later on string manipulation
+  paste("Hello,", name)
+}
+
+# the default is to say hello to me
+hi_max <- hello_name()
+# but if I have to, I can say hello to Jason
+hi_jason <- hello_name(name = "Jason")
+
+# return the outputs
+hi_max
+hi_jason
+```
+

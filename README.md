@@ -26,14 +26,12 @@ A resource for ARU students who wish to know more about bioinformatics, computin
     - [ ] `glm`
   - [x] general programming
     - [x] variables, data types, classes    
-    - [ ] reading and writing data
-    - [ ] data frames
-      - [ ] functions on data frames
-      - [ ] indexing, filtering
-    - [ ] writing functions
-    - [ ] loops & when to use
-    - [ ] conditionals
-    - [ ] plotting - base & ggplot2
+    - [x] reading, indexing, and writing data frames
+    - [ ] functional programming, writing and applying functions
+    - [ ] string manipulation
+    - [ ] plotting - base
+    - [ ] the tidyverse
+      - [ ] dplyr, tidyr, ggplot2
 - [ ] `scripting` will contain help in making scripts in BASH, R, python
   - [ ] running files: `./`
 - [ ] `git`

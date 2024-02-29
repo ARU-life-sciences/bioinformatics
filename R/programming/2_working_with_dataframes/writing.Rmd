@@ -1,0 +1,47 @@
+# Writing data
+
+So far we have either created objects in R or loaded them into R using `read.csv`.
+It's essential to also write out files from R onto our computer. This allows us
+to open the file in other applications.
+
+## Writing CSV files
+
+First we can start by loading in our data again.
+
+```{r}
+barley <- read.csv("data/barley.csv", stringsAsFactors = TRUE)
+```
+
+And we can filter this data in some interesting way. I am interested this time in
+all yields less than the mean yield across the whole data set.
+
+```{r}
+# compute the mean
+# note that `mean` is actually the name of a function
+# so don't overwrite it!!
+global_mean <- mean(barley$yield)
+
+# and filter our data, just like we did in `indexing`
+below_global_mean <- barley[barley$yield < global_mean, ]
+
+# and let's look at the structure instead of printing everything out.
+str(below_global_mean)
+```
+Great, we've filtered the data and have only got 68 observations or rows. We can 
+write this to a file. The `write.csv` function is our friend if we want to write
+a CSV specifically. It minimally takes `x` which is the R object to write and 
+`file` which is the location of where we want to write the file.
+
+```{r}
+# simply call the write.csv function.
+write.csv(x = below_global_mean, file = "./data/below_global_mean.csv")
+```
+
+If we check the `data` folder, it should now have another CSV file written in to it.
+
+
+
+
+
+
+

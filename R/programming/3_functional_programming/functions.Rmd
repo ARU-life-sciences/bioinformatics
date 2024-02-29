@@ -1,0 +1,90 @@
+# Functions
+
+We have already encountered many functions in this book. We will break
+down functions further in this short note.
+
+## Ordinary functions
+
+We will work on a simple data type, the vector. Functions are called by
+wrapping an object in the function call. For example to take the mean of
+a vector of numbers:
+
+```{r}
+# make some dummy data
+data <- c(12, 30, 2, 34, 9, 8, 64, 12, 3, 99)
+
+# take the mean
+# we call the function by naming the function and opening parentheses
+# around the object
+mean(data)
+```
+
+Functions can have parameters. These are extra arguments which are added
+to the function call that modify the behavior of the function. In `mean`
+we see there is another argument called `na.rm`. Let's investigate.
+
+```{r}
+# append an NA - or Not Available. It's missing data.
+# we can tack a bit of missing data on the end using
+# the c() function.
+na_data <- c(data, NA)
+
+# now call mean
+mean(na_data)
+```
+
+Hang on - we got an `NA` back? This is because the default
+implementation of `mean` will always return `NA` if any `NA`'s are
+present in the data! We have to tell R to remove them explicitly.
+
+```{r}
+# pass TRUE to the na.rm parameter to remove those pesky NA values
+mean_na_rm <- mean(na_data, na.rm = TRUE)
+```
+
+We can also call multiple functions at the same time. Say we have two
+data sets and we want to get the mean of each of them and then sum the
+results, we can do that easily.
+
+```{r}
+# data as above
+# data 2 below
+data_2 <- c(102, 3, 2, 4, 9, 2, 1, 12, 97)
+
+# sum and mean each data individually
+sum(mean(data), mean(data_2))
+```
+
+## Special functions
+
+R has many functions you may not think are functions. One is `+`.
+
+```{r}
+# okay that's fine
+two <- 1 + 1
+
+also_two <- `+`(1, 1)
+
+all.equal(two, also_two)
+```
+
+We can do this wizardry as `+` is a function! Usually it's called with
+one argument either side of the function. But we can 'capture' the
+function by putting it in backticks, and pass the arguments like we
+would call any other function.
+
+Another weird function is `[`.
+
+```{r}
+# okay, fine!
+first <- data[1]
+
+# huh??
+also_first <- `[`(data, 1)
+
+all.equal(first, also_first)
+```
+
+The square braces in all their forms are functions, and can be called
+like normal functions. You wouldn't want to do this though because it
+wouldn't be good programming style.
