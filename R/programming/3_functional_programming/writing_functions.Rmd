@@ -2,18 +2,15 @@
 
 Functions have three things:
 
-1. The body - the actual code inside
-2. The formals - the list of arguments given to the function
-3. The environment - the location of all of the functions variables
+1.  The body - the actual code inside
+2.  The formals - the list of arguments given to the function
+3.  The environment - the location of all of the functions variables
 
-We will talk about the body and the formals, but probably not the environment until
-later - that's a more complex subject.
+We will talk about the body and the formals, but probably not the environment until later - that's a more complex subject.
 
 ## How to write a function
 
-All functions are initiated with the `function` keyword. You can have functions
-on single lines - I don't recommend this syntax usually, but for very short 
-functions it is fine.
+All functions are initiated with the `function` keyword. You can have functions on single lines - I don't recommend this syntax usually, but for very short functions it is fine.
 
 ```{r}
 # make a function which adds one to the input
@@ -22,8 +19,7 @@ add_one <- function(x) x + 1
 add_one(100)
 ```
 
-If your function is on more than one line, you will need curly braces to 'wrap'
-the whole function nicely.
+If your function is on more than one line, you will need curly braces to 'wrap' the whole function nicely.
 
 ```{r}
 add_one_multiply_2 <- function(x) {
@@ -57,8 +53,8 @@ cat_dir <- function() {
 # call our function
 cat_dir()
 ```
-On the other hand, functions can have default values in the arguments. See this 
-example.
+
+On the other hand, functions can have default values in the arguments. See this example.
 
 ```{r}
 # create function - then pass 'key/value' pairs in arguments
@@ -78,3 +74,78 @@ hi_max
 hi_jason
 ```
 
+## Control flow
+
+You can't get very far in programming without controlling the flow of information through the program. In programming terms these are the conditional statements. The `if... else` clauses. I've left this until now because control flow is most often used in functions. The syntax in general is:
+
+```{r}
+# our fake condition evaluates to true
+CONDITION <- TRUE
+
+# so we go down the true branch here
+if (CONDITION) {
+  TRUE
+} else {
+  # not the else branch!
+  FALSE
+}
+```
+
+The syntax is very similar to other C style programming languages.
+
+```{r}
+# if statements are useful to test input parameters
+
+any_Rmd_files <- function(file_path) {
+  # here we are testing if the file path parameter is missing
+  # if it is
+  if (missing(file_path)) {
+    # we give a warning
+    warning("You did not input a file list, defaulting to `.`\n")
+    # and assing our new file path
+    file_path <- "."
+  }
+  
+  # now we can use the file path, if it was missing, it was
+  # edited
+  files <- list.files(file_path)
+  
+  # and these are our indexing rules we covered
+  # we logically index into our files, if they end with Rmd
+  # we keep them
+  files[endsWith(files, "Rmd")]
+}
+
+any_Rmd_files()
+```
+
+`if` statements therefore don't have to have an `else` branch. But in many cases it makes sense to do so. As with functions, `if...else` statements can be on a single line. Sometimes it's easier to reason with this way.
+
+```{r}
+# we can make a quick and dirty test for a number being even
+is_even <- function(x) {
+  # the modulo function (%%) gives the remainder after division.
+  if (x %% 2 == 0) "even" else "odd"
+}
+
+is_even(3)
+```
+
+For the last bit on control flow, we can have a look at the `ifelse` function. It's rather useful.
+
+```{r}
+# begin by loading barley
+barley <- read.csv("../2_working_with_dataframes/data/barley.csv")
+
+# take the yield column again
+yield <- barley$yield
+
+# assign high and low yield based on mean value
+high_or_low_yield <- ifelse(yield < mean(yield), yes = "low", no = "high")
+
+# assign this back to our data in a new column
+barley$high_or_low_yield <- high_or_low_yield
+
+# check the first few rows
+head(barley)
+```
