@@ -43,9 +43,13 @@ z <- x * y
 cat("The value of z is:", z)
 ```
 
-## Questions
+## Over to you
 
-...
+1. Create a variable called `first` and assign it a numerical value
+2. Create a second variable called `second` and assign it another numerical value
+3. Multiply your two variables together
+4. Are there other ways to assign to variables in R? For help type `` ?`<-` ``
+in the console.
 
 
 

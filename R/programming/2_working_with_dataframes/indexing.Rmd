@@ -5,7 +5,8 @@
 What is indexing? In programming lingo it is the process of getting particular
 values out of the data. For example, we want to get the 5th row of our data frame.
 Or all the rows between 5 and 20. Or the third column. This may not be particularly
-useful by itself, but we can index using the results from expressions.
+useful by itself, but we can index using the results from expressions. Expressions
+allow us to both filter and sort the data.
 
 Indexing in R is very useful and necessary, but confusing. I'll stick to the very
 basics. If you need to go further, check ?\`[\`.
@@ -21,7 +22,7 @@ How do I get the 5th row?
 barley <- read.csv(file = "data/barley.csv", stringsAsFactors = TRUE)
 
 # get the 5th row
-barley[5,]
+barley[5, ]
 
 ```
 Even though that's a short amount of code, there is a bit to break down. We index
@@ -45,7 +46,7 @@ barley[5, 2, drop = FALSE]
 See the difference? I don't know why R did not enable this by default but hey ho.
 
 One more important and common indexing rule is `$`. `$` gets the column by name, 
-not number.
+not number. We saw this in `reading_and_viewing.Rmd`.
 
 ```{r}
 # extract yield, returning a vector
@@ -56,7 +57,9 @@ yield <- barley[["yield"]]
 ```
 
 The double `[[` extracts a single element from a list/data frame. These both return
-vectors of `yield`, so we can index those further.
+vectors of `yield`, so we can index those further. Vectors can only be indexed
+with a single number, as they are 1-dimensional. If you try `yield[5, 2]` an error
+will throw.
 
 ```{r}
 # should be equivalent to the above where we indexed into barley.
@@ -185,3 +188,12 @@ And index into the data frame.
 ```{r}
 barley[m, ]
 ```
+
+## Over to you
+
+1. Get the 52nd row of the `barley` data.
+2. Get the third column of the data frame by number _and_ by name.
+3. Order the data frame by year. First sort the `barley$year` vector, and then
+index the whole data frame.
+4. Get the row of `barley` corresponding to the minimum yield.
+

@@ -39,7 +39,10 @@ write.csv(x = below_global_mean, file = "./data/below_global_mean.csv")
 
 If we check the `data` folder, it should now have another CSV file written in to it.
 
+## Over to you
 
+1. Read in `barley` and write out the first 10 lines to `./data/barley_first_10_lines.csv`
+2. Can you convert `barley.csv` to `barley.tsv` changing the commas to tabs?
 
 
 

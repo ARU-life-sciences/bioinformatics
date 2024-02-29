@@ -81,14 +81,14 @@ head(barley)
 An even more interactive way to view the data if you are in RStudio is to use the
 `View` function. Try that on your own machines.
 
+## Over to you
 
-
-
-
-
-
-
-
-
-
+1. How do you think you would read in a TSV (Tab Separated Values)? Hint: 
+see `?read.csv`
+2. How would you see the last few rows in your data? You know `head`. Hint: see
+`?head`
+3. What does the `str` function do? Are there any other useful summary functions
+you can find? Hint: see `?str`
+4. How do you select a column in a data frame?
+5. Select the `variety` column of the data frame.
 

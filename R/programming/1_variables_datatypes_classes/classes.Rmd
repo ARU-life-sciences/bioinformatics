@@ -1,14 +1,10 @@
 # Classes
 
-Classes are extended data types either defined by the people who maintain R, 
-or us, the humble users. There are at least three different ways of defining 
-classes in R (`s3`, `s4`, `Reference classes`). We only look at `s3` here, as 
-they are the most simple (if a bit weird).
+Classes are extended data types either defined by the people who maintain R, or us, the humble users. There are at least three different ways of defining classes in R (`s3`, `s4`, `Reference classes`). We only look at `s3` here, as they are the most simple (if a bit weird).
 
 ## Built-in classes
 
-A good example of a class is `data.frame`, which we will see is a glorified 
-`list` with extra attributes.
+A good example of a class is `data.frame`, which we will see is a glorified `list` with extra attributes.
 
 ```{r}
 # making a data frame
@@ -21,16 +17,13 @@ typd <- typeof(d)
 cat("The type of a data frame is:", typd, "\n")
 ```
 
-We can see all of the so-called 'methods' associated with this class. Methods are
-functions which have specific behavior based on the class of object they are called
-on.
+We can see all of the so-called 'methods' associated with this class. Methods are functions which have specific behavior based on the class of object they are called on.
 
 ```{r}
 methods(class = class(d))
 ```
 
-There are actually loads of functions which have specific behavior when called on
-`data.frame` - that's interesting.
+There are actually loads of functions which have specific behavior when called on `data.frame` - that's interesting.
 
 ```{r}
 # we produce quite a weird plot which attempts to plot each pairwise
@@ -38,11 +31,7 @@ There are actually loads of functions which have specific behavior when called o
 plot(d)
 ```
 
-However if we have another class which implements the `plot` method, such as `table`,
-we can see the difference. So even though the function call is the same (`plot()`)
-the results from the function depend on the class of the object the function is 
-being called on. This is good to keep in mind as you go through your R journey,
-as otherwise some function calls might catch you off guard.
+However if we have another class which implements the `plot` method, such as `table`, we can see the difference. So even though the function call is the same (`plot()`) the results from the function depend on the class of the object the function is being called on. This is good to keep in mind as you go through your R journey, as otherwise some function calls might catch you off guard.
 
 ```{r}
 # table is a useful function that makes frequency tables in R
@@ -58,10 +47,7 @@ plot(tab)
 
 ## Making our own classes
 
-While the in built classes are useful and interesting, we can also create our
-own classes. I think this is quite an advanced topic, and pretty abstract. Therefore
-this section will be brief, and I suggest come back to this later in the course.
-I've put it here because they are data types, and they are important.
+While the in built classes are useful and interesting, we can also create our own classes. I think this is quite an advanced topic, and pretty abstract. Therefore this section will be brief, and I suggest come back to this later in the course. I've put it here because they are data types, and they are important.
 
 Classes are best created using `structure`.
 
@@ -85,9 +71,7 @@ vec <- c(1, 3, 2, 5, 3, 4, 5)
 red(vec)
 ```
 
-And we can make a generic method like this. Again, this is pretty advanced stuff,
-and many people never make classes. They are a lovely way to organise your code
-though. We can make specific methods like this.
+And we can make a generic method like this. Again, this is pretty advanced stuff, and many people never make classes. They are a lovely way to organise your code though. We can make specific methods like this.
 
 ```{r}
 # I just made this up, so roll with it
@@ -120,4 +104,9 @@ red_data <- red(sample(1:1000, 50))
 plot(red_data)
 ```
 
+## Over to you
 
+1.  List all the methods in the `formula` class.
+2.  How many are there? Hint: use the `length` function.
+3.  Create a new class with a class name of your choice.
+4.  Implement a generic function for your class.

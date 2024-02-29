@@ -223,6 +223,12 @@ names later on. We'll look at this when we want to index into data frames.
 Data frames can have mixed types in the columns, but they all must be the same
 length.
 
-## Questions
+## Over to you
 
-...
+1. What's the difference between a primitive and a compound type in R?
+2. Vectors and lists are superficially similar. What's the difference?
+3. Can you create a vector of integers?
+4. Create a data frame with a numerical column, and a character column.
+
+
+
