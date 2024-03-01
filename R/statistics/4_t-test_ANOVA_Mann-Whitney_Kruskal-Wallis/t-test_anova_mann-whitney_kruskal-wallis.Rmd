@@ -1,0 +1,373 @@
+---
+title: "T-test, ANOVA, Mann-Whitney, Kruskal Wallis"
+author: "Jason Hodgson"
+date: '2024-02-28'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Necessary libraries
+
+In this tutorial we will use: ggplot2. Run the following code to be sure you have the necessary dependencies installed.
+
+```{r}
+# Check if ggplot2 is installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  # If not installed, install ggplot2
+  install.packages("ggplot2")
+}
+
+
+# Load the installed packages
+library(ggplot2)
+
+
+```
+
+# Setting the working directory
+
+This tutorial assumes that you have created a folder called "**week_7_t-test_anova**" within your "**PfR_stats_portfolio**" folder, and have created "**data**" and "**analysis**" folders inside "**week_7_t-test_anova**". Save the class data file "**form-1\_\_anthropometrics.csv**" in the "**data**" folder, and save this .Rmd file in the "**analysis**" folder. Once you have set everything up, set the working directory to "**week_7_t-test_anova**", by choosing "**Session -\> Set Working Directory -\> Choose Directory**".
+
+Check that your working directory is set correctly using the `getwd()` function. You should see the full file path of your working directory.
+
+```{r}
+# check your working directory
+getwd()
+```
+
+# Loading the data
+
+```{r}
+# load the data from the .csv file
+d <- read.csv(file="../data/form-1__anthropometrics.csv", header=TRUE, stringsAsFactors = TRUE)
+
+# check the structure of the data frame the str() function describes the full structure of a data frame, including the number of variables, and observations, and the class() of each variable
+str(d)
+
+```
+
+# Functions used in this tutorial
+
+`getwd()`
+
+`read.csv()`
+
+`str()`
+
+`shapiro.test()`
+
+`t.test()`
+
+`wilcox.test()`
+
+`aov()`
+
+`kruskal.test()`
+
+`print()`
+
+`ggplot2::ggplot()`
+
+`ggplot2::geom_histogram()`
+
+`ggplot2::geom_boxplot()`
+
+`ggplot2::geom_violin()`
+
+# Working with a numerical dependent variable, and a categorical independent variable
+
+It is often the case that your experimental design will involve varying a treatment condition (e.g. *drug A* versus *placebo* controll), and measuring their effect on a measured numerical variable (e.g. *systolic blood pressure*). Alternatively, you might be interested in testing a hypothesis about the effect of some categorical variable (e.g. *sex*) on some measured variable (e.g. *height*) in data that you have collected. In this case you can use a T-test, ANOVA, Mann-Whitney, or Kruskal-Wallis test. The conditions for which of these you should choose are as follows:
+
+-   **t-test**: normally distributed dependent variable, two categories in the grouping variable
+
+-   **Mann-Whitney**: non-normally distributed dependent variable, two categories in the grouping variable
+
+-   **ANOVA**: normally distributed dependent variable, three or more categories in the grouping variable
+
+-   **Kruskal-Wallis**: non-normally distributed dependent variable, three or more categories in the grouping variable
+
+# Checking if your data are normal
+
+The first step in formally analysing your data are evaluating whether your numerical variable is how your numerical variable is distributed. If your data are normal, then it is best to use one of the parametric tests (T-test, ANOVA) because these have greater sensitivity (greater statistical power). This means you are less likely to fail to reject the null hypothesis even when it is false (Type 2 error).
+
+## Visually examining your data
+
+Begin by visualising the distribution of your numerical variable with a histogram, to check if your data are bell-shaped, or whether there is obvious skew. We will use the ggplot2 R package for producing publication quality histogram plots.
+
+### Histogram of height
+
+```{r}
+
+# choose a binwidth for your plot. The binwidth is the with of the bars in histogram, and is in the same scale as your variable (e.g. height in cm, then binwidth is in cm). The choice of binwidth is up to you, and you might want to experiment a bit to find a binwidth that displays the data best. As a rule of thumb, if the sample size is small you will want a bigger binwidth, but your binwidth should never be smaller than the precision of your measurment. For example if you measured height with a precision of 1 cm, having a binwidth of 0.1 makes no sense because the bars cannot possibly be touching since you will have bins for values that cannot be present in the data.
+
+# A sensible binwidth for small sample size data (n < 100) is often a third of the standard deviation. For very large data sets, set the binwidth equal to the precision of the measurment.
+
+height_binwidth <- sd(d$X5_Height_in_cm, na.rm=TRUE)/3
+
+# create a histogram of a the height variable
+P_height <- ggplot(data=d, aes(x=X5_Height_in_cm)) + # define the variables in the plot
+              geom_histogram(binwidth=height_binwidth) + # call the histogram function and set the binwidt
+              theme_bw() + # choose a cleaner plot theme
+              xlab("Height (cm)") # relable the x axis
+
+# print the plot to the document
+print(P_height)
+```
+
+In this plot the data resemble a normal distribution for a relatively small sample (n = 81).
+
+### Histogram of weight
+
+```{r}
+# define a binwidth
+weight_binwidth <- sd(d$X6_Weight_in_kg, na.rm=TRUE)/3
+
+# make the plot
+P_weight <- ggplot(data=d, aes(x=X6_Weight_in_kg)) + # define the variables in the plot
+              geom_histogram(binwidth=weight_binwidth) + # call the histogram function and set the binwidth
+              theme_bw() + # choose a cleaner plot theme
+              xlab("Weight (kg)") # relable the x axis
+
+# print the plot to the document
+print(P_weight)
+```
+
+In this case the data look like they may be left-skewed. In other words there are more small values in the data, and a long tail of large values.
+
+## Formally testing for normality: The Shapiro-Wilk test
+
+There are two commonly used formal tests of normality: the Shapiro-Wilk test, and the Kolmogorov-Smirnov tests. These both test the hypothesis that the sample data are drawn from a normal distribution. This makes the alternative hypothesis that the data are not normal. Thus, the interpretation of the computed p-value is as follows:
+
+-   p-value \> 0.05: data are normal
+
+-   p-value \< 0.05: data are not normal
+
+We will use the Shapiro-Wilk test to check for normality. This is performed using the `shapiro.test()` function.
+
+### Testing for normality of height
+
+```{r}
+# test for normality of height
+height_normality_test <- shapiro.test(d$X5_Height_in_cm)
+
+# print the results to the document
+print(height_normality_test)
+```
+
+In this test, the p-value is greater than 0.05, and we accept the null hypothesis that the height data are normally distributed.
+
+### Testing for normality of weight
+
+```{r}
+# test for normality of weight
+weight_normality_test <- shapiro.test(d$X6_Weight_in_kg)
+
+# print the results to the document
+print(weight_normality_test)
+```
+
+In this test, the p-value is less than 0.05 and we reject the null hypothesis that the weight data are normally distributed. In this case, we cannot treat the weight data as normal, and cannot use parametric statistical tests that assume normality.
+
+# Plotting a categorical variable versus a numerical variable
+
+## Box plots
+
+### Traditional box plot
+
+```{r}
+# create the plot
+P_box_1 <- ggplot(data=d, aes(x=X3_Gender, y=X5_Height_in_cm)) +
+              geom_boxplot() +
+              theme_bw() +
+              xlab("Sex") +
+              ylab("Height (cm)")
+
+# print the plot to the document
+print(P_box_1)
+```
+
+### Notched boxplot
+
+A notched boxplot is similar to traditional boxplot, however notches are added to the boxes. The notches can be used to compare the groups. As a general rule, if the notches do not overlap, it suggests that the medians between the two groups are significantly different. In this case, it is likely that a formal hypothesis test of the difference between means will be significant.
+
+```{r}
+# create the plot
+P_box_2 <- ggplot(data=d, aes(x=X3_Gender, y=X5_Height_in_cm)) +
+              geom_boxplot(notch=TRUE) +
+              theme_bw() +
+              xlab("Sex") +
+              ylab("Height (cm)")
+
+# print the plot to the document
+print(P_box_2)
+```
+
+In this plot we see no overlap between the notches for the groups, and we would expect there to be a significant difference in height between males and females in our data if tested formally.
+
+## Violin plots
+
+A violin plot gives a very good representation of the shape of the distribution of the underlying data. The width of the "violin" indicates the frequency of the observations. Normal data should look like a bell curve turned on its side, and mirrored.
+
+```{r}
+# create the plot
+P_violin <- ggplot(data=d, aes(x=X3_Gender, y=X5_Height_in_cm)) +
+              geom_violin(trim=FALSE, fill="red") + # setting trim to FALSE displays the full range
+              theme_bw() +
+              xlab("Sex") +
+              ylab("Height (cm)")
+
+# print the plot to the document
+print(P_violin)
+
+```
+
+In this plot we can see that the most frequent heights for females and males do not line up, suggesting a difference in the means between these groups.
+
+# Performing a t-test
+
+Performing any version of the t-test in R is easily done with the `t.test()` function. We will illustrate one and two-tailed versions of the unpaired t-test by testing for sex differences in average height. In our data, we have already seen that height is normally distributed, and thus does not violate the assumptions of the t-test.
+
+## Two-tailed unpaired t-test
+
+The two-tailed version of the hypothesis is that there is a difference in average heights between males and females. For the two-tailed version of the test, it does not matter whether males or females are taller on average, it only matters whether they are different.
+
+```{r}
+# calculate the t-test of the effect of sex on height
+two_tailed_height <- t.test(d$X5_Height_in_cm ~ d$X3_Gender, alternative="two.sided")
+
+# report the test results to the document
+print(two_tailed_height)
+```
+
+In this test the males are reported to have an mean height of 175.8 cm, and females a mean height of 163.8 cm, and this difference was found to be significant (t = -6.67, df=50.8, p=1.85e-08). Note when reporting a t-test, you must give the t value, the degrees of freedom, and the p value.
+
+## One-tailed unpaired t-test
+
+If you have an *a priori* reason to believe either males or females are taller, you should can use a one-tailed version of the t-test. In this case we will test the hypothesis that males are taller than females on average. To perform a one-tailed test we have to specify either `"greater"` or `"less"` to the `alternative` argument of the `t.test()` function. The `"less"` and `"greater"` indicators refer to the order of the factor levels in the grouping variable. If `"Female"` is the first level and `"Male"` is the second level then we want to specify `"less"`. On the other hand if `"Male"` is the first level and `"Female"` is the second level then we want to specify `"greater"`. You can check the order of the factor levels with the `levels()` function: enter `levels(d$X3_Gender)` on the console. Alternatively, you can look at the output of the `str()` function when we described the data frame at the beginning of the tutorial. It happens to be the case that `"Female"` is the first level, so we want to indicate `"less"`.
+
+```{r}
+# calculate the one-tailed t-test of the effect of sex on height
+one_tailed_height <- t.test(d$X5_Height_in_cm ~ d$X3_Gender, alternative="less")
+
+# print the test result to the document
+print(one_tailed_height)
+```
+
+The one-tailed version of the test shows that males significantly taller than females in the class data (t = -6.67, df = 50.84, p = 9.25e-09). Notice the t value, and the degrees of freedom are the same as the two-tailed test, but the p-value is less. This is because the significant area of the tail is greater in the one-tailed hypothesis test, making the t-value more extreme.
+
+# Performing a Mann-Whitney U test
+
+The Mann-Whitney U test is used when you want to perform a t-test, however your data are not normally distributed. We will test hypotheses about a sex difference in body weight. This is performed in exactly the same way as the t-test, however it uses the `wilcox.test()` function instead. Another name for the Mann-Whitney U test is the Wilcoxon Rank Sums test.
+
+## Two-tailed Mann-Whitney U test
+
+The two-tailed hypothesis is that there is a difference in body weight between males and females. The two tailed test is agnostic about which sex is heavier, it only matters that there is a difference.
+
+```{r}
+# calculate the Mann-Whitney U test
+two_tailed_weight <- wilcox.test(d$X6_Weight_in_kg ~ d$X3_Gender, alternative="two.sided")
+
+# print the results to the document
+print(two_tailed_weight)
+```
+
+The Mann-Whitney U test shows that there is a significant difference in weight between males and females (W = 262.5, p = 4.8e-06). Note that when reporting the test results you should report the W test statistic as well as the p-value.
+
+## One-tailed Mann-Whitney U test
+
+If you have an *a priori* reason to believe one of the groups is greater than the other, you can specify a one-tailed hypothesis. We will test the hypothesis that males are heavier than females in the class data. Similar to the `t.test()` function, you must specify either `"less"` or `"greater"` according to the order of the factor levels. In our case `"Female"` is the first factor level so we will specify `"less"`. See the description of the one-tailed t-test if this is confusing.
+
+```{r}
+# calculate the Mann-Whitney U test
+one_tailed_weight <- wilcox.test(d$X6_Weight_in_kg ~ d$X3_Gender, alternative="less")
+
+# print the results to the document
+print(one_tailed_weight)
+```
+
+# Performing an ANOVA
+
+An ANOVA is the appropriate test to check for a difference in means if the data are normal and if there are more than three groups in the grouping variable. The `aov()` function is used to calculate an ANOVA. This function fits the ANOVA model. To summarise the results including seeing the p-value you need to use the `summary()` function on the fitted model. We previously saw that the data for height is normal, and thus fits the assumptions of the ANOVA test. We will test the (rather nonsensical) hypothesis that activity level effects height. There are seven levels to the activity level variable.
+
+```{r}
+
+# use the aov() function to fit the model
+my_anova <- aov(X5_Height_in_cm ~ X7_Activity_Level_NAS, data=d)
+
+# summarise the model
+summary(my_anova)
+
+```
+
+In this test, no significant relationship was found between activity level and height in the class (F = 1.618, df = 6, p = 0.154). Note that when reporting the results of an ANOVA you must report the F statistic, the degrees of freedom, and the p-value.
+
+# Performing a Kruskal-Wallis test
+
+The non-parametric version of the ANOVA is the Kruskal-Wallis test. This test can be performed on non-normal data broken into more than three categories by a grouping variable. The test is performed with the `kruskal.test()` function. We will test the hypothesis that there is a difference in body weight among people with different activity levels.
+
+```{r}
+# calculate the kruskal-wallis test
+my_kruskal <- kruskal.test(d$X6_Weight_in_kg ~ d$X7_Activity_Level_NAS)
+
+# print the results to the document
+print(my_kruskal)
+```
+
+The results show that there is no evidence for a difference in body weight associated with differences in activity level in the class data (Kruskal-Wallis chi-squared=9.31, df = 6, p = 0.157). Note that when reporting results of this test you need to give the test statistic, the degrees of freedom, and the p-value.
+
+# Class Exercises
+
+## Exercise 1. Test the hypothesis that sex affects body temperature.
+
+### Step 1. Plot and interpret the histogram of body temperature
+
+*Insert R code and interpretation here*
+
+### Step 2. Test for normality of body temperature using the Shapiro-Wilk test
+
+*Insert R code and interpretation here*
+
+### Step 3. Visualise the relationship between sex and body temperature with a boxplot or violin plot
+
+*Insert R code and interpretation here*
+
+### Step 4. Formally test and interpret the relationship between sex and body temperature using either a t-test, or Mann-Whitney U test depending upon whether body temperature is normal or not.
+
+*Insert R code and interpretation here*
+
+## Exercise 2: Test the hypothesis that activity level affects heart rate.
+
+### Step 1. Plot and interpret the histogram of heart rate
+
+*Insert R code and interpretation here*
+
+### Step 2. Test for normality of heart rate using the Shapiro-Wilk test
+
+*Insert R code and interpretation here*
+
+### Step 3. Visualise the relationship between activity level and heart rate with a boxplot or violin plot
+
+*Insert R code and interpretation here*
+
+### Step 4. Formally test and interpret the relationship between heart rate and activity level using either a ANOVA, or Kruskal-Wallis test depending upon whether heart rate is normal or not.
+
+*Insert R code and interpretation here*
+
+```{r}
+library(sn)
+
+# Set the parameters for the skewed distribution
+alpha <- 5  # shape parameter, controls the skewness
+n <- 1000    # sample size
+
+# Generate random numbers from a skewed distribution
+skewed_data <- rsn(n, alpha = alpha)
+
+p_skew <- ggplot(,aes(x=skewed_data)) + geom_histogram() + theme_bw() + xlab("heart rate")
+
+print(p_skew)
+
+```
