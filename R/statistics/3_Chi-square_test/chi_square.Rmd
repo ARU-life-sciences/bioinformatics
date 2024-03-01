@@ -1,0 +1,336 @@
+---
+title: "Week 6 Chi Squared test"
+author: "Jason Hodgson"
+date: '2024-02-21'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Necessary libraries
+
+In this tutorial we will use: ggplot2, and kableExtra. Run the following code to be sure you have the necessary dependencies installed.
+
+```{r}
+# Check if ggplot2 is installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  # If not installed, install ggplot2
+  install.packages("ggplot2")
+}
+
+# Check if kableExtra is installed
+if (!requireNamespace("kableExtra", quietly = TRUE)) {
+  # If not installed, install kableExtra
+  install.packages("kableExtra")
+}
+
+# Load the installed packages
+library(ggplot2)
+library(kableExtra)
+
+```
+
+# Setting the working directory
+
+This tutorial assumes that you have created a folder called "**week_6_chi_squared**" within your "**PfR_stats_portfolio**" folder, and have created "**data**" and "**analysis**" folders inside "**week_6_chi_squared**". Save the class data file "**form-1\_\_anthropometrics.csv**" in the "**data**" folder, and save this .Rmd file in the "**analysis**" folder. Once you have set everything up, set the working directory to "**week_6_chi_squared**", by choosing "**Session -\> Set Working Directory -\> Choose Directory**".
+
+Check that your working directory is set correctly using the `getwd()` function. You should see the full file path of your working directory.
+
+```{r}
+# check your working directory
+getwd()
+```
+
+# Loading the data
+
+```{r}
+# load the data from the .csv file
+d <- read.csv(file="../data/form-1__anthropometrics.csv", header=TRUE, stringsAsFactors = TRUE)
+
+# check the dimensions of the data frame
+dim(d)
+
+# check the column names of the data frame
+names(d)
+```
+
+# Functions used in this tutorial
+
+`getwd()`
+
+`read.csv()`
+
+`dim()`
+
+`names()`
+
+`class()`
+
+`levels()`
+
+`as.factor()`
+
+`as.character()`
+
+`as.integer()`
+
+`as.numeric()`
+
+`table()`
+
+`kableExtra::kable()`
+
+`plot()`
+
+`ggplot2::geom_bar()`
+
+`chisq.test()`
+
+`fisher.test()`
+
+# Working with categorical data
+
+It is often the case that the data you collect will be in the form of words rather than numbers. For example, things like ***sex**; male, female*, ***cancer**;* *positive*, *negative*, or even things like ***size;** small, medium, large*. Data of this type are categorical variables. Categorical variables can be either nominal, or ordinal, with the difference being that ordinal variables are ordered, while nominal variables have no defined relationship between the various levels. The levels are the types of values that a categorical variable can take. For example, the levels of a "sex" variable are "female" and "male".
+
+## Checking the class of categorical variables
+
+When you read a data table into R and save it as a data frame, R will assign a `class()` to each column of the data frame. The `read.csv()` function defaults to making all columns that contain letters of `class()` "character". You can change this behaviour by adding the `stringsAsFactors=TRUE` argument to the `read.csv()` command. This will make all columns that contain words of `class()` "factor". Notice that `stringsAsFactors=TRUE` was added to the `read.csv()` command that read in the data above. It is best to work with categorical data as `class()` "factor" in R. Factor data has `levels()` associated with it. The `levels()` are the possible states that the variable can take.
+
+```{r}
+# check the class of the sex variable
+class(d$X3_Gender)
+
+# check the levels of the sex variable
+levels(d$X3_Gender)
+```
+
+## Changing the class of a variable
+
+It may sometimes be the case that you have recorded categorical data as numbers. For example, someone might record "sex" data as 0, or 1, with female=0, and male=1. In this case, R will likely interpret the column as `class()` "numeric", or `class()` "integer". You can change the class() of a variable using one of the following: `as.factor()`, `as.character()`, `as.integer()`, or `as.numeric()`.
+
+```{r}
+# check the class of the data variable
+class(d$X2_Date)
+
+# make it character data
+d$X2_Date <- as.character(d$X2_Date)
+
+# check the class again
+class(d$X2_Date)
+
+```
+
+# Making tables of categorical variables
+
+It is generally the case that the best way to display categorical data is in summary tables. A summary table of categorical data reports the number of observations of each level of the variable. The `table()` function makes computing summary tables very easy.
+
+### Making a table of a single categorical variable
+
+```{r}
+
+# table of a single categorical variable: sex
+table(d$X3_Gender)
+```
+
+### Making a table of two categorical variables
+
+It is common to want to make a table of two categorical variables. This is sometimes known as a cross table, and will give the number of observations for each combination of the two variables.
+
+```{r}
+# table of two categorical variables: sex X smoker
+table(d$X3_Gender, d$X8_Smoker)
+
+
+```
+
+### Making a nicely formatted table for display
+
+If you want to create a nicely formatted table for display when knitting your .Rmd to a Word document, you can use the `kable()` function.
+
+```{r}
+my_table <- table(d$X3_Gender, d$X8_Smoker)
+kable(my_table)
+```
+
+# Visualising categorical variables graphically
+
+In addition to a table, you might want to also graphically display categorical data. There are a few graph styles to choose from when plotting categorical data.
+
+## Base R square plot
+
+This is plot that I am calling the base R square plot (for lack of a better name) is probably the simplest plot to make, however it is also not particularly informative. The plot represents each combination of the variable levels as a square that is proportional in size to the number of observations. In most cases these data would probably be better represented by the summary table.
+
+```{r}
+plot(table(d$X3_Gender, d$X8_Smoker))
+```
+
+## Bar plots
+
+Bar plots can be used to represent categorical data. Bar plots are very commonly used to show the frequency of observations of each level a categorical variable. You can use the `geom_bar()` function from the `ggplot2` package to create nice barplots.
+
+### Bar plots of a single variable
+
+```{r}
+# create a barplot of sex
+P1 <- ggplot(data=d, aes(x=X3_Gender)) + 
+  geom_bar() + 
+  theme_bw() +
+  xlab("Sex")
+
+# print the plot
+P1
+
+```
+
+### Bar plots of two categorical variables
+
+There are a few ways you can choose to represent two different variables in a bar chart.
+
+#### Stacked bar plot
+
+This will produce a prettier version of the base R square plot.
+
+```{r}
+# create a bar plot of sex and smoker status
+P2 <- ggplot(data=d, aes(x=X3_Gender, fill=X8_Smoker)) + 
+  geom_bar() +
+  theme_bw() + # changes the default theme
+  xlab("Sex") +
+  labs(fill = "Smoker?") +
+  scale_fill_manual(values = c("red", "blue"))
+
+P2
+
+```
+
+#### Side by side bar plot
+
+This will often produce a more informative visual representation of the data.
+
+```{r}
+# bar plot using position_dodge() option
+P3 <- ggplot(data=d, aes(x=X3_Gender, fill=X8_Smoker)) + 
+  geom_bar(position=position_dodge()) +
+  theme_bw() + # changes the default theme
+  xlab("Sex") +
+  labs(fill = "Smoker?") +
+  scale_fill_manual(values = c("red", "blue"))
+
+P3
+
+
+```
+
+# Performing the Chi-squared test
+
+The Chi-squared test is used to check if the observed number of each combination of levels is expected given the null hypothesis that each combination is equally likely. Deviations from randomness (i.e. a significant Chi-squared value) suggest that some combinations of observations are more likely than others. The Chi-squared test can easily be computed in R using the `chisq.test()` function. This function takes a summary table as input, such as that created by the `table()` function.
+
+## Chi-squared test with a single variable
+
+### Test the null hypothesis that males and females are equally likely in Prep for Research.
+
+In this example, you first create the summary table, and view it. You then perform the Chi-squared test.
+
+```{r}
+# first create the appropriate table
+sex_table <- table(d$X3_Gender)
+
+# print the table for display
+sex_table
+
+# perform the chi-squared test
+chisq.test(sex_table)
+```
+
+The summary table shows that females are almost twice as common as males in the class data. The interpretation of the Chi-squared test result is that the p-value of 0.001 is significant if $\alpha = 0.05$, meaning you reject the null hypothesis that males and females are equally likely. Because females are more common in the observed data, we accept the alternative hypothesis that females are more common in Prep for Research.
+
+## Chi-squared test with two variables
+
+### Test the null hypothesis that smoking is equally common among males and females in Prep for Research
+
+The procedure for performing a Chi-squared test on the interaction between two variables is the same as doing so with a single variable.
+
+```{r}
+# first create the summary table
+smoking_by_sex_table <- table(d$X3_Gender, d$X8_Smoker)
+
+# display the table
+smoking_by_sex_table
+
+# perform Chi-squared test
+chisq.test(smoking_by_sex_table)
+```
+
+The table shows that there are almost twice as many females in the class as males, and there are also twice as many female smokers as male smokers. Intuitively, because the proportions are the same between the groups, it looks like smoking is equally common in males and females. Indeed, the Chi-squared test fails to reject the null hypothesis that smoking is equally likely among males and females, and we accept the null hypothesis. Note that in this example, the chisq.test function gives a warning. This is because there are very few observations of smokers, and when there are too few observations in any of the cells of a Chi-squared test, the test statistic can become unreliable. When sample sizes are small you can use Fisher's Exact test as an alternative to the Chi-squared test.
+
+## Fisher's exact test
+
+Fisher's exact test can be performed using the `fisher.test()` function. It's use is similar to that of the `chisq.test()` function.
+
+### Test the null hypothesis that smoking is equally common among males and females in Prep for Research using Fisher's exact test
+
+```{r}
+# get the summary table
+smoking_by_sex_table <- table(d$X3_Gender, d$X8_Smoker)
+
+# display the summary table
+smoking_by_sex_table
+
+# perform Fisher's exact test
+fisher.test(smoking_by_sex_table)
+
+```
+
+The interpretation of the Fisher's exact test is the same as for the Chi-squared test.
+
+# Exercises
+
+## Question 1. What is the class of the waist measurement variable?
+
+Insert R block here
+
+## Question 2. Can you change the class of the date variable back to factor?
+
+Insert R block here
+
+## Question 3. Create a summary table of time since caffeine
+
+Insert R block here
+
+## Question 4. Create a cross table of time since caffeine by sex
+
+Insert R block here
+
+## Question 5. Create a bar plot of time since caffeine
+
+Insert R block here
+
+## Question 6. Create a bar plot of time since caffeine by sex
+
+Insert R block here
+
+## Question 7. Test the null hypothesis that all times since caffeine are equally likely
+
+Insert R block here
+
+## Question 8. Test the null hypothesis that there is no difference between males and females in time since caffeine
+
+Insert R block here
+
+## Challenge Question 9. Characterise each sample as "low", "healthy", or "high" BMI.
+
+To do so you will first have calculate a new BMI column in the data. You will then have to write a function that categorises each BMI according the following rule (according to the USA CDC):
+
+-   \< 18.5 = low
+
+-   18.5-24.5 = healthy
+
+-   \>24.5 = high
+
+    Insert R block here
+
+## Challenge Question 10. Test the null hypothesis that males and females are equally likely to have low, healthy, and high BMI.
+
+Insert R block here

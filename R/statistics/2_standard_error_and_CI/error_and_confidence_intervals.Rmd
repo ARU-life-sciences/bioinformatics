@@ -1,0 +1,366 @@
+---
+title: "Week 5 Error and Confidence Intervals"
+author: "Jason Hodgson"
+date: '2024-02-12'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Necessary libraries
+
+In this tutorial we will use: dplyr, and kableExtra. Run the following code to be sure you have the necessary dependencies installed.
+
+```{r}
+
+# Check if dplyr is installed
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+  # If not installed, install dplyr
+  install.packages("dplyr")
+}
+
+# Check if kableExtra is installed
+if (!requireNamespace("kableExtra", quietly = TRUE)) {
+  # If not installed, install kableExtra
+  install.packages("kableExtra")
+}
+
+# Load the installed packages
+library(dplyr)
+library(kableExtra)
+
+```
+
+# Setting the working directory
+
+This tutorial assumes that you have created a folder called "**week_5_error_confidence_intervals**" within your "**PfR_stats_portfolio**" folder, and have created "**data**" and "**analysis**" folders inside "**week_5_error_confidence_intervals**". Save the class data file "**form-1\_\_anthropometrics.csv**" in the "**data**" folder, and save this **.Rmd** file in the "**analysis**" folder. Once you have set everything up, set the working directory to "**week_5_error_confidence_intervals**", by choosing "**Session -\> Set Working Directory -\> Choose Directory".**
+
+Check that your working directory is set correctly using the **getwd()** function. You should see the full file path of your working directory.
+
+```{r}
+# check working directory
+getwd()
+```
+
+# Loading the data
+
+For this tutorial we will be continuing with the class physiology data. Begin by loading the data into a data frame.
+
+```{r}
+# load the data from the .csv file
+d <- read.csv(file="../data/form-1__anthropometrics.csv", header=TRUE)
+
+# check the dimensions of the data frame
+dim(d)
+```
+
+# Functions used in this tutorial
+
+`getwd()`
+
+`read.csv()`
+
+`dim()`
+
+`mean()`
+
+`sd()`
+
+`sqrt()`
+
+`cat()`
+
+`is.integer()`
+
+`is.numeric()`
+
+`summarise()`
+
+`t()`
+
+`kable()`
+
+# Calculating the Standard Error of the Mean
+
+The suppose you are interested in understanding the relationship between height, and sex in the British public. Ideally you would measure every single person in the UK for height and sex, and if you did so you would be able to know with certainty what this relationship is. You could describe the *true* difference and similarity in height between the sexes in people living in the UK. However, it is not practical to measure the entire population. Instead we can measure a *sample* of the population, and if our *sample* is drawn randomly from the population, then the sample The mean of a set of measurements or data points is an important descriptive statistic because it gives you as sense of the middle of the range of values. In statistics we assume that the sample mean from your data is an estimate of the true population that you are interested in
+
+Error of the mean describes how close your sample mean is to the true population mean. In scientific statistical analysis we are trying to infer the value of an unmeasurable quantity (the true population mean), from a measurable quantity (the sample mean). The SEM allows us to understand how close we can expect our measured value to be to the true value. The population SEM is given by the following formula:
+
+$$
+SEM = \frac{s}{\sqrt{n}}
+$$
+
+Where $s$ is the standard deviation, and $n$ is the sample size. However, our measured SEM will depend on the sample size, and we need to correct for this. The following formula gives the sample SEM.
+
+$$
+SEM = \frac{s}{\sqrt{n-1}}
+$$
+
+### Calculate the standard error of the mean height
+
+There is not a built in R function to calculate the SEM, probably because the SEM formula is rather straightforward, and there are functions to calculate each parameter of the formula. We will first calculate each mean, standard deviation, and sample size and then use these to calculate the SEM.
+
+```{r}
+# first calculate the mean. This is not necessary for the SEM calculation but you will want to report the mean with the SEM
+# NOTE: it is a good idea to always use na.rm=TRUE to make sure missing values are not included in the calculation
+mean_height <- mean(d$X5_Height_in_cm, na.rm=TRUE)
+
+#next calculate the standard deviation, again using na.rm=TRUE
+sd_height <- sd(d$X5_Height_in_cm, na.rm=TRUE)
+
+# next calculate the sample size. To do so we will use two functions: length() and na.omit(). The length() function returns the length of a vector, and the na.omit() function removes missing values from a vector
+n_height <- length(na.omit(d$X5_Height_in_cm)) - 1
+
+# now we can calculate the SEM
+sem_height <- sd_height / sqrt(n_height)
+
+# the values are each saved as objects. You can report them to the final Rmd file like this
+cat("mean height =", mean_height, "SEM =", sem_height)
+```
+
+### Writing a function to calculate the standard error of the mean
+
+You will notice in the example above that a lot of steps went into calculating the SEM, and each step required the same input variable: the column of heights from the data frame. For simple tasks like this that you have to repeat over and over, it is useful to define a function to simplify things. In the example below we first define a function to calculate SEM and then apply the function to the height data.
+
+```{r}
+#define the SEM function for a vector of values x
+get_sem <- function(x) {
+  # calculate sd
+  sd <- sd(x, na.rm=TRUE)
+  
+  # calculate the number of observations (n); ignoring any missing values
+  n <- length(na.omit(x)) - 1
+  
+  # calculate SEM
+  sem <- sd / sqrt(n)
+  
+  # return SEM to the user
+  return(sem)
+}
+
+# test the function for height
+sem_height_2 <- get_sem(d$X5_Height_in_cm)
+
+# print a report
+cat("height SEM =", sem_height_2)
+
+```
+
+Once you have defined the function it is now easy to apply it to any numeric column in the data frame, or indeed any vector. Let's try it with a few more columns in the data frame:
+
+```{r}
+# weight
+sem_weight <- get_sem(d$X6_Weight_in_kg)
+
+# report the results to the document
+cat("weight SEM =", sem_weight, "\n")
+
+# age
+sem_age <- get_sem(d$X4_Age_in_years)
+
+# report the results
+cat("age SEM =", sem_age, "\n")
+
+# what happens when we try to get the SEM of a column that is categorical data like sex?
+sem_sex <- get_sem(d$X3_Gender)
+
+# report the results
+cat("sex SEM =", sem_sex, "\n")
+```
+
+Note in this the last example our function tries to perform a standard deviation calculation on the column, whether the column is numerical or categorical. Taking the standard deviation of a categorical variable does not make sense, and consequently it produces the "**Warning: NAs introduced by coercion**" output, and the final SEM value it returns is also **NA**. This is not an ideal behaviour. We want our function to first check if the variable is a numerical, and only return a SEM if it is. Let's update the function to first check if the column is numbers.
+
+```{r}
+#define the SEM function for a vector of values x
+get_sem <- function(x) {
+  
+  # check that the argument passed to "x" is numbers
+  if (!(is.numeric(x) || is.integer(x))) {
+    stop("expecting an object of class \"numeric\" or class \"integer\"\n")
+  } 
+  
+  # calculate sd
+  sd <- sd(x, na.rm=TRUE)
+  
+  # calculate n
+  n <- length(na.omit(x)) - 1
+  
+  # calculate SEM
+  sem <- sd / sqrt(n)
+  
+  # return SEM to the user
+  return(sem)
+}
+
+```
+
+Try testing the updated function by copying and pasting the following commands into the console:
+
+-   `get_sem(d$X3_Gender)`
+
+-   `get_sem(d$X5_Height_in_cm)`
+
+You should get an error message for the categorical variable, and a number for the numeric variable. This is the functionality that we want.
+
+# Calculating confidence intervals
+
+### Confidence interval description
+
+Confidence intervals (CI) describe the range of values that has a given percent chance of containing the true value of your summary statistic (e.g. mean). Usually, 95% or 99% CI are used. To calculate a given CI you first need to calculate the margin of error (ME)
+
+$$
+ME = z* \times SEM
+$$
+
+where $z*$ is a constant that describes the number of standard deviations required to contain a given percentage of values from a normal distribution. The values of $z*$ that we will be using are as follows:
+
+$$
+CI_{(95\%)}: z* = 1.96
+$$
+
+$$
+CI_{(99\%)}: z* = 2.58
+$$
+
+We can then calculate the CI by adding and subtracting the ME from the sample mean:
+
+$$
+CI = \overline{x} \pm ME
+$$
+
+### Calculating confidence intervals in R
+
+We will start by calculating a confidence interval "by hand". Let's calculate the 95% CI of height in our data.
+
+```{r}
+# first calculate the SEM using the previously defined SEM function
+height_sem <- get_sem(d$X5_Height_in_cm)
+
+# second calculate the Margin of Error
+height_me <- height_sem * 1.96
+
+# third, calculate the mean
+height_mean <- mean(d$X5_Height_in_cm, na.rm=TRUE)
+
+# fourth, calculate the lower bound of the CI
+height_ci_lower <- height_mean - height_me
+
+# fifth, calculate the upper bound of the CI
+height_ci_upper <- height_mean + height_me
+
+# finally, combine into a CI
+height_ci <- c(height_ci_lower, height_ci_upper)
+
+cat("height 95% confidence interval:", height_ci)
+```
+
+### Confidence Interval function
+
+As with the SEM calculations, it is often more efficient to write repeated calculations as functions.
+
+```{r}
+get_CI <- function(x, range="CI95") {
+  
+  # check that the argument passed to "x" is numbers
+  if (!(is.numeric(x) || is.integer(x))) {
+    stop("expecting an object of class \"numeric\" or class \"integer\"\n")
+  } 
+  
+  # check that the range is either 95% or 99%
+  allowed <- c("CI95", "CI99")
+  if (!(range %in% allowed)) {
+    stop("The CI range must be either CI95 or CI99")
+  }
+  
+  # define z* value
+  z <- list(CI95=1.96, CI99=2.58)
+  
+  #calculate margin of error
+  me <- get_sem(x) * z[[range]]
+  
+  # calculate CI
+  lower <- mean(x, na.rm=TRUE) - me 
+  upper <- mean(x, na.rm=TRUE) + me
+  CI <- c(lower, upper)
+  
+  return(CI)
+  
+}
+
+# check it for height
+
+height_ci_95 <- get_CI(d$X5_Height_in_cm, range="CI95")
+cat("height 95% CI:", height_ci_95, "\n")
+
+height_ci_99 <- get_CI(d$X5_Height_in_cm, range="CI99")
+cat("height 99% CI:", height_ci_99, "\n")
+
+```
+
+# Creating informative tables
+
+SEM and CI are useful for describing how confident you are in your summary statistics. It is often useful to create informative tables that describe your measured variables in terms of the mean, SD, SEM, and CI. The "dplyr" R library is very useful for this.
+
+```{r}
+
+# create summary table for height and weight
+summary_table <- d |>
+  summarise(
+    Mean_height = mean(X5_Height_in_cm),
+    SD_height = sd(X5_Height_in_cm),
+    SEM_height = get_sem(X5_Height_in_cm),
+    CI95_height_lower = get_CI(X5_Height_in_cm)[[1]],
+    CI95_height_upper = get_CI(X5_Height_in_cm)[[2]],
+    
+    Mean_weight = mean(X6_Weight_in_kg),
+    SD_weight = sd(X6_Weight_in_kg),
+    SEM_weight = get_sem(X6_Weight_in_kg),
+    CI95_weight_lower = get_CI(X6_Weight_in_kg)[[1]],
+    CI95_weight_upper = get_CI(X6_Weight_in_kg)[[2]],
+  )
+
+
+# print a pretty formatted table. I will rotate the table so it fits on the page using t()
+
+# Print a pretty table using kableExtra
+kable(t(summary_table))
+
+```
+
+# Exercise
+
+Use the example code above to answer the following questions. To do so edit this R Markdown document. Insert an R code block after each question, and insert your code to answer the question. Make sure your code works and produces the expected outcome by executing your code.
+
+## Question 1. Calculate and report the mean and SEM of age "by hand".
+
+Insert your R block here:
+
+## Question 2. Calculate and report the mean and SEM for age, body temperature, and heart rate using the get_sem() function.
+
+Insert your R block here:
+
+## Question 3. Calculate and report the 99% CI of age "by hand".
+
+Insert your R block here:
+
+## Question 4. Calculate and report the 99% CI of age, body temperature, and heart rate using the get_CI() function.
+
+Insert your R block here:
+
+## Question 5. Create and report a summary table describing the mean, SD, SEM and 99% CI of age, body temperature, and heart rate.
+
+Insert your R block here:
+
+## Challenge Question 6. Create a new column in the data frame called BMI, and then report the mean and 99% CI
+
+To do this you will have to look up the formula for BMI. You will also have to create a new column in the data frame by applying the BMI formula to the height and weight columns. Ask chatGPT for help if you get stuck.
+
+Insert your R block here:
+
+## Challenge Question 7. Write a function to calculate the population SEM that uses the $\sqrt{n}$ . Demonstrate your function.
+
+You should be able to edit the existing get_sem() function for this.
+
+Insert your R block here:

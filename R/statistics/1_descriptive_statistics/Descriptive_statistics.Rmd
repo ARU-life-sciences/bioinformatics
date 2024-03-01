@@ -1,0 +1,350 @@
+---
+title: "Descriptive statistics and plots"
+author: "Jason Hodgson"
+date: "2024-02-06"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Necessary Packages
+
+This tutorial requires two packages that must be installed. The following code will check if the packages are installed, and if they are not will install them. It will then load the packages.
+
+```{r}
+# Check if ggplot2 is installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  # If not installed, install ggplot2
+  install.packages("ggplot2")
+}
+
+# Check if dplyr is installed
+if (!requireNamespace("dplyr", quietly = TRUE)) {
+  # If not installed, install dplyr
+  install.packages("dplyr")
+}
+
+# Load the installed packages
+library(ggplot2)
+library(dplyr)
+```
+
+# R functions used in this tutorial
+
+`read.csv()`
+
+`dim()`
+
+`head()`
+
+`tail()`
+
+`names()`
+
+`class()`
+
+`levels()`
+
+`as.factor()`
+
+`as.character()`
+
+`as.numeric()`
+
+`as.integer()`
+
+`mean()`
+
+`median()`
+
+`sd()`
+
+`table()`
+
+`dplyr::group_by()`
+
+`dplyr::summarise()`
+
+`ggplot2::ggplot()`
+
+`ggplot2::geom_histogram()`
+
+`ggplot2::geom_bar()`
+
+# Set your working directory
+
+Make sure you have set your working directory to "**week_4_descriptive_statistics**" within your "**PfR_stats_portfolio**" folder. From the R Studio top toolbar choose: **Session =\> Set Working Directory =\> Choose Directory.**
+
+# Reading the data into R
+
+For this exercise we will be using the data from your physiology practical. The data that you uploaded to the ARU_class_project data set on EpiCollect can be downloaded as a .csv file (see below for a description of .csv files. The file we will be working is called "**form-1\_\_anthropometrics.csv**" and should be put in the "**data**" folder inside the "**week_4_descriptive_statistics**" folder in your R statistical analysis portfolio.
+
+### About .csv files
+
+CSV stands for comma separated values. This is a text file arranged as a table. The first line of the file contains the variable names, and each subsequent line contains an entry which consists of all the data from one person in the sample. For each line in the file, the columns are separated by commas. This means commas are a special character that the computer reads to divide up the file into columns. Files of this type are stored with a file name ending in .csv by convention. Follow this convention, because many computer systems use file extensions to decide how a file should be treated.
+
+### Read in the data and save it as a data frame
+
+If your folders and files are set up correctly, the following code should read in the data.
+
+```{r}
+# read the data and save it to a data frame called d.
+# NOTE: the file call within read.csv must give the relative path from the analysis file (this R markdown document), to the data file.
+d <- read.csv(file="../data/form-1__anthropometrics.csv", header=TRUE)
+```
+
+If the above code executed without errors you should have the data read in and stored in a variable called "d".
+
+# Looking at your data visually
+
+You should begin every data analysis by inspecting your data visually to get a feel for your data. R stores data in a class of object called a **data frame**. Data frames have many special properties that allow you to work with data efficiently. There are also many **functions** that allow you to explore data frames.
+
+### Checking the dimensions of your data frame
+
+```{r}
+# the dim() function will give the number of rows and columns in a data frame
+dim(d)
+```
+
+### Looking at a subset of the data frame
+
+It is often useful to view a subset of your data frame to see the names of each column, and the types of values in each row. For large data frames it is not possible to view the entirety of the data frame. You can use the **head()** and **tail()** functions to see the first and last lines, respectively.
+
+```{r}
+head(d)
+```
+
+```{r}
+tail(d)
+```
+
+### Checking the column names
+
+In order to work on a data frame, you will need to know the names of the columns in order to reference them. The **names()** function will return a list of the column names of a data frame.
+
+```{r}
+names(d)
+```
+
+### Checking the class of a column of data
+
+R assigns to each column in a data frame a type, or **class**. The most common classes are **numeric**, **integer,** **character**, and **factor**.
+
+-   **Numeric:** Columns of type numeric can only contain numbers, or the missing data character **\<NA\>.** Letters, and words are not allowed in numeric columns. R will allow mathematical operations to be performed on numeric columns.
+
+-   **Integer:** Columns of type integer are similar to numeric columns, however only integers are allowed. Mathematical operations can be performed on integer data. Note, however, that if a mathematical operation creates numbers with decimal points (e.g. division), the class will switch to numeric.
+
+-   **Character:** Columns of type character can contain strings of letters, numbers, or other characters such as +-&%\$# ,. Character columns can not be manipulated mathematically. Character columns can store *nominal* data.
+
+-   **Factor:** Columns of type factor are similar to character columns, and also store strings of characters of any type. The difference is factor columns have **levels** associated with them. The levels are a list of values that contains each unique value in the column of data. Levels can be ordered, or unordered. Factor columns can contain *nominal* or *ordinal* data. It is best to work with *nominal* and *ordinal* data as factor data, and it is often necessary to convert character data to factor data.
+
+The **class()** function checks the class of any R object. To check the class of a column of a data frame you need to specify the column name using the \$ operator.
+
+```{r}
+# to check the "X2_Date" column in the data frame called "d"
+class(d$X2_Date)
+```
+
+```{r}
+# to check the "X6_Weight_in_kg" column in the data frame called "d"
+class(d$X6_Weight_in_kg)
+```
+
+### Changing the class of a data column
+
+When you read a data file into R with **read.table()** or **read.csv()**, R tries to interpret what type of data is stored in each column, and assigns it a class. You might sometimes find that R is not behaving as you expect it to when working with a data frame, and this may be because R thinks the data is of a different class than you do. This is a frequent cause of errors, so you should get int he habit of checking the class of your data. If you need to change the class of a data column you can use **as.factor()**, **as.character()**, **as.integer()**, or **as.numeric().**
+
+R always reads assigns any data column that contains anything other than numbers to character. You will often want to change these columns to factor.
+
+```{r}
+# check the class to start
+class(d$X3_Gender)
+
+# you need to use the assignment operator and assign the converted data column back to itself to save the change
+d$X3_Gender <- as.factor(d$X3_Gender)
+
+#check the class again
+class(d$X3_Gender)
+```
+
+### Checking the levels of a factor column
+
+You can check the levels of a factor column using the **levels()** function.
+
+```{r}
+# First check the class and switch to factor if necessary
+class(d$X10_Time_since_caffei)
+d$X10_Time_since_caffei <- as.factor(d$X10_Time_since_caffei)
+class(d$X10_Time_since_caffei)
+
+# next check levels
+levels(d$X10_Time_since_caffei)
+```
+
+### Changing the order of factor levels for ordinal data
+
+If you have ordinal data, it might be necessary to change the order of the factor levels. In the example of time since caffeine above, the order should be from smallest time interval to greatest.
+
+```{r}
+# check levels order
+levels(d$X10_Time_since_caffei)
+
+# change them
+levels(d$X10_Time_since_caffei) <- c("﹥ 15 mins", "15 - 30 mins", "30 - 45 mins", "45 - 60 mins", "﹥ 60 mins", "")
+
+# check levels order
+levels(d$X10_Time_since_caffei)
+```
+
+# Describing your data mathematically
+
+The next step in a data analysis is to describe your data mathematically using summary statistics.
+
+### Calculating the mean
+
+To calculate the mean of numeric or integer data you use the **mean()** function. The **na.rm=TRUE** argument in the **mean()** function tells R to "remove missing data" when calculating the mean.
+
+```{r}
+# mean weight
+mean(d$X6_Weight_in_kg, na.rm=TRUE)
+```
+
+### Calculating the median
+
+To calculate the median or numeric or integer data, you use the **median()** function. The **na.rm=TRUE** argument in the **mean()** function tells R to "remove missing data" when calculating the median.
+
+```{r}
+# median height
+median(d$X5_Height_in_cm, na.rm=TRUE)
+```
+
+### Calculating the mode
+
+Calculating the mode of nominal or ordinal data is less straight forward. Surprisingly, R has no mode function. One of the great things about R is when a function does not exist, we can write our own!
+
+```{r}
+
+# first define a mode function
+get_mode <- function(data_column, na.rm = FALSE) {
+  # Check if the input is a character or factor
+  if (!is.character(data_column) && !is.factor(data_column)) {
+    stop("Input must be a character or factor column.")
+  }
+  
+  # Remove NAs if na.rm is TRUE
+  if (na.rm) {
+    data_column <- data_column[!is.na(data_column)]
+  }
+  
+  # Convert to factor to handle both character and factor inputs
+  data_factor <- as.factor(data_column)
+  
+  # Calculate the table of frequencies
+  freq_table <- table(data_factor)
+  
+  # Find the mode(s)
+   modes <- names(freq_table[freq_table == max(freq_table)])
+  
+  return(modes)
+}
+
+```
+
+Use the **get_mode()** function defined above to get the modal value of factor data. Note that the function can return more than one value if there are equal amounts of two or more levels.
+
+```{r}
+# get mode of activity level
+get_mode(d$X7_Activity_Level_NAS, na.rm=TRUE)
+```
+
+### Calculating the standard deviation
+
+The **sd()** function calculates the standard deviation of *numeric* or *integer* data.
+
+```{r}
+# standard deviation of weight
+sd(d$X6_Weight_in_kg, na.rm=TRUE)
+```
+
+# Creating data tables
+
+Tables are a fantastic way to summarise data. You can summarise individual factor or character columns, or you can combine multiple columns to cross tabulate.
+
+### Tables of a single character or factor column
+
+The **table()** function makes it easy to summarise character and factor data.
+
+```{r}
+# table of gender
+table(d$X3_Gender)
+```
+
+### Tables of multiple character or factor columns (cross tables)
+
+```{r}
+# table of gender by smoking
+table(d$X3_Gender, d$X8_Smoker)
+```
+
+### Tables of summary statistics by a factor column
+
+You might be interested to know the mean value of a numeric column broken down by a second factor column. For example, you might want to know the mean weight broken down by sex. To do this we will use the **dplyr** package that was loaded at the beginning of the tutorial. This uses the TidyVerse pipe notation.
+
+```{r}
+# create the summary table of mean weight and the standard deviation for each sex
+summary_table <- d %>%
+  group_by(X3_Gender) %>%
+  summarise(mean_weight = mean(X6_Weight_in_kg, na.rm = TRUE), sd_weight =sd(X6_Weight_in_kg, na.rm=TRUE))
+
+# print the table
+print(summary_table)
+```
+
+# Plotting frequency distributions
+
+Once you have summarised your data numerically and with tables, you will want to visualise it to understand its frequency distribution. This is done with histograms for numeric data and bar graphs for ordinal data. For plotting, we will use the **ggplot2** R package loaded at the beginning of this tutorial.
+
+### Plotting a histogram
+
+Note that you may want to change the **binwidth** argument. This sets the with of the bars in the plot. Here it is set to 3 cm.
+
+```{r}
+# histogram of height data
+my_histogram <- ggplot(data=d, aes(x=X5_Height_in_cm)) + 
+  geom_histogram(binwidth=3) +
+  xlab("height (cm)") +
+  theme_bw()
+
+print(my_histogram)
+```
+
+### Plotting a histogram and colouring it by a factor column
+
+```{r}
+# histogram of height data
+my_histogram <- ggplot(data = d, aes(x = X5_Height_in_cm, fill = X3_Gender)) + 
+  geom_histogram(binwidth = 3, color = "black", alpha = 0.7) +  # Set the border color and transparency
+  scale_fill_manual(values = c("red", "blue")) +  # Specify the fill colors for each gender
+  xlab("Height (cm)") +
+  theme_bw()
+
+print(my_histogram)
+
+
+```
+
+### Plotting a bar graph of factor data
+
+If you want to look at the distribution of ordinal data you can use a bar graph.
+
+```{r}
+# bar graph of time since caffeine 
+my_bar <- ggplot(data=d, aes(x=X10_Time_since_caffei)) + 
+  geom_bar() +
+  theme_bw() +
+  xlab("Time since caffeine")
+
+print(my_bar)
+```
