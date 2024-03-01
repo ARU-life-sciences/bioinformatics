@@ -39,4 +39,28 @@ Later authors have continued the confusion.
 Cleveland (1993) suggests that the data for the Morris site may have had the 
 years switched.
 
+## Cats
 
+The heart and body weights of samples of male and female cats used for digitalis experiments. The cats were all adult, over 2 kg body weight.
+
+Format
+
+This data frame contains the following columns:
+
+Sex
+
+    sex: Factor with levels "F" and "M".
+Bwt
+
+    body weight in kg.
+Hwt
+
+    heart weight in g.
+
+Source
+
+R. A. Fisher (1947) The analysis of covariance method for the relation between a part and the whole, Biometrics 3, 65–68. 
+
+## Resource
+
+https://vincentarelbundock.github.io/Rdatasets/articles/data.html
