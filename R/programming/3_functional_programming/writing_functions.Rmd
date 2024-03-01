@@ -6,7 +6,7 @@ Functions have three things:
 2.  The formals - the list of arguments given to the function
 3.  The environment - the location of all of the functions variables
 
-We will talk about the body and the formals, but probably not the environment until later - that's a more complex subject.
+We will talk about the body and the formals, but probably not the environment until later - that's a more complex subject. Basically a function takes an optional input, and produces a visible output (usually).
 
 ## How to write a function
 

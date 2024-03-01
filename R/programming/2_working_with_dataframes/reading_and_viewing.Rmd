@@ -82,6 +82,26 @@ head(barley)
 An even more interactive way to view the data if you are in RStudio is to use the
 `View` function. Try that on your own machines.
 
+## Column names and row names
+
+A data frame always has column names and row names. Get the row names by calling 
+`rownames(barley)` and the column names with `colnames(barley)`. These functions can
+also be used to change the row/column names.
+
+```{r}
+# paste is useful to collapse vectors of strings into a single string with a separator.
+cat("Original names:", paste(colnames(barley), collapse = ", "))
+```
+
+Now let's change them. We assign a vector _of the same length_ to the column names
+vector. You can either type this out as I've done, or it can be the result of a 
+function over the names.
+
+```{r}
+colnames(barley) <- c("Row Names", "Yield", "Variety", "Year", "Site")
+cat("Altered names:", paste(colnames(barley), collapse = ", "))
+```
+
 ## Over to you
 
 1. How do you think you would read in a TSV (Tab Separated Values)? Hint: 

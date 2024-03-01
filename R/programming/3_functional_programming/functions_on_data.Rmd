@@ -1,0 +1,31 @@
+# Using functions on data frames
+
+Given that we have already looked at indexing in data frames, we have already used functions on data frames! Here we will look at other functions to apply on data frames. For example:
+
+-   How do I compute the a function on a column?
+
+-   How do I compute the same function across several columns at once?
+
+-   How do I compute across rows?
+
+-   If the data is grouped, how do I execute functions on each group?
+
+These are roughly ordered in increasing complexity.
+
+## Functions on columns
+
+We have already covered this - but as a reminder.
+
+```{r}
+# load the cats data
+cats <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv", stringsAsFactors = TRUE)
+```
+
+## Functions on multiple columns
+
+Sometimes we want to summarise several columns at the same time. It would be tedious to try and do this by hand for each one, and it would introduce errors. Less code `<-` better. Say we want to know how common each category is for each of the categorical columns. We would use the `table` function.
+
+```{r}
+# the frequency of each variety
+table(barley$variety)
+```
