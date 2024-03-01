@@ -9,7 +9,8 @@ to open the file in other applications.
 First we can start by loading in our data again.
 
 ```{r}
-barley <- read.csv("data/barley.csv", stringsAsFactors = TRUE)
+barley <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv", stringsAsFactors = TRUE)
+# barley <- read.csv("data/barley.csv", stringsAsFactors = TRUE)
 ```
 
 And we can filter this data in some interesting way. I am interested this time in

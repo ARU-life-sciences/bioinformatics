@@ -19,7 +19,8 @@ How do I get the 5th row?
 # let's get barley back
 # we can automatically convert strings to factors if we ask R to...
 # which is what we did by hand in `reading_and_viewing.Rmd`
-barley <- read.csv(file = "data/barley.csv", stringsAsFactors = TRUE)
+barley <- read.csv(file = "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv", stringsAsFactors = TRUE)
+# barley <- read.csv(file = "data/barley.csv", stringsAsFactors = TRUE)
 
 # get the 5th row
 barley[5, ]

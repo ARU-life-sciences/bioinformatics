@@ -14,7 +14,8 @@ CSV (Comma Separated Value) files in with the `read.csv` function.
 # our data is called barley
 # we read in the data using the `read.csv` function
 # and we pointed to our data
-barley <- read.csv(file = "data/barley.csv")
+barley <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv")
+# barley <- read.csv(file = "data/barley.csv")
 
 # when I learned R, we always read in files using the
 # file.choose() function. However, this is rarely useful
