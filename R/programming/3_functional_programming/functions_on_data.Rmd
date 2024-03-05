@@ -12,7 +12,7 @@ Given that we have already looked at indexing in data frames, we have already us
 
 These are roughly ordered in increasing complexity.
 
-## Functions on columns
+## Functions on columns in a data frame
 
 We have already covered this - but as a reminder.
 
@@ -21,11 +21,85 @@ We have already covered this - but as a reminder.
 cats <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv", stringsAsFactors = TRUE)
 ```
 
-## Functions on multiple columns
+## Functions on multiple columns in a data frame
 
-Sometimes we want to summarise several columns at the same time. It would be tedious to try and do this by hand for each one, and it would introduce errors. Less code `<-` better. Say we want to know how common each category is for each of the categorical columns. We would use the `table` function.
+Sometimes we want to summarise several columns at the same time. It would be tedious to try and do this by hand for each one, and it would introduce errors. Less code `<-` better.
 
 ```{r}
-# the frequency of each variety
-table(barley$variety)
+# what are the columns to extract?
+bwt_and_hwt <- c("Bwt", "Hwt")
+# index on the column names
+bwt_and_hwt_data <- cats[, bwt_and_hwt]
+
+# now the fun bit
+lapply(X = bwt_and_hwt_data, FUN = mean)
 ```
+
+So what does this mean? `lapply` stands for 'list apply', or apply a function over elements of a list. Because we know that data frames are lists, `lapply` will treat each column as a separate list, and iterate over them. It also returns the result as a list. You also have to supply the function to `lapply` - above we gave the `mean` function. But we can very well supply our own. What if we wanted both the mean and the standard deviation?
+
+```{r}
+# bit more complex
+lapply(
+  X = bwt_and_hwt_data,
+  # apply the functions mean and sd, but put them in a
+  # list
+  FUN = function(e) list(mean = mean(e), sd = sd(e))
+)
+```
+
+The output is a bit of a complicated nested list. It's usually easier to use `sapply` which is a wrapper around `lapply` that simplifies the output data structure. Here it makes a little `matrix`.
+
+```{r}
+sapply(
+  X = bwt_and_hwt_data,
+  # apply the functions mean and sd, but put them in a
+  # list
+  FUN = function(e) list(mean = mean(e), sd = sd(e))
+)
+```
+
+## Functions on rows in a data frame
+
+In R, generally things are set up to compute over columns. It's a much easier and more common use case. You can apply functions on rows though, using `apply`.
+
+```{r}
+# correct for units
+bwt_and_hwt_data$Bwt <- bwt_and_hwt_data$Bwt * 1000
+
+# use apply, MARGIN = 1 means operate over rows
+sum_bwt_hwt <- apply(X = bwt_and_hwt_data, MARGIN = 1, FUN = sum)
+
+bwt_and_hwt_data$sum <- sum_bwt_hwt
+
+head(bwt_and_hwt_data)
+```
+
+The use of `apply` is a bit overkill here. We can just use the columns. `apply` is more useful when there are many columns that you want to run a function over.
+
+```{r}
+# The above is equivalent to
+bwt_and_hwt_data$sum <- bwt_and_hwt_data$Bwt + bwt_and_hwt_data$Hwt
+
+# however over more than two columns... it can be useful
+# pass other arguments to the FUN, just as comma separated arguments
+# at the end.
+apply(X = cats, MARGIN = 1, FUN = paste, collapse = ",")[1]
+```
+
+## Functions over groups
+
+The `cats` data frame only has one group - sex. So we will use this simple two level factor as our grouping variable. We can look at the average body weight across the sexes using `tapply`.
+
+```{r}
+sex <- cats$Sex
+body_weight <- cats$Bwt
+
+# use tapply
+tapply(X = body_weight, INDEX = sex, FUN = mean)
+```
+
+`sex` here will be forced into a `factor` which is R's internal representation of a collection of known items. Every factor will have a number of 'levels' which are the values a factor can take.
+
+## A note on (probably) better packages
+
+The above uses the most basic functionality in R to achieve our results. Even a cursory search of the questions above will lead to a wide variety of answers - many of them from the 'tidyverse' or 'data.table'. Each has their own syntax and quirks. We will delve later on in the course specifically to these packages to see how they work.
