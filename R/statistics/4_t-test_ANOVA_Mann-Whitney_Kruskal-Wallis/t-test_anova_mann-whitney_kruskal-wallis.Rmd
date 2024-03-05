@@ -1,8 +1,10 @@
 ---
 title: "T-test, ANOVA, Mann-Whitney, Kruskal Wallis"
 author: "Jason Hodgson"
-date: '2024-02-28'
-output: word_document
+date: "2024-02-28"
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
