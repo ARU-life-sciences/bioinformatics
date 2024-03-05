@@ -171,9 +171,34 @@ just a fancy list.
 
 ### Important special data types
 
-There are two other data types I want to highlight here, matrices and data frames.
+There are other data types I want to highlight here, matrices and data frames.
 Data frames are perhaps the most widely used data types in R, so a good understanding
 of these will help you a lot in your R quest.
+
+#### Factors
+
+Factors are categorical variables, usually character vectors, which can only take
+on a specific set of values. They are really useful for a whole range of things,
+from modelling to plotting.
+
+They can also be natively sorted on the order of the levels, using `sort`, and 
+prevent the user from inputting typos - or unidentified levels - into the factor.
+
+```{r}
+# unordered, recorded months
+recorded_months <- c("Oct", "Jan", "Mar", "Sep")
+
+# all the months, in order
+month_levels <- c(
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+
+# make factor with `factor` function, and give the factor levels.
+f <- factor(recorded_months, levels = month_levels)
+# and sort
+sort(f)
+```
 
 #### Matrices
 
