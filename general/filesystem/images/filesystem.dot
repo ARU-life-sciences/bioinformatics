@@ -1,0 +1,9 @@
+graph G {
+    "root (/)" -- "bin"
+    "root (/)" -- "etc"
+    "root (/)" -- "HOME (~)"
+    "root (/)" -- "lib"
+    "HOME (~)" -- "Documents"
+    "HOME (~)" -- "Downloads"
+    "HOME (~)" -- "Pictures"
+}
