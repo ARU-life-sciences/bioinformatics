@@ -193,6 +193,6 @@ system that we have permission to view.
 
 + List the files in your current directory.
 + List the files in the directory two levels above your current directory.
-How many files and/or directories are there?
+  How many files and/or directories are there?
 + Change directory to the root directory and print the working directory
-using `pwd`. What does it say?
+  using `pwd`. What does it say?
