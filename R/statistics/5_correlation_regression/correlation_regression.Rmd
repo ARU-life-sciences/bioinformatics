@@ -84,13 +84,14 @@ The statistical techniques you have available to you when you are working with t
 Let's begin by considering the relationship between height and weight in our data. You might expect that taller people tend to weigh more. If this is so we should expect to see a clear positive relationship between height and weight. Let's plot height on the x-axis, and weight on the y-axis.
 
 ```{r}
-
+# use ggplot2 and the geom_point() function to create a scatter plot
 plot_1 <- ggplot(data=d, aes(x=X5_Height_in_cm, y=X6_Weight_in_kg)) +
             geom_point(size = 2) +
             theme_bw() +
             xlab("Height (cm)") +
             ylab("Weight (kg)")
 
+# print the plot
 print(plot_1)
 
 ```
@@ -223,9 +224,9 @@ print(plot_2)
 
 As expected, there is also a pretty clear relationship between height and the log of weight. We can test this relationship formally using the Pearson correlation coefficient.
 
-## Parametric hypothesis test: Pearson's correlation  coefficient
+## Parametric hypothesis test: Pearson's correlation coefficient
 
-We can perform a formal test of the relationship between height and the log of weight using the parametric Pearson's product-moment correlation. This is a test of linear correlation between two variables
+We can perform a formal test of the relationship between height and the log of weight using the parametric Pearson's product-moment correlation. This is a test of linear correlation between two variables. This formally measures the extent to which two variables depend on each other, or co-vary.
 
 ```{r}
 # test the hypothesis that taller people tend to be heavier using Pearson's correlation coefficient
@@ -237,7 +238,7 @@ print(height_weight_cor_test)
 
 ```
 
-This test shows that there is a positive correlation between height and the log of weight (t=6.94, df=79, p=9.80e-10). The correlation coefficient is r = 0.615, which is a moderately strong correlation. We can calculate the proportion of variation in the log of weight that is explained by height by calculating the r^2^ value. The r value is stored in the correlation test object as "estimate". We can get this value using the \$ operator on the test object
+This test shows that there is a positive correlation between height and the log of weight (t=6.94, df=79, p=9.80e-10). The correlation coefficient is r = 0.615, which is a moderately strong correlation. Correlation coeificients can range from -1 to 1, with -1 being a perfect negative correlation, 1 being a perfect positive correlation, and 0 being no correlation. We can calculate the proportion of variation in the log of weight that is explained by height by calculating the r^2^ value. The r value is stored in the correlation test object as "estimate". We can get this value using the \$ operator on the test object
 
 ```{r}
 # get the r value
@@ -260,17 +261,17 @@ If you have non-normal data and do not want to transform your data, or if you tr
 ```{r}
 # test the hypothesis that taller people tend to be heavier using Pearson's correlation coefficient
 
-height_weight_rank_test <- cor.test(x= d$X5_Height_in_cm, y = log(d$X6_Weight_in_kg), method="spearman")
+height_weight_rank_test <- cor.test(x= d$X5_Height_in_cm, y = d$X6_Weight_in_kg, method="spearman")
 
 # print the test results
 print(height_weight_rank_test)
 ```
 
-As expected the non-parametric Spearman's rank correlation test also finds a significant positive relationship between height and weight (Spearman's rho = 0.624, S = 33320, p = 4.959e-10).
+As expected the non-parametric Spearman's rank correlation test also finds a significant positive relationship between height and weight (Spearman's rho = 0.624, S = 33320, p = 4.959e-10). The Spearman's rho statistic is the measure of the correlation and should be interpreted the same as Pearson's *r*. It's range is also from a perfect negative correlation (rho = -1) to a perfect positive correlation (rho = 1), with the mid point being no correlation (rho = 0).
 
 # Linear Regression
 
-When performing a correlation analysis, we are measuring the strength of the relationship between two variables. Another way to think about the relationship between two variables is the as the affect that one variable has on another. This approach is known as **regression**. In regression we are describing the relationship between variables using a mathematical equation, and this equation can be used to make predictions about the dependent variable given known values of the independent variables. This method works by finding the line that best fits the data. This means that the line minimizes the distance between it and each of the points. Let's fit the a line to our visualisation of the relationship between height and weight.
+When performing a correlation analysis, we are measuring the strength of the relationship between two variables. Another way to think about the relationship between two variables is the as the affect that one variable has on another. This approach is known as **regression**. In regression we are describing the relationship between variables using a mathematical equation, and this equation can be used to make predictions about the dependent variable given known values of the independent variables. In linear regression the equation will take the form of a line: $y = mx + b$. This method works by finding the line that best fits the data. This means that the line will minimize the distance between it and each of the points. Let's fit the a line to our visualisation of the relationship between height and weight.
 
 ## Scatter plot with regression line
 
@@ -291,7 +292,7 @@ This plot shows the line of best fit, along with the shaded region that indicate
 
 ## Hypothesis testing with linear regression
 
-In linear regression, the null hypothesis is that there is not a linear relationship between the independent and dependent variables. When there is no relationship between variables, the scatter plot will appear as a cloud of points, and the fitted regression line will be flat. We can demonstrate the null hypothesis (no relationship) by simulating values drawn from a normal distribution.
+In linear regression, the null hypothesis is that there is not a linear relationship between the independent and dependent variables. When there is no relationship between variables, the scatter plot will appear as a cloud of points, and the fitted regression line will be flat. We can demonstrate the null hypothesis (no relationship) by simulating values drawn from a normal distribution. In this example we are purposely not creating any relationship between the x and y values.
 
 ```{r}
 # simulate x and y values using rnorm()
