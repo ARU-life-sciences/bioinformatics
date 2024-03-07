@@ -361,7 +361,8 @@ applications.</p>
 <div id="writing-csv-files" class="section level2">
 <h2>Writing CSV files</h2>
 <p>First we can start by loading in our data again.</p>
-<pre class="r"><code>barley &lt;- read.csv(&quot;data/barley.csv&quot;, stringsAsFactors = TRUE)</code></pre>
+<pre class="r"><code>barley &lt;- read.csv(&quot;https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv&quot;, stringsAsFactors = TRUE)
+# barley &lt;- read.csv(&quot;data/barley.csv&quot;, stringsAsFactors = TRUE)</code></pre>
 <p>And we can filter this data in some interesting way. I am interested
 this time in all yields less than the mean yield across the whole data
 set.</p>

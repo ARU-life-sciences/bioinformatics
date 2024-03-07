@@ -362,7 +362,9 @@ display: none;
 variables</li>
 </ol>
 <p>We will talk about the body and the formals, but probably not the
-environment until later - that’s a more complex subject.</p>
+environment until later - that’s a more complex subject. Basically a
+function takes an optional input, and produces a visible output
+(usually).</p>
 <div id="how-to-write-a-function" class="section level2">
 <h2>How to write a function</h2>
 <p>All functions are initiated with the <code>function</code> keyword.
@@ -402,7 +404,8 @@ cat_dir &lt;- function() {
 
 # call our function
 cat_dir()</code></pre>
-<pre><code>## apply.Rmd 
+<pre><code>## functions_on_data.html 
+## functions_on_data.Rmd 
 ## functions.Rmd 
 ## htmls 
 ## writing_functions.Rmd</code></pre>
@@ -470,7 +473,7 @@ any_Rmd_files &lt;- function(file_path) {
 
 any_Rmd_files()</code></pre>
 <pre><code>## Warning in any_Rmd_files(): You did not input a file list, defaulting to `.`</code></pre>
-<pre><code>## [1] &quot;apply.Rmd&quot;             &quot;functions.Rmd&quot;         &quot;writing_functions.Rmd&quot;</code></pre>
+<pre><code>## [1] &quot;functions_on_data.Rmd&quot; &quot;functions.Rmd&quot;         &quot;writing_functions.Rmd&quot;</code></pre>
 <p><code>if</code> statements therefore don’t have to have an
 <code>else</code> branch. But in many cases it makes sense to do so. As
 with functions, <code>if...else</code> statements can be on a single

@@ -510,10 +510,34 @@ x</code></pre>
 </div>
 <div id="important-special-data-types" class="section level3">
 <h3>Important special data types</h3>
-<p>There are two other data types I want to highlight here, matrices and
+<p>There are other data types I want to highlight here, matrices and
 data frames. Data frames are perhaps the most widely used data types in
 R, so a good understanding of these will help you a lot in your R
 quest.</p>
+<div id="factors" class="section level4">
+<h4>Factors</h4>
+<p>Factors are categorical variables, usually character vectors, which
+can only take on a specific set of values. They are really useful for a
+whole range of things, from modelling to plotting.</p>
+<p>They can also be natively sorted on the order of the levels, using
+<code>sort</code>, and prevent the user from inputting typos - or
+unidentified levels - into the factor.</p>
+<pre class="r"><code># unordered, recorded months
+recorded_months &lt;- c(&quot;Oct&quot;, &quot;Jan&quot;, &quot;Mar&quot;, &quot;Sep&quot;)
+
+# all the months, in order
+month_levels &lt;- c(
+  &quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, 
+  &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;
+)
+
+# make factor with `factor` function, and give the factor levels.
+f &lt;- factor(recorded_months, levels = month_levels)
+# and sort
+sort(f)</code></pre>
+<pre><code>## [1] Jan Mar Sep Oct
+## Levels: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec</code></pre>
+</div>
 <div id="matrices" class="section level4">
 <h4>Matrices</h4>
 <p>These are two dimensional vectors essentially; think of a table of
