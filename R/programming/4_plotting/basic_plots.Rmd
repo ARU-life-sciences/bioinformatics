@@ -1,0 +1,28 @@
+# Plotting in R
+
+One of the great strengths of R are the plotting abilities. Here we will run through the `base` plotting. `base` plots are great for exploratory work, but as we will see perhaps later on, they can also produce publication quality plots.
+
+## Plotting vectors
+
+Vector plots can be useful to either plot the raw data along with an index (if the index is meaningful), or can be plotted as frequency distributions (e.g. to assess normality).
+
+```{r}
+# here the index is meaningful - it's the place at which we drew a particular sample
+# note if variables are in back ticks, you can add spaces and all sorts.
+# this is a numeric vector of random numbers from 1 to 1000
+`Random values (0-1000)` <- sample(x = 1:1000, size = 200, replace = TRUE)
+
+# just call plot - the type = "l" says draw lines. Dots are drawn by default
+plot(`Random values (0-1000)`, type = "l")
+```
+
+Another usage is to somehow interpret a vector more than simply plotting the values as they occur. We may want to plot a histogram.
+
+```{r}
+# generate some random normal data with given mean and sd
+# this is a numeric vector
+hist_data <- rnorm(n = 600, mean = 2, sd = 1.2)
+
+# call the hist function, it will bin and plot the data automatically for us
+hist(hist_data)
+```

@@ -1,14 +1,10 @@
 # Reading and viewing data
 
-We will be working with yield data from a Minnesota barley trial. Let's see how
-we read data into R, and then get a sense of what the data is.
+We will be working with yield data from a Minnesota barley trial. Let's see how we read data into R, and then get a sense of what the data is.
 
 ## Reading in data
 
-Reading in data almost always requires you to put what's called a 'file path' that
-points to where the file is on your computer. In our case, the directory where this
-file lives also has a `data` directory in it. That's where our data is. We read in
-CSV (Comma Separated Value) files in with the `read.csv` function.
+Reading in data almost always requires you to put what's called a 'file path' that points to where the file is on your computer. In our case, the directory where this file lives also has a `data` directory in it. That's where our data is. We read in CSV (Comma Separated Value) files in with the `read.csv` function.
 
 ```{r}
 # our data is called barley
@@ -27,30 +23,21 @@ if (FALSE) {
 }
 ```
 
-That's it! You have read in data in to R, and now it's stored internally as a 
-`data.frame`. R can read in any tabular data using the `read.table` function. So
-if you don't have a CSV, check that function out.
+That's it! You have read in data in to R, and now it's stored internally as a `data.frame`. R can read in any tabular data using the `read.table` function. So if you don't have a CSV, check that function out.
 
-For tabular data, I personally will always recommend you work with plain text files
-e.g. CSV/TSV etc, rather than excel files. You will always be able to export excel
-files as plain text files, but then you will lose the markup. If the markup is 
-really important, you should code it as another column.
+For tabular data, I personally will always recommend you work with plain text files e.g. CSV/TSV etc, rather than excel files. You will always be able to export excel files as plain text files, but then you will lose the markup. If the markup is really important, you should code it as another column.
 
 ## Viewing data
 
-We should always look at the data structure before we go any further. What are 
-the columns? What data types are all the columns? If they are not the data type
-we want, how do we change them?
+We should always look at the data structure before we go any further. What are the columns? What data types are all the columns? If they are not the data type we want, how do we change them?
 
-Use `str`
+Use `str` to view the data at a glance. It shows lots of key metrics about the data.
 
 ```{r}
 str(barley)
 ```
-Immediately we see there are 5 columns, of types `int` (integer), `num` (floating
-point number), and `chr` (character - or string). In most cases, we want our 
-`chr`s to be factors. These are vectors of a fixed and known set of possible 
-values. It makes certain things easier later on.
+
+Immediately we see there are 5 columns, of types `int` (integer), `num` (floating point number), and `chr` (character - or string). In most cases, we want our `chr`s to be factors. These are vectors of a fixed and known set of possible values. It makes certain things easier later on.
 
 ```{r}
 # select a column using the $ symbol
@@ -70,32 +57,27 @@ Now if we view the structure of our data again, things have changed, albeit subt
 ```{r}
 str(barley)
 ```
-And we can see how many 'levels' each factor has. This is the number of unique 
-elements in that vector.
 
-A nice way to view a portion of the data is the `head` function. It shows us the 
-first few rows of the data.
+And we can see how many 'levels' each factor has. This is the number of unique elements in that vector.
+
+A nice way to view a portion of the data is the `head` function. It shows us the first few rows of the data.
 
 ```{r}
 head(barley)
 ```
-An even more interactive way to view the data if you are in RStudio is to use the
-`View` function. Try that on your own machines.
+
+An even more interactive way to view the data if you are in RStudio is to use the `View` function. Try that on your own machines.
 
 ## Column names and row names
 
-A data frame always has column names and row names. Get the row names by calling 
-`rownames(barley)` and the column names with `colnames(barley)`. These functions can
-also be used to change the row/column names.
+A data frame always has column names and row names. Get the row names by calling `rownames(barley)` and the column names with `colnames(barley)`. These functions can also be used to change the row/column names.
 
 ```{r}
 # paste is useful to collapse vectors of strings into a single string with a separator.
 cat("Original names:", paste(colnames(barley), collapse = ", "))
 ```
 
-Now let's change them. We assign a vector _of the same length_ to the column names
-vector. You can either type this out as I've done, or it can be the result of a 
-function over the names.
+Now let's change them. We assign a vector *of the same length* to the column names vector. You can either type this out as I've done, or it can be the result of a function over the names.
 
 ```{r}
 colnames(barley) <- c("Row Names", "Yield", "Variety", "Year", "Site")
@@ -104,12 +86,8 @@ cat("Altered names:", paste(colnames(barley), collapse = ", "))
 
 ## Over to you
 
-1. How do you think you would read in a TSV (Tab Separated Values)? Hint: 
-see `?read.csv`
-2. How would you see the last few rows in your data? You know `head`. Hint: see
-`?head`
-3. What does the `str` function do? Are there any other useful summary functions
-you can find? Hint: see `?str`
-4. How do you select a column in a data frame?
-5. Select the `variety` column of the data frame.
-
+1.  How do you think you would read in a TSV (Tab Separated Values)? Hint: see `?read.csv`
+2.  How would you see the last few rows in your data? You know `head`. Hint: see `?head`
+3.  What does the `str` function do? Are there any other useful summary functions you can find? Hint: see `?str`
+4.  How do you select a column in a data frame?
+5.  Select the `variety` column of the data frame.
