@@ -1,0 +1,414 @@
+---
+title: "Correlation and Regression"
+author: "Jason Hodgson"
+date: "2024-03-06"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Necessary libraries
+
+In this tutorial we will use: ggplot2. Run the following code to be sure you have the necessary dependencies installed.
+
+```{r}
+# Check if ggplot2 is installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  # If not installed, install ggplot2
+  install.packages("ggplot2")
+}
+
+
+# Load the installed packages
+library(ggplot2)
+
+
+```
+
+# Setting the working directory
+
+This tutorial assumes that you have created a folder called "**week_8_correlation_regression**" within your "**PfR_stats_portfolio**" folder, and have created "**data**" and "**analysis**" folders inside "**week_8_correlation_regression**". Save the class data file "**form-1\_\_anthropometrics.csv**" in the "**data**" folder, and save this .Rmd file in the "**analysis**" folder. Once you have set everything up, set the working directory to "**week_8_correlation_regression**", by choosing "**Session -\> Set Working Directory -\> Choose Directory**".
+
+Check that your working directory is set correctly using the `getwd()` function. You should see the full file path of your working directory.
+
+```{r}
+# check your working directory
+getwd()
+```
+
+# Loading the data
+
+```{r}
+
+# load the data from the .csv file
+d <- read.csv(file="../data/form-1__anthropometrics.csv", header=TRUE, stringsAsFactors = TRUE)
+
+# check the structure of the data frame the str() function describes the full structure of a data frame, including the number of variables, and observations, and the class() of each variable
+str(d)
+
+
+```
+
+# Functions used in this tutorial
+
+`getwd()`
+
+`read.csv()`
+
+`str()`
+
+`print()`
+
+`shapiro.test()`
+
+`cor.test()`
+
+`log()`
+
+`lm()`
+
+`ggplot2::ggplot()`
+
+`ggplot2::geom_point()`
+
+`ggplot2::geom_smooth()`
+
+# Working with a numeric dependent variable and a numeric independent variable
+
+The statistical techniques you have available to you when you are working with two numerical variables are **scatter plots** for visualisation, and **correlation** and **regression** for hypothesis testing and statistical modelling.
+
+# Plotting: scatter plots
+
+Let's begin by considering the relationship between height and weight in our data. You might expect that taller people tend to weigh more. If this is so we should expect to see a clear positive relationship between height and weight. Let's plot height on the x-axis, and weight on the y-axis.
+
+```{r}
+
+plot_1 <- ggplot(data=d, aes(x=X5_Height_in_cm, y=X6_Weight_in_kg)) +
+            geom_point(size = 2) +
+            theme_bw() +
+            xlab("Height (cm)") +
+            ylab("Weight (kg)")
+
+print(plot_1)
+
+```
+
+In this plot, each point represents the height and weight of one data point (one person) in our class data. As expected, taller people do tend to weigh more in our data, however the relationship between height and weight is not perfect. There is variation. For example, the very tallest person at close to 2 meters, is not particularly heavy.
+
+# Hypothesis testing
+
+## Checking for normality
+
+The first choice to make when performing hypothesis tests with two numerical variables is decide between parametric or non-parametric hypothesis tests. To do so it is important to check the distributions of the variables. We can use parametric tests if both variables are normal, and non-parametric tests if one or both variables are non-normal. However, if a variable is found to be non-normal, we may be able to use a mathematical transformation to make the data normal before performing a parametric test.
+
+### Checking for normality: height
+
+#### Visually examining the data
+
+Begin by visualising the distribution of your numerical variable with a histogram, to check if your data are bell-shaped, or whether there is obvious skew. We will use the ggplot2 R package for producing publication quality histogram plots.
+
+##### Histogram of height
+
+```{r}
+# choose a binwidth for your plot. The binwidth is the with of the bars in histogram, and is in the same scale as your variable (e.g. height in cm, then binwidth is in cm). The choice of binwidth is up to you, and you might want to experiment a bit to find a binwidth that displays the data best. As a rule of thumb, if the sample size is small you will want a bigger binwidth, but your binwidth should never be smaller than the precision of your measurment. For example if you measured height with a precision of 1 cm, having a binwidth of 0.1 makes no sense because the bars cannot possibly be touching since you will have bins for values that cannot be present in the data.
+
+# A sensible binwidth for small sample size data (n < 100) is often a third of the standard deviation. For very large data sets, set the binwidth equal to the precision of the measurment.
+
+height_binwidth <- sd(d$X5_Height_in_cm, na.rm=TRUE)/3
+
+# create a histogram of a the height variable
+P_height <- ggplot(data=d, aes(x=X5_Height_in_cm)) + # define the variables in the plot
+              geom_histogram(binwidth=height_binwidth) + # call the histogram function and set the binwidt
+              theme_bw() + # choose a cleaner plot theme
+              xlab("Height (cm)") # relable the x axis
+
+# print the plot to the document
+print(P_height)
+```
+
+Height appears to be approximately normal. We can confirm this with a formal test of normality.
+
+##### Shapiro-Wilk test of normality: height
+
+```{r}
+# perform the shaprio-wilk test
+height_shapiro_test <- shapiro.test(d$X5_Height_in_cm)
+
+# print the results to the document
+print(height_shapiro_test)
+```
+
+The results of the Shapiro-Wilk test fail to reject the null hypothesis (W = 0.98, p = 0.347), and we can assume that height is normally distributed in our data.
+
+### Checking for normality: weight
+
+##### Histogram of weight
+
+```{r}
+# define a binwidth
+weight_binwidth <- sd(d$X6_Weight_in_kg, na.rm=TRUE)/3
+
+# make the plot
+P_weight <- ggplot(data=d, aes(x=X6_Weight_in_kg)) + # define the variables in the plot
+              geom_histogram(binwidth=weight_binwidth) + # call the histogram function and set the binwidth
+              theme_bw() + # choose a cleaner plot theme
+              xlab("Weight (kg)") # relable the x axis
+
+# print the plot to the document
+print(P_weight)
+```
+
+The distribution of weight data suggests that there might be left skew, with more values clustered towards lower weights.
+
+##### Shapiro-Wilk test of normality: weight
+
+```{r}
+# perform the shaprio-wilk test
+weight_shapiro_test <- shapiro.test(d$X6_Weight_in_kg)
+
+# print the results to the document
+print(weight_shapiro_test)
+```
+
+The Shapiro-Wilk test rejects the null hypothesis that the weight data are normally distributed (W = 0.936, p = 0.0005), and we cannot assume that the weight data are normally distributed. It is often the case that skewed data such as this can be made normal with a simple mathematical transformation. The most common such transformation is the logarithm.
+
+### Logarithmic transformation of weight
+
+We will check whether a log transformation makes the data normally distributed and allows us to use parametric statistics. Mathematical transformations that make the data normal are always valid for hypothesis testing, however, they can make the interpretation of the hypothesis test more difficult.
+
+##### Histogram of the log of weight
+
+```{r}
+# define a binwidth
+log_weight_binwidth <- sd(log(d$X6_Weight_in_kg), na.rm=TRUE)/3
+
+# make the plot
+P_log_weight <- ggplot(data=d, aes(x=log(X6_Weight_in_kg))) + # define the variables in the plot
+              geom_histogram(binwidth=log_weight_binwidth) + # call the histogram function and set the binwidth
+              theme_bw() + # choose a cleaner plot theme
+              xlab("Log weight (kg)") # relable the x axis
+
+# print the plot to the document
+print(P_log_weight)
+```
+
+The histogram of the log of weight appears to be approximately normal. We can test this formally with the Shapiro-Wilk test.
+
+##### Shapiro-Wilk test of normality: weight
+
+```{r}
+# perform the shaprio-wilk test
+log_weight_shapiro_test <- shapiro.test(log(d$X6_Weight_in_kg))
+
+# print the results to the document
+print(log_weight_shapiro_test)
+```
+
+The Shapiro-Wilk test fails to reject the null hypothesis of normality (W = 0.979, p = 0.2089), and we can consider the log of weight to be normally distributed. Let's visualise the relationship between height and the log of weight.
+
+##### Scatter plot of height versus log of weight
+
+```{r}
+plot_2 <- ggplot(data=d, aes(x=X5_Height_in_cm, y=log(X6_Weight_in_kg))) +
+            geom_point(size = 2) +
+            theme_bw() +
+            xlab("Height (cm)") +
+            ylab("Log weight (kg)")
+
+print(plot_2)
+
+```
+
+As expected, there is also a pretty clear relationship between height and the log of weight. We can test this relationship formally using the Pearson correlation coefficient.
+
+## Parametric hypothesis test: Pearson's correlation  coefficient
+
+We can perform a formal test of the relationship between height and the log of weight using the parametric Pearson's product-moment correlation. This is a test of linear correlation between two variables
+
+```{r}
+# test the hypothesis that taller people tend to be heavier using Pearson's correlation coefficient
+
+height_weight_cor_test <- cor.test(x= d$X5_Height_in_cm, y = log(d$X6_Weight_in_kg), method="pearson")
+
+# print the test results
+print(height_weight_cor_test)
+
+```
+
+This test shows that there is a positive correlation between height and the log of weight (t=6.94, df=79, p=9.80e-10). The correlation coefficient is r = 0.615, which is a moderately strong correlation. We can calculate the proportion of variation in the log of weight that is explained by height by calculating the r^2^ value. The r value is stored in the correlation test object as "estimate". We can get this value using the \$ operator on the test object
+
+```{r}
+# get the r value
+r_height_log_weight <- height_weight_cor_test$estimate
+
+# get the r^2 value
+r2_height_log_weight <- r_height_log_weight^2
+
+# report the value
+cat("The r^2 value of height and log of weight is", r2_height_log_weight, "\n")
+
+```
+
+The r2 value is 0.379, meaning that height explains 38% of the variation in log of weight.
+
+## Non-parametric hypothesis test: Spearman's rank correlation
+
+If you have non-normal data and do not want to transform your data, or if you transform your data and it is still not normal, you can use the non-parametric Spearman's rank correlation to test the relationship between your variables. This test first converts your observed values to ranks from smallest to largest, and then calculates the correlation of the ranks. To perform this test you use the same `cor.test()` function as the Pearson's test, but set the `method` argument to "spearman".
+
+```{r}
+# test the hypothesis that taller people tend to be heavier using Pearson's correlation coefficient
+
+height_weight_rank_test <- cor.test(x= d$X5_Height_in_cm, y = log(d$X6_Weight_in_kg), method="spearman")
+
+# print the test results
+print(height_weight_rank_test)
+```
+
+As expected the non-parametric Spearman's rank correlation test also finds a significant positive relationship between height and weight (Spearman's rho = 0.624, S = 33320, p = 4.959e-10).
+
+# Linear Regression
+
+When performing a correlation analysis, we are measuring the strength of the relationship between two variables. Another way to think about the relationship between two variables is the as the affect that one variable has on another. This approach is known as **regression**. In regression we are describing the relationship between variables using a mathematical equation, and this equation can be used to make predictions about the dependent variable given known values of the independent variables. This method works by finding the line that best fits the data. This means that the line minimizes the distance between it and each of the points. Let's fit the a line to our visualisation of the relationship between height and weight.
+
+## Scatter plot with regression line
+
+Note that in linear regression it is not assumed that the variables are normal. We can add a fitted line using the `ggplot2::geom_smooth()` function with the `method="lm"` option.
+
+```{r}
+plot_3 <- ggplot(data=d, aes(x=X5_Height_in_cm, y=X6_Weight_in_kg)) +
+            geom_point(size = 2) +
+            geom_smooth(method="lm") +
+            theme_bw() +
+            xlab("Height (cm)") +
+            ylab("Weight (kg)")
+
+print(plot_3)
+```
+
+This plot shows the line of best fit, along with the shaded region that indicates the error in the line fit. The plot shows that the line of best fit has a positive slope, indicating a positive relationship between height and weight.
+
+## Hypothesis testing with linear regression
+
+In linear regression, the null hypothesis is that there is not a linear relationship between the independent and dependent variables. When there is no relationship between variables, the scatter plot will appear as a cloud of points, and the fitted regression line will be flat. We can demonstrate the null hypothesis (no relationship) by simulating values drawn from a normal distribution.
+
+```{r}
+# simulate x and y values using rnorm()
+x_vals <- rnorm(100, mean = 5, sd = 3)
+y_vals <- rnorm(100, mean = 7, sd = 3)
+
+# combine into a data frame
+d_sim <- data.frame(cbind(x_vals, y_vals))
+
+# plot the relationship
+plot_4 <- ggplot(data=d_sim, aes(x=x_vals, y=y_vals)) +
+            geom_point(size=2) +
+            geom_smooth(method="lm") +
+            theme_bw() +
+            xlab("simulated x values") +
+            ylab("simulated y values")
+
+print(plot_4)
+```
+
+## 
+
+In this plot the points appear as a cloud, and the fitted line is flat. This is what is expected when there is no relationship between variables. To formally test the null hypothesis that there is no relationship between the variables, you test whether the slope of the line is significantly different from zero. We can fit a linear model and test it's significance using the `lm()` function.
+
+### Testing for a relationship between the simulated random values
+
+The `lm()` function requires you to specify your model in the form of a formula. The notation for this is very simple. You use the \~ symbol to indicate "is predicted by". In sentence form, your dependent variable (y-axis) is predicted by your independent variable(s) (x-axis). So, in the simulated example:
+
+y_vals \~ x_vals
+
+```{r}
+# first fit the linear model
+random_variables_lm <- lm(y_vals ~ x_vals, data=d_sim)
+
+# report a summary of the model
+summary(random_variables_lm)
+```
+
+The interpretation of this output is as follows:
+
+-   **Residuals:** The residuals are the difference between the predicted values (values on the line), and observed values (the actual points). The smaller the residuals, the better the model is performing. You also want to look at whether the residuals are symmetrical or not. If not, that indicates the model is performing better in one part of the range of values than another.
+
+-   **Coefficients:** The coefficients describe the equation of the fitted the line. In the table, the estimate gives the estimate of the coefficient. The first value is the y intercept, and the second value in the table is the slope. So the model above calculates a line of $y = 0.03285x + 7.48079$. The table also gives the error and the significance of these estimates. In this example the intercept is significant, but the slope is not. The slope is the more important parameter.
+
+-   **Residual standard error:** This is the average distance that the points fall from the fitted line. The degrees of freedom of the residual standard error is the number of observations minus the number of parameters in the model.
+
+-   **R-squared values:** The R-squared value describes the proportion of variation that the model is explaining. Two versions of the statistic, the multiple r-squared and adjusted r-squared. In general, if you have one independent variable, report the multiple r-squared, and if you have multiple independent variables, report the adjusted r-squared. In our example, the model is explaining 0.1% of the variation, or almost nothing.
+
+-   **F-statistic:** This is the test statistic used to calculate the p-value. This should be reported.
+
+-   **degrees of freedom:** This is also used to calculate the p-value and should be reported. It is calculated as the sample size minus the number of parameters (variables).
+
+-   **p-value:** The p-value gives the overall signficance of the model. If the p-value is greater than your chosen alpha value (e.g. 0.05) then the null hypothesis is accepted and the model is not useful for describing the relationship between the variables.
+
+### Testing for a relationship between height and weight using linear regression
+
+```{r}
+# first fit the linear model
+height_weight_lm <- lm(X6_Weight_in_kg ~ X5_Height_in_cm, data=d)
+
+# report a summary of the model
+summary(height_weight_lm)
+```
+
+The linear regression shows that a significant positive relationship between height and weight (F = 44.96 on 1 and 79 DF, p = 2.718e-09). The R-squared value shows that height explains about 35% of the variation in weight in our data. The report of the residuals shows that the residuals are not exactly symmetrical with smaller differences to the fit with shorter heights, than with larger heights, however the model performs pretty similarly throughout the range. The formula for calculating weight from height is as follows: $weight = 1.06(height) - 110.83$
+
+## Adding more independent variables to the model
+
+In the previous section we created a linear model that was highly significant, but that only explained 35% of the variation in weight. This means 65% of the variation in body weight is still left unexplained. It may be the case that other variables in our data can help explain some of this variation. For example, it may be the case that being male or female contributes to variation in weight. For example, you might think that given males and females of the same height, males might be heavier on average. Linear regression allows us to add additional independent variables to our model. First lets add sex to our visualisation of the relationship between height and weight.
+
+```{r}
+plot_5 <- ggplot(data=d) +
+            geom_point(aes(x=X5_Height_in_cm, y=X6_Weight_in_kg, colour = X3_Gender),size = 2) +
+            geom_smooth(aes(x=X5_Height_in_cm, y=X6_Weight_in_kg), method="lm") +
+            theme_bw() +
+            xlab("Height (cm)") +
+            ylab("Weight (kg)")
+
+print(plot_5)
+```
+
+In this plot it looks like there are more males above the line, and more females below the line suggesting that sex may also play a role in body weight variation. We can test this formally by adding sex to our linear regression.
+
+```{r}
+# first fit the linear model
+height_weight_sex_lm <- lm(X6_Weight_in_kg ~ X5_Height_in_cm + X3_Gender, data=d)
+
+# report a summary of the model
+summary(height_weight_sex_lm)
+```
+
+This model shows that adding information about sex does improve the model. Both height and sex and found to be significant. However the model still only explains 39.8% of the variation, and so is only increases the explanatory power of the model by about 4%. The equation for calculating weight from height and sex is as follows: $weight = 0.77(height) + 9.95(male) - 64.86$. Notice in this equation we add 9.95 to the prediction only if the sample is male. Factor predictor variables are estimated by randomly setting one of the levles as the baseline (female in this case), and then adding or subtracting from this as necessary for the other levels.
+
+# Exercises
+
+## Exercise 1. Perform a full statistical analysis testing the hypothesis that weight affects systolic blood pressure.
+
+1.  VIsualise the relationship between the variables with a scatter plot. Put blood pressure on the y-axis, and weight on the x-axis.
+
+2.  Check for normality in weight and systolic blood pressure.
+
+3.  Transform any variable found not to be normal using the log() transformation and again check for normality.
+
+4.  Perform a parametric correlation (Pearson) if the data are normal, and a non-parametric correlation if the data are non-normal (Spearman).
+
+5.  Add a regression line to your scatter plot.
+
+6.  Fit and describe a linear model testing the hypothesis.
+
+7.  Interpret your results. Is there a relationship between weight and blood pressure? If so, how much of the variation does your model explain?
+
+## Exercise 2. Use linear regression to test the hypothesis that BMI and sex affect heart rate.
+
+1.  Create a new column in the data frame for BMI by calculating BMI from height and weight.
+
+2.  Visualise the relationship between BMI and heart rate with a scatter plot. Colour the points by sex. Include a regression line.
+
+3.  Fit a linear model predicting heart rate from BMI and sex.
+
+4.  Interpret your results. Do BMI and sex influence heart rate?
