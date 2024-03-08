@@ -358,18 +358,3 @@ The results show that there is no evidence for a difference in body weight assoc
 
 *Insert R code and interpretation here*
 
-```{r}
-library(sn)
-
-# Set the parameters for the skewed distribution
-alpha <- 5  # shape parameter, controls the skewness
-n <- 1000    # sample size
-
-# Generate random numbers from a skewed distribution
-skewed_data <- rsn(n, alpha = alpha)
-
-p_skew <- ggplot(,aes(x=skewed_data)) + geom_histogram() + theme_bw() + xlab("heart rate")
-
-print(p_skew)
-
-```
