@@ -2,14 +2,9 @@
 
 ## Indexing introduction
 
-What is indexing? In programming lingo it is the process of getting particular
-values out of the data. For example, we want to get the 5th row of our data frame.
-Or all the rows between 5 and 20. Or the third column. This may not be particularly
-useful by itself, but we can index using the results from expressions. Expressions
-allow us to both filter and sort the data.
+What is indexing? In programming lingo it is the process of getting particular values out of the data. For example, we want to get the 5th row of our data frame. Or all the rows between 5 and 20. Or the third column. This may not be particularly useful by itself, but we can index using the results from expressions. Expressions allow us to both filter and sort the data.
 
-Indexing in R is very useful and necessary, but confusing. I'll stick to the very
-basics. If you need to go further, check ?\`[\`.
+Indexing in R is very useful and necessary, but confusing. I'll stick to the very basics. If you need to go further, check ?\`[\`.
 
 ## Indexing rows
 
@@ -26,11 +21,8 @@ barley <- read.csv(file = "https://raw.githubusercontent.com/ARU-life-sciences/b
 barley[5, ]
 
 ```
-Even though that's a short amount of code, there is a bit to break down. We index
-into data frames using `[`. Generally it works like this: `x[i, j]`, where `i` is
-the row index and `j` is the column index. These can be numbers, or characters if
-the rows or columns are named. The comma is necessary after the 5 in our example.
-Without it, we'd select the 5th column!
+
+Even though that's a short amount of code, there is a bit to break down. We index into data frames using `[`. Generally it works like this: `x[i, j]`, where `i` is the row index and `j` is the column index. These can be numbers, or characters if the rows or columns are named. The comma is necessary after the 5 in our example. Without it, we'd select the 5th column!
 
 Say we want the 5th row and 2nd column.
 
@@ -38,16 +30,15 @@ Say we want the 5th row and 2nd column.
 barley[5, 2]
 ```
 
-Will return the value. If we want to keep the data frame structure, you have to 
-specify that you don't want to drop the two dimensional structure.
+Will return the value. If we want to keep the data frame structure, you have to specify that you don't want to drop the two dimensional structure.
 
 ```{r}
 barley[5, 2, drop = FALSE]
 ```
+
 See the difference? I don't know why R did not enable this by default but hey ho.
 
-One more important and common indexing rule is `$`. `$` gets the column by name, 
-not number. We saw this in `reading_and_viewing.Rmd`.
+One more important and common indexing rule is `$`. `$` gets the column by name, not number. We saw this in `reading_and_viewing.Rmd`.
 
 ```{r}
 # extract yield, returning a vector
@@ -57,10 +48,7 @@ yield <- barley$yield
 yield <- barley[["yield"]]
 ```
 
-The double `[[` extracts a single element from a list/data frame. These both return
-vectors of `yield`, so we can index those further. Vectors can only be indexed
-with a single number, as they are 1-dimensional. If you try `yield[5, 2]` an error
-will throw.
+The double `[[` extracts a single element from a list/data frame. These both return vectors of `yield`, so we can index those further. Vectors can only be indexed with a single number, as they are 1-dimensional. If you try `yield[5, 2]` an error will throw.
 
 ```{r}
 # should be equivalent to the above where we indexed into barley.
@@ -71,21 +59,16 @@ I told you it was a bit confusing.
 
 ## Useful indexing
 
-It's all very well indexing into certain things manually, but the true power of 
-indexing happens when we index based on the result from an expression. Using our
-new found indexing powers, we can start filtering usefully.
+It's all very well indexing into certain things manually, but the true power of indexing happens when we index based on the result from an expression. Using our new found indexing powers, we can start filtering usefully.
 
-Say we want to return all the rows where yield is greater than 50 bushels per acre.
-We want to create a logical vector of all the places where this is true first.
+Say we want to return all the rows where yield is greater than 50 bushels per acre. We want to create a logical vector of all the places where this is true first.
 
 ```{r}
 yield_50 <- barley$yield > 50
 yield_50
 ```
-So again, a bit to break down here. We first get the yield vector (`barley$yield`).
-We then use the greater than operator to ask for every element in the yield vector
-'is this element greater than 50?'. So `>` is a vectorised function - as we touched on
-in a previous tutorial.
+
+So again, a bit to break down here. We first get the yield vector (`barley$yield`). We then use the greater than operator to ask for every element in the yield vector 'is this element greater than 50?'. So `>` is a vectorised function - as we touched on in a previous tutorial.
 
 Now we can use this vector to subset our data frame!
 
@@ -93,11 +76,9 @@ Now we can use this vector to subset our data frame!
 barley[yield_50, ]
 ```
 
-We pass the logical vector into our square braces and remember to add a comma after
-as we are indexing into the rows.
+We pass the logical vector into our square braces and remember to add a comma after as we are indexing into the rows.
 
-We might want to only extract rows of a certain variety. No problem, we know how 
-to do that now.
+We might want to only extract rows of a certain variety. No problem, we know how to do that now.
 
 ```{r}
 # the variety I want
@@ -113,8 +94,7 @@ trebi_data <- barley[trebi, ]
 trebi_data
 ```
 
-So there are the 12 rows which relate to yield for the `Trebi` variety. If we wanted
-the yields associated with `Trebi`, that's easy too.
+So there are the 12 rows which relate to yield for the `Trebi` variety. If we wanted the yields associated with `Trebi`, that's easy too.
 
 ```{r}
 # using our prior knowledge
@@ -127,9 +107,7 @@ trebi_data_yield_braces <- trebi_data[["yield"]]
 all.equal(trebi_data_yield_dollar, trebi_data_yield_braces)
 ```
 
-Now to do something a bit more complicated. We can combine multiple logical
-expressions to filter on multiple conditions. If we wanted to combine the selected
-variety and yield over 50 bushels per acre, we could do something like this.
+Now to do something a bit more complicated. We can combine multiple logical expressions to filter on multiple conditions. If we wanted to combine the selected variety and yield over 50 bushels per acre, we could do something like this.
 
 ```{r}
 # the & operator performs element-wise AND
@@ -138,9 +116,8 @@ trebi_and_yield_50 <- trebi & yield_50
 
 barley[trebi_and_yield_50, ]
 ```
-Sometimes we want to sort our data. If you think about this problem it's a question
-of generating a vector of indices which describe how the data should be reordered.
-Luckily, R has good functions for achieving this.
+
+Sometimes we want to sort our data. If you think about this problem it's a question of generating a vector of indices which describe how the data should be reordered. Luckily, R has good functions for achieving this.
 
 In this example, I want to sort the whole data frame by yield.
 
@@ -149,9 +126,8 @@ In this example, I want to sort the whole data frame by yield.
 sorted_yield <- order(barley$yield)
 sorted_yield
 ```
-This vector basically says the first element should be in position 71 in the 
-sorted data, the second element in position 113... and so on. Now we can index
-our data using this vector.
+
+This vector basically says the first element should be in position 71 in the sorted data, the second element in position 113... and so on. Now we can index our data using this vector.
 
 ```{r}
 # note we still need that comma! As we are sorting _rows_
@@ -161,8 +137,7 @@ sorted_data_by_yield <- barley[sorted_yield, ]
 head(sorted_data_by_yield)
 ```
 
-Notice that this sorts in increasing order. If we want the reverse, that's 
-surprisingly easy. We use a function called `rev`.
+Notice that this sorts in increasing order. If we want the reverse, that's surprisingly easy. We use a function called `rev`.
 
 ```{r}
 # wrap `rev` around the sorted yield, reversing the order of the 
@@ -173,9 +148,7 @@ sorted_data_by_yield_rev <- barley[rev(sorted_yield), ]
 head(sorted_data_by_yield_rev)
 ```
 
-Lastly, there are specific functions to find the index of the maximum/minimum 
-values. These can sometimes be useful - but all they are doing are returning
-_indexes_.
+Lastly, there are specific functions to find the index of the maximum/minimum values. These can sometimes be useful - but all they are doing are returning *indexes*.
 
 ```{r}
 # which.max returns which index is the max value
@@ -192,9 +165,7 @@ barley[m, ]
 
 ## Over to you
 
-1. Get the 52nd row of the `barley` data.
-2. Get the third column of the data frame by number _and_ by name.
-3. Order the data frame by year. First sort the `barley$year` vector, and then
-index the whole data frame.
-4. Get the row of `barley` corresponding to the minimum yield.
-
+1.  Get the 52nd row of the `barley` data.
+2.  Get the third column of the data frame by number *and* by name.
+3.  Order the data frame by year. First sort the `barley$year` vector, and then index the whole data frame.
+4.  Get the row of `barley` corresponding to the minimum yield.
