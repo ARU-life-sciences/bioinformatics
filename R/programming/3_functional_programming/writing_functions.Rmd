@@ -19,7 +19,7 @@ add_one <- function(x) x + 1
 add_one(100)
 ```
 
-If your function is on more than one line, you will need curly braces to 'wrap' the whole function nicely.
+If your function is on more than one line, you will need curly braces to 'wrap' the whole function nicely. By default, the last expression in the function body is the return of the whole function.
 
 ```{r}
 add_one_multiply_2 <- function(x) {
