@@ -17,6 +17,8 @@ for DIR in */; do
     for RMD in *.Rmd; do
       # get the base name of the file
       BASE=$(basename $RMD ".Rmd")
+      # echo back some useful user output to the terminal
+      echo "Rendering $RMD to $BASE.html"
       # get R to do the hard work
       # note for future me, I had to run: file.copy(rmarkdown::pandoc_exec(), "/somewhere/on/path", overwrite = TRUE)
       Rscript -e "rmarkdown::render(input = './$BASE.Rmd', output_file = './$BASE.html', output_format = 'html_document', output_dir='./htmls')"

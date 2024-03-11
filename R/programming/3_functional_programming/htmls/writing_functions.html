@@ -376,7 +376,8 @@ add_one &lt;- function(x) x + 1
 add_one(100)</code></pre>
 <pre><code>## [1] 101</code></pre>
 <p>If your function is on more than one line, you will need curly braces
-to ‘wrap’ the whole function nicely.</p>
+to ‘wrap’ the whole function nicely. By default, the last expression in
+the function body is the return of the whole function.</p>
 <pre class="r"><code>add_one_multiply_2 &lt;- function(x) {
   # add one
   add_one &lt;- x + 1
@@ -404,8 +405,7 @@ cat_dir &lt;- function() {
 
 # call our function
 cat_dir()</code></pre>
-<pre><code>## functions_on_data.html 
-## functions_on_data.Rmd 
+<pre><code>## functions_on_data.Rmd 
 ## functions.Rmd 
 ## htmls 
 ## writing_functions.Rmd</code></pre>
