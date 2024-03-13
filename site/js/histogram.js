@@ -20,6 +20,7 @@ const stats = [
 // plot height array as a histogram
 const plot = Plot.plot({
   x: { label: "Height (cm) →" },
+  caption: "A histogram of height data from students. The red line shows the mean of the data, ~168cm.",
   marks: [
       Plot.rectY(height, Plot.binX({y: "count"}, {x: {thresholds: 15, value: "height"}})),
       Plot.ruleX(stats, {x: "stat", stroke: "red", strokeWidth: 2}),

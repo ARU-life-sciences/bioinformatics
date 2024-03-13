@@ -37,7 +37,8 @@ const plot = Plot.plot({
   width: 250,
   height: 250,
   marginLeft: 80,
-  marginBottom: 80,
+  marginBottom: 70,
+  caption: "A contingency table, or cross table of gender and smoking status. This data can be used to perform a Chi-squared test.",
   marks: [
     Plot.text(final, {x: "Gender", y: "Smoker", text: "count", fontSize: d => d.count / 1.1 < 5 ? 20 : d.count / 1.1 } ),
     Plot.axisX({fontSize: 18}),

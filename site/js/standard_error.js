@@ -22,6 +22,7 @@ const plot = Plot.plot({
   y: {axis:null},
   marginLeft: 70,
   x: {domain: [160, 175], label: "Height (cm)"},
+  caption: "The red dot is the mean height of the students with ± 1 standard error as a white horizontal bar.",
   marks: [
     Plot.link(data, {x1: "se1", x2: "se2", y1: "y", y2: "y" }),
     Plot.dot(data, {x: "Mean", y: "y", fill: "red", r: 5})
