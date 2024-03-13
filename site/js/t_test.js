@@ -21,10 +21,10 @@ const plot = Plot.plot({
   marginBottom: 40,
   width: 250,
   x: {
-    grid: true,
     inset: 6,
   },
   y: {
+    grid: true,
     label: "Height (cm)",
   },
   caption: "Horizontal box plots showing the potential difference between male and female students in height.",
