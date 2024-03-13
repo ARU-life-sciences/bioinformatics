@@ -27,7 +27,7 @@ const plot = Plot.plot({
     grid: true,
     label: "Height (cm)",
   },
-  caption: "Horizontal box plots showing the potential difference between male and female students in height.",
+  caption: "Box plots showing the potential difference between male and female students in height.",
   marks: [
     Plot.boxY(raw_data, { x: "Gender", y: "Height" }),
     Plot.axisX({ fontSize: 15 }),
