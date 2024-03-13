@@ -6,8 +6,9 @@ let raw_data = await d3.csv(
   function(d) {
     // get the variable 5_Height_in_cm and change to number
     return {
-      Gender: d["3_Gender"],
-      Height: +d["5_Height_in_cm"]
+      Weight: +d["6_Weight_in_kg"],
+      Height: +d["5_Height_in_cm"],
+      Gender: d["3_Gender"]
     };
   }
 );
@@ -15,20 +16,25 @@ let raw_data = await d3.csv(
 const plot = Plot.plot({
   marginLeft: 80,
   marginBottom: 40,
+  grid: true,
+  color: { legend: true },
   x: {
-    grid: true,
     inset: 6,
     label: "Height (cm)",
   },
-  caption: "Horizontal box plots showing the potential difference between male and female students in height.",
+  y: {
+    label: "Weight (kg)"
+  },
+  caption: "Scatterplot with line of best fit, showing a potential relationship between weight (kg) and height (cm), between the two genders.",
   marks: [
-    Plot.boxX(raw_data, { x: "Height", y: "Gender" }),
+    Plot.dot(raw_data, { x: "Height", y: "Weight", stroke: "Gender" }),
+    Plot.linearRegressionY(raw_data, { x: "Height", y: "Weight", stroke: "Gender" }),
     Plot.axisX({ fontSize: 15 }),
     Plot.axisY({ fontSize: 15 })
   ]
 });
 
-const div = document.querySelector("#t_test_plot");
+const div = document.querySelector("#correlation_regression_plot");
 div.append(plot);
 
 
