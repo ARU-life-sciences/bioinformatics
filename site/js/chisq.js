@@ -12,8 +12,6 @@ let raw_data = await d3.csv(
   }
 );
 
-console.log(raw_data);
-
 // iterate over raw_data and count the
 // frequency of each combination
 let count = {};

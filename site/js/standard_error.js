@@ -21,11 +21,13 @@ const data= [{ Mean: mean, y: "Height (cm)", se1: mean + se, se2: mean - se}];
 const plot = Plot.plot({
   y: {axis:null},
   marginLeft: 70,
+  marginBottom: 40,
   x: {domain: [160, 175], label: "Height (cm)"},
   caption: "The red dot is the mean height of the students with ± 1 standard error as a white horizontal bar.",
   marks: [
-    Plot.link(data, {x1: "se1", x2: "se2", y1: "y", y2: "y" }),
-    Plot.dot(data, {x: "Mean", y: "y", fill: "red", r: 5})
+    Plot.link(data, {x1: "se1", x2: "se2", y1: "y", y2: "y", strokeWidth: 2, markerEnd: "tick", markerStart: "tick" }),
+    Plot.dot(data, {x: "Mean", y: "y", fill: "red", r: 5}),
+    Plot.axisX({fontSize: 15})
   ]
 });
 
