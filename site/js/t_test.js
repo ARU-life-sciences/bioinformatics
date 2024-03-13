@@ -13,16 +13,23 @@ let raw_data = await d3.csv(
 );
 
 const plot = Plot.plot({
+  style: {
+    display: "block",
+    margin: "auto",
+  },
   marginLeft: 80,
   marginBottom: 40,
+  width: 250,
   x: {
     grid: true,
     inset: 6,
+  },
+  y: {
     label: "Height (cm)",
   },
   caption: "Horizontal box plots showing the potential difference between male and female students in height.",
   marks: [
-    Plot.boxX(raw_data, { x: "Height", y: "Gender" }),
+    Plot.boxY(raw_data, { x: "Gender", y: "Height" }),
     Plot.axisX({ fontSize: 15 }),
     Plot.axisY({ fontSize: 15 })
   ]
