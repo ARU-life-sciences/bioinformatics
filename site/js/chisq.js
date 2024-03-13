@@ -34,6 +34,11 @@ for (const [key, value] of Object.entries(count)) {
 }
 
 const plot = Plot.plot({
+  // required to center the plot
+  style: {
+    display: "block",
+    margin: "auto",
+  },
   width: 250,
   height: 250,
   marginLeft: 80,
@@ -48,3 +53,5 @@ const plot = Plot.plot({
 
 const div = document.querySelector("#chi_sq_plot");
 div.append(plot);
+
+
