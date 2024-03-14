@@ -1,0 +1,250 @@
+---
+title: "The GLM"
+author: "Jason Hodgson"
+date: '2024-03-12'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Necessary libraries
+
+In this tutorial we will use: ggplot2. Run the following code to be sure you have the necessary dependencies installed.
+
+```{r}
+# Check if ggplot2 is installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) {
+  # If not installed, install ggplot2
+  install.packages("ggplot2")
+}
+
+
+# Load the installed packages
+library(ggplot2)
+```
+
+# Setting the working directory
+
+This tutorial assumes that you have created a folder called "**week_8_glm**" within your "**PfR_stats_portfolio**" folder, and have created an "**analysis**" folders inside "**week_8_glm**". Save this .Rmd file in the "**analysis**" folder. This week we will be using the same data, however, instead of downloading the data and setting up a data directory, R will be reading the data file directly from the internet. We have posted the file on the new ARU-life-sciences GitHub repository. Once you have set everything up, set the working directory to "**week_8_glm**", by choosing "**Session -\> Set Working Directory -\> Choose Directory**".
+
+Check that your working directory is set correctly using the `getwd()` function. You should see the full file path of your working directory.
+
+```{r}
+# check your working directory
+getwd()
+```
+
+# Loading the data
+
+The class raw data is now available at "<https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/form-1__anthropometrics.csv>". The `read.csv()` function can read .csv files from the internet if you pass the file URL to the `file=` argument of the function.
+
+```{r}
+# Read in the data. The file is hosted on GitHub, and can be read directly from there so long as you have an internet connection
+d <- read.csv(file="https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/form-1__anthropometrics.csv", stringsAsFactors = TRUE)
+
+# Check the structure of the data frame using the str() function
+str(d)
+```
+
+# Functions used in this tutorial
+
+`getwd()`
+
+`read.csv()`
+
+`str()`
+
+`glm()`
+
+`predict()`
+
+# The Generalised Linear Model
+
+The generalised linear model (GLM) extends the application of linear regression to the prediction of further response variable (dependent variable) types. In linear regression, the response variable (the variable you are trying to explain or predict) is generally a rational number (values can be negative, zero, or positive, including fractions). However, there are many other data types that you might be interested in explaining, such as count data (values can only be zero or positive integers), or boolean data (values can only be *true* or *false*, or *success* or *failure*, or some other binary outcome). GLM is a family of models that allow you to perform regression on a wide range of variable types by specifying a distribution type and a specific *link* function. The link function provides the relationship between the linear predictor (independent variables) and the mean of the distribution of the response variable.
+
+There are four main GLM families that you should be aware of; *gaussian*, *poisson* and *binomial*.
+
+-   **Gaussian**. The gaussian GLM is used when your response variable is a rational number. This is the equivalent of linear regression. The link function for gaussian GLM is identity, meaning the data are not transformed.
+
+-   **Poisson**. Poisson GLM is used when your response variable is count data. This is the equivalent of poisson regression. The link function for poisson GLM is the logarithm($ln(\mu)$), meaning the data are log transformed.
+
+-   **Binomial**. Binomial GLM is used to predict the number of occurences of a binary oucome (e.g.true/false, positive/negative, etc.). This is equivalent to logistic regression. The link function for binomial GLM is logit, and data are transformed as $ln(\frac{\mu}{n - \mu})$.
+
+# Performing a GLM in R
+
+You use the `glm()` function to perform GLM in R. The `glm()` function allows you to specify a model using the same formula notation as used by the `lm()` function: dependent_var \~ independent_var1 + independent_var2, etc. The `glm()` function also allows you to specify the GLM family type and link function using the `family()` argument. For example, to specify a gaussian GLM you would specify `glm(formula, data, gaussian(link="identity"))` . This specification is equivalent to linear regression and will produce the same result as a standard `lm()`. Once you have fit a model using `glm()` you can summarise the results using `summary()`, and you can create a vector of predicted results from the fit model using `predict()`.
+
+## Gaussian: Linear regression with GLM
+
+The g is the simplest, and probably most common type of GLM. This is appropriate when you are trying to predict a linear, rational response variable, such as height, or weight, or absorbance in spectrophotometry. In our data we can use a gaussian GLM to predict the weight of a person from their height. This is equivalent of the linear regression done in the previous tutorial. Let's begin by comparing a GLM to an LM of weight by height.
+
+### Comparing a linear model to a gaussian GLM of weight \~ height
+
+#### Fit the LM of weight \~ height 
+
+```{r}
+# fit the linear model
+my_lm_model <- lm(X6_Weight_in_kg ~ X5_Height_in_cm, data=d)
+
+# summarise the results
+summary(my_lm_model)
+```
+
+#### Fit the gaussian GLM of weight \~ height 
+
+```{r}
+# fit the glm specifying appropriate family and link
+my_glm_model <- glm(X6_Weight_in_kg ~ X5_Height_in_cm, data=d, gaussian(link="identity"))
+
+# summarise the model
+summary(my_glm_model)
+```
+
+###  
+
+#### Interpretation
+
+Notice that the outcomes of the two models are very similar but not identical. In particular, the estimates of the slopes and intercepts, and their associated p-values from each model fit are identical. However, the linear model also reports an R-squared value, and an overall model p-value. The R-squared value tells you the proportion of variation that the model explains, and the p-value tells you whether the overall model is different from randomness. These values are not reported for the GLM. Instead the GLM reports an AIC value (Akaike Information Criterion). The AIC is an estimator of prediction error, with lower values of AIC indicating a better fitting model. AIC values are only useful relatively to compare the fit of related models (i.e models predicting the same response variable). The AIC value can be used to select the best model. In general, the best model has the lowest AIC with the fewest number of parameters (fewest independent variables).
+
+#### Using a GLM for prediction
+
+Once we have fit a GLM, we can use the `predict()` function to predict the values of the response variable for a given model. This is a useful function to allow you to understand the error in your predictions, and also more importantly, to allow you to potentially make predictions outside of your data set for unmeasured quantities.
+
+```{r}
+# get predicted weights for each sample and save it to a new column in the data frame
+d$predicted_weight <- predict(my_glm_model)
+
+# create a scatter plot of the predicted weight against the actual weuight
+
+P1 <- ggplot(data=d, aes(x=X6_Weight_in_kg, y = predicted_weight)) +
+        geom_point() +
+        geom_smooth(method="lm") + # add a regression line
+        theme_bw() +
+        xlab("Actual weight (kg)") +
+        ylab("predicted weight (kg)")
+
+print(P1)
+
+
+```
+
+#### Does adding information about sex improve the model?
+
+As in linear regression we can make more complicated (and potentially more informative) models by adding independent variables to our prediction. Let's add sex to height information to see if it improves our predictive power.
+
+```{r}
+# fit the model
+my_glm_model_2 <- glm(X6_Weight_in_kg ~ X5_Height_in_cm + X3_Gender, family = gaussian(link = "identity"), 
+    data = d)
+
+# summarise the model
+summary(my_glm_model_2)
+```
+
+In this model sex was found to be significant (p=0.01) with an estimate of males being 9.9kg heavier than females for a given height. However, the AIC value is lower than the model that does not include sex (AIC= 649.51, versus AIC = 654.24). **As a general rule, if the difference in AIC values between models is greater than two, you should prefer the model with the lower AIC.**
+
+The AIC value suggest the model that includes sex is better than the model without it. Let's try predicting the values using this model, to see how much closer to the line the predicted values appear.
+
+```{r}
+# get predicted weights for each sample and save it to a new column in the data frame
+d$predicted_weight_2 <- predict(my_glm_model_2)
+
+# create a scatter plot of the predicted weight against the actual weuight
+
+P2 <- ggplot(data=d, aes(x=X6_Weight_in_kg, y = predicted_weight_2)) +
+        geom_point() +
+        geom_smooth(method="lm") + # add a regression line
+        theme_bw() +
+        xlab("Actual weight (kg)") +
+        ylab("predicted weight from height and sex (kg)")
+
+print(P2)
+
+```
+
+The points are generally closer to the line, meaning our predictions of weight are better if we know the sex and height of individuals.
+
+## Poisson regression with GLM
+
+Poisson regression is used when trying to predict count data. In our class data heart rate (heart beats per minute) is count data. The values have to be either zero or positive integers. We can use poisson GLM to predict heart rate from our independent variables. In this example we are trying to understand the effect of our chosen independent variables on heart rate. Let's create a model that predicts heart rate from Body Mass Index.
+
+### Predicting heart rate from BMI
+
+To fit a poisson GLM we want to specify `poisson(link="log")` . Note that the calculation for BMI is as follows:
+
+$$
+BMI = \frac{kg}{m^2}
+$$
+
+#### Visualising the relationship between BMI and heart rate
+
+Begin by calculating BMI and visualising the relationship with a scatter plot
+
+```{r}
+# first calculate BMI from height and weight and save it to a new column in the data frame
+d$BMI <- d$X6_Weight_in_kg / ((d$X5_Height_in_cm/100)^2)
+
+# plot the relationship
+P3 <- ggplot(data=d, aes(x=BMI, y=X19_Heart_rate_bpm_me)) +
+        geom_point() +
+        geom_smooth(method="lm") +
+        theme_bw() +
+        xlab("BMI") +
+        ylab("heart rate (bpm)")
+
+print(P3)
+
+
+```
+
+The line is flat and there appears to be no clear relationship between BMI and heart rate. We can formally test this by fitting a model.
+
+#### Modelling the relationship between BMI and heart rate
+
+```{r}
+# fit the poisson glm
+my_p_glm <- glm(X19_Heart_rate_bpm_me ~ BMI, data=d, poisson(link="log"))
+
+# summarise the model
+summary(my_p_glm)
+```
+
+The model summary confirms that BMI is not significantly related to heart rate (p = 0.992) and should not be used as a predictor for heart rate, as the predicted values would be no better than random chance.
+
+## Binomial regression with GLM
+
+Our example class data do not have an example data type that naturally fit the binomial distribution model. However to fit a binomial GLM model in R you would use the now familiar `glm()` function with the `binomial(link="logit")` argument. An example of data that would be appropriate for a binomial GLM is the number of "heads" per experiment when flipping a coin 10 times per experiment.
+
+# Exercises
+
+## Exercise 1. Can you find a model that predicts heart rate? 
+
+In the example above BMI was found not to be related to heart rate. Can you find a model that siginficantly predicts heart rate from the variables in our data set? Think about the factors that might affect heart rate. For example, you might think time since caffeine might affect heart rate, with people who had caffeine recently having higher heart rates.
+
+1.  Begin by hypothesising a relationship between your variable, or variables and heart rate
+
+2.  Visualise the relationship with a meaningful plot
+
+3.  Fit a poisson GLM for your hypothesised model
+
+4.  Interpret the results
+
+5.  Try to find a better model, and compare the relative model fits with the AIC
+
+## Exercise 2: Can you find a model that explains waist to hip ratio?
+
+Waist to hip ratio ($\frac{waist(cm)}{hips(cm)}$) has been used as a measure of health, and even as a measure of physical attractiveness. Can you find a model that explains waist to hips ratio in our data?
+
+1.  Begin by creating a new column in the data frame for waist to hips ratio
+
+2.  Create a hypothesis to explain waist to hips ratio from the other variables in our data
+
+3.  Visualise the relationship with a meaningful plot
+
+4.  Formally fit a model using a gaussian GLM
+
+5.  Evaluate the results
+
+6.  Try to find a better fitting model

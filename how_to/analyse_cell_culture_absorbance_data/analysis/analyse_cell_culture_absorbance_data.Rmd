@@ -1,0 +1,85 @@
+---
+title: "How To: Analyse cell culture absorbance data"
+author: "Jason Hodgson"
+date: '2024-03-12'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+# Formatting your data
+
+It is important that you record your data table in the correct format. In data science, it is standard to record data following very simple rules: **observations are represented as rows, variables are represented as columns**. For your cell culture data you only have four variables. You have two necessary variables: 1) *concentration*, and 2) *absorbance*. You also have two less obvious variable which are the *plate* that each replicate was run on, and the *well* on the plate that each sample was run in. Even though these last two variables are not intentionally part of your experimental design, it may be important to consider them in your analysis, because crystal violet assays are known to vary between plates, and also the position on the plate (e.g. outer wells versus inner) are also know to effect the results.
+
+In your experimental design, *absorbance* is your dependent variable, because this is your measure of the number of cells, and this is the thing you are ultimately interested in. *Concentration* is your independent variable, because this is what you are manipulating in your experimental design. Both *plate* and *well* are also independent variables because these are being controlled by the experimenter. You are hypothesising that the concentration of the treatment is affecting the number of cells
+
+Thus, each of your replicates should be a row in the data, and each row should contain a *concentration* (the treatment), an *absorbance* (the measurement), the *plate* ID, and the *well* ID. Your data table should be stored in a separate file that looks something like this:
+
+| absorbance | concentration | plate   | well |
+|------------|---------------|---------|------|
+| 1.08       | 0             | plate_1 | A1   |
+| 1.36       | 0             | plate_1 | A2   |
+| 0.98       | 0             | plate_1 | A3   |
+| 1.23       | 0             | plate_1 | A4   |
+| 1.98       | 10            | plate_1 | B1   |
+| 2.04       | 10            | plate_1 | B2   |
+| 2.36       | 10            | plate_1 | B3   |
+| 2.25       | 10            | plate_1 | B4   |
+
+: Example Crystal Violet Assay data
+
+# Reading in your data
+
+If your data are stored in the correct format, it is very easy to read your data into R using the `read.csv()` function. To use this function it is important to know the relative path from your analysis file (Your R Markdown document) to your data file (the .csv file). We suggest setting up a folder on your computer for your project, and then having a "data" folder where your raw data file lives, and an "analysis" folder
+
+```{r}
+# read in the data and save it to an object called d
+d <- read.csv(file="../data/dummy_data.csv")
+#d <- read.csv(file="../data/cell_culture_dummy_data.csv")
+
+# examine the structure of the data
+str(d)
+```
+
+The `str()` command shows that there are 96 observations of 3 variables. The three variables are *plate*, *concentration*, and *absorbance.*
+
+```{r}
+library(ggplot2)
+
+my_boxplot <- ggplot(data=d, aes(x=as.factor(concentration), y=absorbance)) +
+                geom_boxplot(notch=TRUE) +
+                theme_bw() +
+                xlab("concentration") +
+                ylab("absorbance")
+
+print(my_boxplot)
+```
+
+```{r}
+my_scatter <- ggplot(data=d, aes(x=concentration, y=absorbance, colour=plate)) +
+                geom_point(size=2, position=position_dodge(width=2)) +
+                theme_bw() +
+                xlab("concentration") +
+                ylab("absrobance")
+
+print(my_scatter)
+```
+
+```{r}
+dummy <- function(x, mean, sd) {
+  
+  add <- rnorm(1, mean/9, sd/5)
+  out <- x + add
+  return(out)
+  
+}
+
+new_values <- na.omit(mapply(FUN=dummy, x=d$absorbance, mean=mean(d$absorbance, na.rm=TRUE), sd=sd(d$absorbance, na.rm=TRUE)))
+
+d$absorbance[97:192] <- abs(new_values)
+write.table(d, file="../data/dummy_data.csv", row.names=FALSE, quote=FALSE, sep=",")
+```
