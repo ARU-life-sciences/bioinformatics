@@ -113,7 +113,7 @@ The example data used in this tutorial come from Harrer et al., and are compiled
 
 ```{r}
 # read the data from the file
-d <- read.csv(file="data/SuicidePrevention.csv", stringsAsFactors = TRUE)
+d <- read.csv(file="https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/SuicidePrevention.csv", stringsAsFactors = TRUE)
 
 #describe the data
 str(d)
@@ -215,7 +215,7 @@ The following code loads the data set comparing the effect of Drug A on blood su
 
 ```{r}
 # read in the data
-df <- read.csv(file="data/blood_sugar.csv", header=TRUE, stringsAsFactors = TRUE)
+df <- read.csv(file="https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/blood_sugar.csv", header=TRUE, stringsAsFactors = TRUE)
 str(df)
 ```
 
