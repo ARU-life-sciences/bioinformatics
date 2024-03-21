@@ -1,0 +1,232 @@
+---
+title: "Meta-analysis"
+author: "Jason Hodgson"
+date: '2024-03-19'
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, echo = TRUE)
+```
+
+# Foreword
+
+This tutorial is adapted from the fantastic and comprehensive guide to doing meta-analyses in R Harrer et al. (<https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/>). Meta-analysis is a larger topic than can be covered in a single tutorial. This tutorial provides a walk through of the simplest implementation of meta-analysis in R, and will be useful to get you started. Refer to Harrer et al. for more complicated implementations. The book is easy to understand, and provides the necessary code to guide you through almost any application of meta-analysis you are likely to encounter.
+
+Harrer, M., Cuijpers, P., Furukawa, T.A., & Ebert, D.D. (2021). *Doing Meta-Analysis with R: A Hands-On Guide*. Boca Raton, FL and London: Chapman & Hall/CRC Press. ISBN 978-0-367-61007-4.
+
+# Necessary libraries
+
+In this tutorial we will use four R libraries that must be installed first if you have not installed them already. The libraries are `meta`, and `kableExtra`. `meta` will both be used for performing the meta-analyses, and for plotting the results. `kableExtra` will be used for formatting visually appealing tables.
+
+The following code checks to see if you have installed these packages yet, and if not installs them. It then loads the packages to make the package functions available in the rest of the tutorial.
+
+```{r}
+
+# Check if meta is installed
+if (!requireNamespace("meta", quietly = TRUE)) {
+  # If not installed, install meta
+  install.packages("meta")
+}
+
+
+# Check if kableExtra is installed
+if (!requireNamespace("kableExtra", quietly = TRUE)) {
+  # If not installed, install kableExtra
+  install.packages("kableExtra")
+}
+
+# load the libraries
+library(meta)
+library(kableExtra)
+
+```
+
+# Setting the working directory
+
+This tutorial assumes that you have created a folder called "**week_10_meta-analysis**" within your "**PfR_stats_portfolio**" folder, and have created an "**analysis**" folders inside "**week_10_meta-analysis**". Save this **.Rmd** file in the "**analysis**" folder. Once you have set everything up, set the working directory to "**week_10_meta-analysis**", by choosing "**Session -\> Set Working Directory -\> To Source File Location".**
+
+# Functions used in this tutorial
+
+`read.csv()`
+
+`str()`
+
+`kable()`
+
+`meta::metacont()`
+
+`meta::forest()`
+
+# Introduction to meta-analysis
+
+In any statistical analysis you are testing some hypothesis of interest against the null hypothesis that nothing interesting is happening. We generally tend to reject the null hypothesis and accept the alternative hypothesis when we calculate a p-value of less than some pre-specified alpha value (commonly 0.05). This can be problematic. First, an alpha value of 0.05 means that the observed pattern is expected to happen even if the null hypothesis is correct 5% of the time. These means that we are expected to reject the null hypotheses even when it is true one out of every twenty hypotheses we test (this is known as type I error). Second, depending on the statistical power of our study, we are in danger of failing to reject the null hypothesis, even when it is false (this is known as type II error). Studies are under powered when the sample size is too small for a given effect size. The effect size can be thought of as the magnitude of the difference between group means in a t-test, or as the correlation coefficient in a correlation study. The smaller the effect size, the larger the sample size necessary to confidently reject the null hypothesis.
+
+Meta-analysis allows researchers to overcome these problems by pooling data from multiple studies, all with the same study design, into a single pooled study with greater statistical power that is less likely to suffer from both type I and type II errors. Meta-analysis is a rigorous statistical analysis that pools data from multiple studies to calculate a pooled effect size with less error and greater confidence than any of the individual studies. This is possible because the pooled sample size is often much greater than the sample size in any of the constituent studies.
+
+## Gathering data for a meta-analysis
+
+A full description of the methodology of conducting a meta-analysis is beyond the scope of this tutorial. In brief, when conducting a meta-analysis you first start with a question that you want to address: e.g. what is the efficacy of Covid 19 vaccine? Once you have your question you want to define the type of studies that fit your criteria for inclusion. For a meta-analysis to be meaningful it is paramount that all of the studies you include have the same, or at least largely similar study designs. This means that all included studies should have the same treatment and control groups, that the treatments are the same, and that the measurement of the effect is the same. Once the criteria for inclusion are set, the goal is to find every single published study that fits the criteria. To do so, a systematic literature search is conducted using defined search terms across many databases (e.g. Google Scholar, Scopus, etc.), and each paper is individually evaluated for inclusion. A record is kept of every rejected paper, and the reason for rejection. Papers that meet the criterion are then put into the meta-analysis to calculate the pooled effect size. For more on conducting a meta-analysis, see Harrer et al. chapter 1.
+
+## Summary statistics (effect sizes)
+
+In every meta-analysis you are calculating a pooled summary statistic that describes the effect size between treatments in the study. Perhaps the most common summary statistic is the standardised mean difference, or SMD. The SMD can most easily be understood by thinking of T-test. In a T-test we are comparing the mean values of some numerical variable grouped by some categorical variable with exactly two groups. Conceptually, the SMD is the difference in the means of some measurement between two groups. In many meta-analyses, the two groups are a treatment group, and a control group. The null-hypothesis is that there is no difference between the means, and the alternative hypothesis is that the treatment group is either greater, or smaller than the control group. The magnitude of the difference in means between the treatment group and the control group describes the effect size.
+
+In this tutorial we will focus on meta-analyses that pool the SMD. Other common meta-analyses use a ratio or proportion as the measure of effect size, or use a correlation as the measure of effect size. These depend on the study type being pooled. If you are interested in these types of meta-analyses refer to Harrer et al.
+
+# Collecting your data properly
+
+When conducting a meta-analysis you will be reading lots of scientific papers and extracting information from them. It is important that you record your data in the correct format to facilitate subsequent down analyses in R. You want to record your data in the shape of the data frame that R expects for a meta-analysis. Like other types of analyses in R, the data frame should be organised where rows are observations, and columns are variables. For a meta-analysis, each observation should be a single study, or a single paper. The minimum number of columns (or variables) that are required will depend on the type of summary statistic you are pooling across studies.
+
+## Difference in means data format
+
+Consider a study design that is testing the affect of drug A on blood glucose level. Drug A is designed to lower glucose levels in people with pre-diabetes. Normal blood glucose is defined as 3.9 to 5.5 mmol/L, pre-diabetes is defined as 5.6 to 6.9 mmol/L and diabetes is defined as greater than 7.0 mmol/L. This example meta-analysis pools studies all with a design where an experimental group of pre-diabetic people were given 25mg of Drug A, while a control group of pre-diabetic people were given a placebo. Each person's blood glucose was measured afterwards and recorded. Four studies were found matching this study design. The table below demonstrates the information needed from each study in order to be able to conduct a meta-analysis.
+
+| paper       | n_e | mean_e | sd_e | n_c | mean_c | sd_c |
+|-------------|-----|--------|------|-----|--------|------|
+| Alpha et al | 87  | 4.3    | 0.9  | 102 | 6.1    | 0.8  |
+| Beta et al  | 43  | 4.8    | 1.3  | 36  | 5.9    | 1.2  |
+| Gamma et al | 157 | 5.0    | 1.1  | 164 | 5.5    | 1.3  |
+| Delta et al | 863 | 4.7    | 0.6  | 901 | 6.1    | 0.7  |
+
+: The variables (columns) in the table are as follows:
+
+-   **paper**: The published study the data are derived from
+
+-   **n_e**: The sample size of the experimental group (Drug A group)
+
+-   **mean_e**: The mean blood glucose level of the experimental group in mmol/L
+
+-   **sd_e**: The standard deviation of the blood glucose levels of the experimental group
+
+-   **n_c**: The sample size of the control group (placebo group)
+
+-   **mean_c**: The mean blood glucose level of the control group in mmol/L
+
+-   **sd_c**: The standard deviation of the blood glucose levels of the control group
+
+## 
+
+# Loading the data
+
+The example data used in this tutorial come from Harrer et al., and are compiled from nine different publications on suicide prevention. The data can be loaded using the following code.
+
+```{r}
+# read the data from the file
+d <- read.csv(file="data/SuicidePrevention.csv", stringsAsFactors = TRUE)
+
+#describe the data
+str(d)
+```
+
+This shows that there are nine observations of ten variables. Each individual study represents a single observation in the meta-analysis data frame. We can see that the variables are a mixture of numbers, integers, and factors. The data set is small enough that we can view and print the entire data frame as a table to our document. We will use the `kableExtra::kable()` function for this.
+
+```{r}
+# print data as a nice table
+kable(d)
+```
+
+From the table you can see that each study is identified by two columns: 'author' and 'pubyear'. Then, for each study there are eight variables that represent the actual data that will be used in the meta-analysis. These are the sample size ('**n.e**'), mean ('**mean.e**'), and standard deviation ('**sd.e'**) of the test group, and the sample size ('**n.c**'), mean ('**mean.c**'), and standard deviation ('**sd.c**') of the control group. There is a factor column describing the two different types of control groups ('**control**'), and a factor column describing the age range of the study participants ('**age_group**').
+
+The sample size, means, and standard deviations will be used in the meta-analysis to calculate an overall sample size, mean, and standard deviation for each test group, and to formally test for significant differences between the groups.
+
+# 
+
+# Analysing the data
+
+The `meta` package makes performing a meta-analysis very easy. In general, if your data are entered in the correct format, the whole meta-analysis can be performed with a single command. There are three primary commands in the `meta` package to use to perform the meta-analysis and calculate the pooled results, and your choice of these will depend on the nature of the summary statistic you are trying to pool.
+
+-   `metacont()` is used for pooling standardised mean differences
+
+-   `metabin()` is used for pooling binary outcomes such as risk ratios and odds ratios
+
+-   `metacor()` is used for pooling correlations
+
+In this tutorial we will be using `metacont()` to pool standarised mean differences, as this is the most common form of meta-analysis. For more information on the other methods see chapter 4 of Harrer et al (<https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/pooling-es.html>). We will perform a meta-analysis of the Suicide Prevention data set.
+
+The first choice you have to make when performing a meta-analysis is whether to use a model with *fixed* effects or *random* effects. The *fixed* effects model is easiest to understand. It considers each individual study in the meta-analysis to be an unbiased random draw from the true population. Conceptually, this is always the goal of every research study, however, in practice it is unlikely to be true. Instead it is likely that each individual study has biases that are unique to it that affect the data in subtle ways. For example, a study conducted on people in the USA might be different from a study conducted on people in the UK for reasons unmeasured by the researchers. These are known as *random* effects, and most researchers think that almost all meta-analyses should use a random effects model to account for these random biases. The arguments to specify model type are `fixed` and `random` respectively, and these expect a logical operator (TRUE or FALSE).
+
+The next choice to make is the method to calculate Tau. Tau is the measure of between study heterogeneity. This is the value that is used to account for the random effects. There are several available methods to calculate Tau, however it is recommended to use Restricted Maximum Likelihood Estimator for meta-analyses involving comparisons of differences of means. This is specified with `method.tau="REML"`. If you are interested, you can read about other estimators of Tau in chapter 4 of Harrer et al.
+
+The final choice you need to make is the method for calculating the confidence interval. For this it is recommended that you use the Knapp-Hartung adjustment. This method uses a t-distribution, rather than a normal distribution, and is generally conservative (e.g. calculates a wider confidence interval). To specify the Knapp-Hartung adjustment use `method.random.ci = "HK"`.
+
+The arguments that must be passed to the `metacon()` function are as follows:
+
+-   `data`: The data frame containing your meta-analysis data
+
+-   `n.e`: The column of the data frame with the sample sizes of the experimental groups
+
+-   `mean.e`: The column of the data frame with the mean values of the experimental groups
+
+-   `sd.e`: The column of the data frame with the standard deviations of the experimental groups
+
+-   `n.c`: The column of the data frame with the sample sizes of the control groups
+
+-   `mean.c`: The column of the data frame with mean values of the control groups
+
+-   `sd.c`: The column of the data frame with the standard deviations of the control groups
+
+```{r}
+# Use metacont to pool results.
+suicide_prevention_meta <- metacont(n.e = n.e,
+                   mean.e = mean.e,
+                   sd.e = sd.e,
+                   n.c = n.c,
+                   mean.c = mean.c,
+                   sd.c = sd.c,
+                   studlab = author,
+                   data = d,
+                   sm = "SMD",
+                   method.smd = "Hedges",
+                   fixed = FALSE,
+                   random = TRUE,
+                   method.tau = "REML",
+                   method.random.ci = "HK",
+                   title = "Suicide Prevention")
+
+# summarise and report the results
+summary(suicide_prevention_meta)
+
+```
+
+The summary of the meta-analysis provides a lot of information for you to understand. First it reports the SMD and CI for each individual study. Next, it reports the total number of studies, and the overall pooled sample size. Then it reports the pooled SMD, the CI and the p-value associated with the SMD. In our example, the SMD = -0.2304, t = -3.71, p=0.0059. The SMD is negative and the p-value is significant. The interpretation of this is that the experimental group has a significantly lower value than the control group for what is being measured. Finally, it reports some information about the observed heterogeneity between the studies, including a formal hypothesis test for heterogeneity. In our example the heterogeneity was found to be non-significant (p=0.3738) meaning there variance between studies was not unexpected if the studies were all drawn from the same population.
+
+When reporting the results of a meta-analysis it is important to report exactly how the data were pooled, e.g.
+
+*As we anticipated considerable between-study heterogeneity, a random-effects model was used to pool effect sizes. The restricted maximum likelihood estimator (Viechtbauer, 2005) was used to calculate the heterogeneity variance tau-squared*. We used Knapp-Hartung adjustments (*Knapp & Hartung, 2003) to calculate the confidence interval around the pooled effect.*
+
+# Visualising the data
+
+Meta-analyses are typically visualised with a plot type known as a forest plot. A forest plot provides information about each individual study that is included in the meta-analysis, as well as information about the pooled results. For each included study, it shows the point estimate of the effect size on the x-axis. This is surrounded by a box, the size of which shows the weight of the study in the pooled results. Studies with larger sample sizes will have larger boxes. The horizontal line through the point estimate and box shows the range of the 95% confidence interval for the estimate. The diamond at the bottom of the plot shows the pooled average estimate of the effect size, with the width of the diamond on the x-axis indicating the confidence interval. The dashed vertical line represents the pooled average effect size.
+
+A forest plot can easily be created for any meta-analysis you have performed using the `meta::forest()` function. There are many options available within the `forest()` function to allow you to customise your plot.
+
+```{r}
+my_forest <- forest(suicide_prevention_meta)
+
+print(my_forest, leftlabs = "author")
+```
+
+The forest plot clearly shows the variation among studies, and also the pooled results. Because the pooled data represented by the diamond at the bottom of the plot does not overlap the zero line on the x-axis we know our pooled SDM is significantly different from zero, and the null hypothesis is rejected.
+
+# Exercise
+
+The following code loads the data set comparing the effect of Drug A on blood sugar levels. Perform a meta-analysis, create a forest plot, and interpret the results.
+
+```{r}
+# read in the data
+df <- read.csv(file="data/blood_sugar.csv", header=TRUE, stringsAsFactors = TRUE)
+str(df)
+```
+
+## Meta-analysis of the affect of Drug A on blood sugar levels
+
+Insert your R code here
+
+## Forest plot of the affect of Drug A on blood sugar levels
+
+Insert your R code here
+
+## Does Drug A decrease blood sugar levels?
+
+Write your interpretation of the results here
