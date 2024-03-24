@@ -1,0 +1,102 @@
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# How do I do a Poisson GLM and plot the predictions in R?
+
+## Read in the data
+
+First of all read in the data, and run the model. If you are unsure how
+to do this, please check out the `R statistics` part of the website.
+
+```{r}
+d <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/form-1__anthropometrics.csv")
+# save the model. Here, we're modelling heart rate as a function of height of the person
+mod <- glm(X19_Heart_rate_bpm_me ~ X5_Height_in_cm, family = "poisson", data = d)
+```
+
+## Summary of the model
+
+```{r}
+mod_summary <- summary(mod)
+
+mod_summary
+
+cat("Data scale intercept is: ", exp(mod_summary$coefficients[1, 1]), ".\n", sep = "")
+cat("Data scale slope is: ", exp(mod_summary$coefficients[2, 1]), ".", sep = "")
+```
+
+Interpretation is as follows. Intercept is `exp(5.525589)` and at zero
+height `exp(5.525589 - 0.006652)`. The slope is `exp(-0.006652)`. This
+means that for every unit increase in height, heart rate goes down by
+around 1%. We'll see this visually later. We can also work out what the
+predicted heart rate would be for a person who is 160cm tall.
+
+```{r}
+# hear
+at_160 <- exp(mod_summary$coefficients[1, 1] + mod_summary$coefficients[2, 1] * 160)
+at_180 <- exp(mod_summary$coefficients[1, 1] + mod_summary$coefficients[2, 1] * 180)
+
+cat("Predicted heart rate at 160cm:", at_160, "\n")
+cat("And there's a", at_160 / at_180, "x higher heart rate at 160cm than at 180cm\n")
+```
+
+## Predict the data
+
+Now we want to plot our predicted values on top of the raw values from
+the data.
+
+```{r}
+# interpolate within the bounds of our data
+min_height <- min(d$X5_Height_in_cm)
+max_height <- max(d$X5_Height_in_cm)
+# 1000 data points to simulate
+new_x <- expand.grid(
+  X5_Height_in_cm = seq(min_height, max_height, length = 1000)
+)
+# and predict the y using the `predict` function
+# se.fit to get the confidence intervals
+new_y <- as.data.frame(predict(mod, newdata = new_x, se.fit = TRUE))
+# modify the new data frame
+new_d <- data.frame(new_x, new_y)
+# in particular we need to exponentiate, as poisson
+# is a log link scale
+new_d$fit_exp <- exp(new_d$fit) 
+# 95% of the area under the normal distribution lies within 
+# 1.96 standard deviations away from the mean.
+new_d$lwr <- exp(new_d$fit - 1.96 * new_d$se.fit) 
+new_d$upr <- exp(new_d$fit + 1.96 * new_d$se.fit)
+
+head(new_d)
+```
+
+## Plot the data
+
+```{r}
+plot(d$X5_Height_in_cm, d$X19_Heart_rate_bpm_me, xlab = "Height (cm)", ylab = "Heart rate (bpm)")
+polygon(
+  x = c(new_d$X5_Height_in_cm,  rev(new_d$X5_Height_in_cm)),
+  c(new_d$lwr, rev(new_d$upr)), col = alpha("red", 0.2), 
+  border = NA
+)
+
+# add the lines
+lines(new_d$X5_Height_in_cm, new_d$fit_exp)
+lines(new_d$X5_Height_in_cm, new_d$lwr)
+lines(new_d$X5_Height_in_cm, new_d$upr)
+```
+```{r, echo=FALSE}
+# now export data
+write.csv(
+  x = new_d[, c("X5_Height_in_cm", "fit_exp", "lwr", "upr")],
+  file = "./data/poisson.csv"
+)
+```
+
+References: -
+<https://stackoverflow.com/questions/75017400/plot-standard-error-in-base-r-scatterplot> -
+Getting Started with R - Andrew Beckerman -
+<https://stats.stackexchange.com/questions/272194/interpreting-poisson-output-in-r> -
+<https://stats.stackexchange.com/questions/11096/how-to-interpret-coefficients-in-a-poisson-regression>
