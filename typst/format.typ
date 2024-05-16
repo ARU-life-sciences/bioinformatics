@@ -63,3 +63,57 @@
   set align(left)
   columns(1, doc)
 }
+
+// https://github.com/lkoehl/typst-boxes/blob/main/lib.typ
+#let box-colors = (
+  default: (stroke: luma(70), fill: white, title: white),
+  red: (stroke: rgb(237, 32, 84), fill: rgb(253, 228, 224), title: white),
+  green: (stroke: rgb(102, 174, 62), fill: rgb(235, 244, 222), title: white),
+  blue: (stroke: rgb(29, 144, 208), fill: rgb(232, 246, 253), title: white),
+)
+
+#let colorbox(
+  title: none,
+  box-colors: box-colors,
+  color: "default",
+  radius: 2pt,
+  width: auto,
+  body,
+) = {
+  return block(
+    fill: box-colors.at(color).fill,
+    stroke: 2pt + box-colors.at(color).stroke,
+    radius: radius,
+    width: width,
+  )[
+    #if title != none [
+      #block(
+        fill: box-colors.at(color).stroke,
+        inset: 8pt,
+        radius: (top-left: radius, bottom-right: radius),
+      )[
+        #text(fill: box-colors.at(color).title, weight: "bold")[#title]
+      ]
+    ]
+
+    #block(
+      width: 100%,
+      inset: (x: 8pt, bottom: 8pt, top: if title == none { 8pt } else { 0pt }),
+    )[
+      #body
+    ]
+  ]
+}
+
+#let watchout(title: none, inner) = {
+  align(
+    center, colorbox(
+      title: title,
+      color: "red",
+      width: 70%,
+      align(left, [
+        #inner
+      ])
+    )
+  )
+}
