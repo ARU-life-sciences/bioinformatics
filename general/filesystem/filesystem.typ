@@ -27,8 +27,8 @@
 The file system is the layout of where all your files live in your computer. I have
 a made up file system (@filesystem) which includes a root directory and a home 
 directory. The root is denoted in the filesystem as `/`, and usually has no files
-or directories above it. The home directory is usually denoted as `~` and is further
-in to your file system and is where all of your familiar directories and files should
+or directories above it. The home directory is usually denoted as `~`, is further
+in to your file system, and is where all of your familiar directories and files should
 live (Documents, Pictures, Downloads, etc).
 
 #figure(image("./images/filesystem.svg", width: 70%), caption: [A made up file system with a
