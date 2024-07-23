@@ -1,4 +1,4 @@
-// general formatting for all the documents in this 
+// general formatting for all the documents in this
 // repository
 
 // The formatter will apply all the correct
@@ -14,7 +14,7 @@
 
   // numbered sections
   set heading(numbering: "1.")
-    
+
   // Display inline code in a small box
   // that retains the correct baseline.
   show raw.where(block: false): box.with(
@@ -25,7 +25,11 @@
   )
   // Display block code in a larger block
   // with more padding.
-  show raw.where(block: true): block.with(fill: luma(240), inset: 10pt, radius: 4pt)
+  show raw.where(block: true): block.with(
+    fill: luma(240),
+    inset: 10pt,
+    radius: 4pt,
+  )
 
   // place shell captions at the top. All other captions will be at
   // the bottom
@@ -40,7 +44,7 @@
 
 // shell adds a shell class to a figure basically
 #let shell(block, caption) = {
-    figure(block, caption: caption, kind: "Shell", supplement: "Shell")
+  figure(block, caption: caption, kind: "Shell", supplement: "Shell")
 }
 
 // add a bit to the top with my name and stuff
@@ -58,7 +62,7 @@
       *#author.name* \
       #author.affiliation \
       #link("mailto:" + author.email)
-  ]))
+    ]))
 
   set align(left)
   columns(1, doc)
@@ -70,6 +74,7 @@
   red: (stroke: rgb(237, 32, 84), fill: rgb(253, 228, 224), title: white),
   green: (stroke: rgb(102, 174, 62), fill: rgb(235, 244, 222), title: white),
   blue: (stroke: rgb(29, 144, 208), fill: rgb(232, 246, 253), title: white),
+  yellow: (stroke: rgb(255, 255, 102), fill: rgb(255, 255, 204), title: black),
 )
 
 #let colorbox(
@@ -98,7 +103,15 @@
 
     #block(
       width: 100%,
-      inset: (x: 8pt, bottom: 8pt, top: if title == none { 8pt } else { 0pt }),
+      inset: (
+        x: 8pt,
+        bottom: 8pt,
+        top: if title == none {
+          8pt
+        } else {
+          0pt
+        },
+      ),
     )[
       #body
     ]
@@ -107,13 +120,53 @@
 
 #let watchout(title: none, inner) = {
   align(
-    center, colorbox(
+    center,
+    colorbox(
       title: title,
       color: "red",
       width: 70%,
-      align(left, [
-        #inner
-      ])
-    )
+      align(
+        left,
+        [
+          #inner
+        ],
+      ),
+    ),
   )
 }
+
+// a function for a question textbox
+#let question(title: none, inner) = {
+  align(
+    center,
+    colorbox(
+      title: title,
+      color: "yellow",
+      width: 70%,
+      align(
+        left,
+        [
+          #inner
+        ],
+      ),
+    ),
+  )
+}
+
+// https://github.com/typst/typst/issues/1278
+#let my_pagebreak(n_cols: 2) = [
+  #context [
+    #let width_page = page.width
+    #let width_col = width_page / n_cols
+    #let x_init = here().position().x
+    #let n_current_col = calc.ceil(x_init / width_col)
+    #let n_colbreaks_required = n_cols - n_current_col
+    #text(
+      1pt,
+      luma(100%),
+    )[#n_colbreaks_required] // The function breaks without this. Seems like an anchor for the colbreaks somehow
+    #for _ in range(n_colbreaks_required) {
+      colbreak()
+    }
+  ]
+]
