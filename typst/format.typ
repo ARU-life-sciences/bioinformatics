@@ -118,6 +118,25 @@
   ]
 }
 
+// textbox for further information
+#let further(title: "Further reading...", inner) = {
+  align(
+    left,
+    colorbox(
+      title: title,
+      color: "green",
+      width: 90%,
+      radius: 4pt,
+      align(
+        left,
+        [
+          #inner
+        ],
+      ),
+    ),
+  )
+}
+
 #let watchout(title: none, inner) = {
   align(
     center,

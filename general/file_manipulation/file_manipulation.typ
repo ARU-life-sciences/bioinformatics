@@ -1,4 +1,4 @@
-#import "../../typst/format.typ": conf, formatter, shell, watchout, question, my_pagebreak
+#import "../../typst/format.typ": conf, formatter, shell, watchout, question, my_pagebreak, further
 
 #show: doc => conf(
   title: [(Fasta) File Manipulation],
@@ -72,7 +72,7 @@ exploiting their structure to demonstrate some useful commands.
 )
 
 #question(
-  [Describe what the `>>` does in the `echo` command? \ What would happen if you replaced it with a single `>`?],
+  [ + Describe what the `>>` does in the `echo` command? \ What would happen if you replaced it with a single `>`?],
   title: [Question time],
 )
 
@@ -96,7 +96,8 @@ finding patterns in text. `grep` will only print, or in this case, count lines t
 flag tells `grep` to count the number of lines that match the pattern.
 
 #question(
-  [What happens when you remove the `-c` flag? \ Can you find a way to remove the header lines from the output? Hint: check out the inverse flag. ],
+  [
+    + What happens when you remove the `-c` flag? \ Can you find a way to remove the header lines from the output? Hint: check out the inverse flag. ],
   title: [Question time],
 )
 
@@ -116,7 +117,8 @@ You can see we have replaced the ">" from before with "seq1", so that the patter
 sequence name. The `-A 1` flag tells `grep` to print the line that matches the pattern, as well as the next line.
 
 #question(
-  [Can you find a way to extract the second sequence from the file? \ How could you extract both sequences (describe two ways if you can)? ],
+  [
+    + Can you find a way to extract the second sequence from the file? \ How could you extract both sequences (describe two ways if you can)? ],
   title: [Question time],
 )
 
@@ -135,7 +137,9 @@ in a file, you can use the `wc` command.
 )
 
 #question(
-  [Describe what the `|` does, and why is it useful? \ What happens when you remove the `-m` flag in `wc`? \ Given your knowledge of filtering sequences, how could you count the number of characters in the second sequence?],
+  [
+    + Describe what the `|` does, and why is it useful? \ What happens when you remove the `-m` flag in `wc`? \ Given your knowledge of filtering sequences, how could you count the number of characters in the second sequence?
+  ],
   title: [Question time],
 )
 
@@ -159,6 +163,8 @@ First, let's add a few more sequences to `example.fasta` so we have some meaning
   [Adding a few more sequences],
 )
 
+You can see that we added extra 'q4' sequences with the same sequence.
+
 Now we are going to find and quantify repeated sequences. This is a useful task if you are trying to clean up a
 file before analysis. To do this, we will use the `sort` and `uniq` commands.
 
@@ -175,8 +181,49 @@ file before analysis. To do this, we will use the `sort` and `uniq` commands.
 And we will finish off with a few questions.
 
 #question(
-  [What happens when you remove the `-c` flag in `uniq`? \
-    Can you find a way to sort the headers in reverse order? \
-    How could you find and quantify repeated sequences in the sequences themselves?],
+  [
+    + What happens when you remove the `-c` flag in `uniq`? \
+    + Can you find a way to sort the headers in reverse order? \
+    + How could you find and quantify repeated sequences in the sequences themselves?
+  ],
+  title: [Question time],
+)
+
+= Counting the number of bases in a fasta file
+
+This seemingly simple task is actually a bit more complex than it first appears. This is a minor warning
+that the following explanation might be a bit more complex than the other commands we have used.
+
+Finding the total sequence length in a fasta file is a more complex problem. This is because
+a fasta file can contain sequences that are split over multiple lines. If the fasta file is a
+single line *_and a single record_*, we can use:
+
+#shell(
+  ```bash
+    # remove headers          and count characters
+    grep -v ">" example.fasta | wc -m
+  ```,
+  [The simplest case],
+)
+Otherwise things get a bit more complicated. This is because `wc` will count the number of characters
+in the file, but this will include the new line characters (yes, new lines themselves are characters, defined by `\n`). So we need to remove these before counting
+the characters. We can do this with `tr`, which is a kind of text replacer.
+
+#shell(
+  ```bash
+    # remove headers          and newlines  and count characters
+    grep -v ">" example.fasta | tr -d '\n' | wc -m
+  ```,
+  [Account for newlines in most cases],
+)
+
+Note that this will count the bases in the entire file, if you want specific records, the problem unfortunately
+gets even harder.
+
+#question(
+  [
+    + Can you explain why then problem of counting bases per record is non-trivial?
+    + Can you write a non-code explanation of how you might approach the problem?
+  ],
   title: [Question time],
 )
