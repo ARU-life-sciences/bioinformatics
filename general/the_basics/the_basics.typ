@@ -228,3 +228,41 @@ system that we have permission to view.
   ],
   title: [Questions],
 )
+
+= File paths
+
+File paths are a way of describing where a file is on your file system. They are
+written as a series of directories separated by forward slashes `/`, and the
+file name at the end. For example, if I have a file called `my_file.txt` in the
+directory `Documents`, which is in my home directory, I can describe the path of
+this file in two ways:
+
++ Absolute path: `/Users/mc9148/Documents/my_file.txt`
+  - this type of path starts from the root of the file system.
++ Relative path: `~/Documents/my_file.txt`.
+  - we start from my home directory. The `~` is a symbol which represents the home directory.
+  - relative paths do not have to start from the home directory, they can start from anywhere
+  but the root - e.g. `../Documents/my_file.txt` would be a relative path to my file.
+
+We can use file paths to navigate the file system, and manipulate documents in one go.
+
+#shell(
+  ```bash
+    # list files in my Documents
+    ls /Users/mc9148/Documents
+    # or
+    ls ~/Documents
+
+    # show the contents of my_file.txt
+    cat /Users/mc9148/Documents/my_file.txt
+  ```,
+  [Using file paths],
+)
+
+= Tab completion
+
+To eliminate typos and make life easier, we can use tab completion. This is a
+feature which allows us to start typing a command or file path, and then press
+`Tab` to complete the command or file path. If there is more than one possible
+completion, pressing `Tab` twice will list the possible completions. Please do
+make use of this feature as it will save you a lot of time.
