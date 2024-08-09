@@ -191,18 +191,22 @@
 ]
 
 // create a punnett square using the alleles from two parents
-// Use like this: punnett_square("Aa", "Aa")
-#let punnett_square(parent1: str, parent2: str) = {
-  // Extract alleles from parent genotypes
-  let p1_alleles = parent1.split("").filter(x => x != "")
-  let p2_alleles = parent2.split("").filter(x => x != "")
+// Use like this: punnett_square(parent1: ("A", "a"), parent2: ("A", "a"), fill: (white, white, white, red))
+#let punnett_square(parent1: (str,), parent2: (str,), fill: ()) = {
+
+  // if the fill is empty, set it to white
+  let fill = if fill == () {
+    (white, white, white, white)
+  } else {
+    fill
+  }
 
   // Determine the resulting genotypes
   let genotypes = (
-    p1_alleles.at(0) + p2_alleles.at(0),
-    p1_alleles.at(0) + p2_alleles.at(1),
-    p1_alleles.at(1) + p2_alleles.at(0),
-    p1_alleles.at(1) + p2_alleles.at(1),
+    parent1.at(0) + parent2.at(0),
+    parent1.at(0) + parent2.at(1),
+    parent1.at(1) + parent2.at(0),
+    parent1.at(1) + parent2.at(1),
   )
 
   // Create the Punnett square
@@ -212,7 +216,10 @@
       align: center + horizon,
       table.header(
         [],
-        table.cell(colspan: 2, [Parental genotype 1 \ (#strong(parent1)) \ ]),
+        table.cell(
+          colspan: 2,
+          [Parental genotype 1 \ (#strong(parent1.join(""))) \ ],
+        ),
       ),
       table.cell(
         rowspan: 2,
@@ -220,15 +227,15 @@
         rotate(
           -90deg,
           reflow: true,
-        )[Parental genotype 2 \ (#strong(parent2)) \ ],
+        )[Parental genotype 2 \ (#strong(parent2.join(""))) \ ],
       ),
-      table.cell(inset: 1cm)[
+      table.cell(inset: 1cm, fill: fill.at(0))[
         #genotypes.at(0)
-      ], table.cell(inset: 1cm)[
+      ], table.cell(inset: 1cm, fill: fill.at(1))[
         #genotypes.at(1)
-      ], table.cell(inset: 1cm)[
+      ], table.cell(inset: 1cm, fill: fill.at(2))[
         #genotypes.at(2)
-      ], table.cell(inset: 1cm)[
+      ], table.cell(inset: 1cm, fill: fill.at(3))[
         #genotypes.at(3)
       ]
     )
@@ -236,8 +243,12 @@
 }
 
 // Create a dihybrid Punnett square using two alleles from the parents
-// Use like this: dihybrid_punnett_square(("Aa", "Bb"), ("Aa", "Bb"))
-#let dihybrid_punnett_square(parent1: (str), parent2: (str)) = {
+// Use like this: dihybrid_punnett_square(parent1: (("A", "a"), ("B", "b")), parent2: (("A", "a"), ("B", "b")), fill: ((0, 1, red), (1, 2, white), (2, 3, white), (3, 0, white)))
+#let dihybrid_punnett_square(
+  parent1: ((str,),),
+  parent2: ((str,),),
+  fill: ((int, int, color),), // indices of cells to fill, with colour. e.g. ((0, white), (1, red), (2, white), (3, white))
+) = {
   // Extract alleles from parent genotypes
   // each parent is an array of strings denoting the diploid genotype for that parent
   // e.g. parent1: ("Aa", "Bb")
@@ -247,10 +258,10 @@
   for (allele1, allele2) in parent1.zip(parent2) {
     // determine the genotypes
     let genotypes = (
-      allele1.at(0) + allele2.at(0),
-      allele1.at(0) + allele2.at(1),
-      allele1.at(1) + allele2.at(0),
-      allele1.at(1) + allele2.at(1),
+      (allele1.at(0), allele2.at(0)),
+      (allele1.at(0), allele2.at(1)),
+      (allele1.at(1), allele2.at(0)),
+      (allele1.at(1), allele2.at(1)),
     )
 
     genotype_array.push(genotypes)
@@ -264,10 +275,6 @@
   // the number of rows and columns are equal
   let no_cols_rows = genotype_array.at(0).len() + 1
 
-  // join two strings together
-  let join = (x, y) => x + y
-
-
   // make it so we have a 2D array of rows
   let table_rows = ()
   let row = ()
@@ -276,7 +283,7 @@
     for gamete2 in genotype_array.at(1) {
       row.push(
         table.cell(inset: 1cm)[
-          #join(gamete1, gamete2)
+          #gamete1.join("")#gamete2.join("")
         ],
       )
     }
@@ -292,11 +299,20 @@
       columns: no_cols_rows,
       rows: no_cols_rows,
       align: center + horizon,
+      fill: (x, y) => {
+        for (ix, iy, col) in fill {
+          if x == ix {
+            if y == iy {
+            return col
+            }
+          }
+        }
+      },
       table.header(
         [],
         table.cell(
           colspan: no_cols_rows - 1,
-          [Parental genotypes 1 \ (#strong(genotype_array.at(0).join(" "))) \ ],
+          [Parental genotypes 1 \ (#strong(genotype_array.at(0).map(e => e.join("")).join(", "))) \ ],
         ),
       ),
       table.cell(
@@ -305,7 +321,7 @@
         rotate(
           -90deg,
           reflow: true,
-        )[Parental genotypes 2 \ (#strong(genotype_array.at(1).join(" "))) \ ],
+        )[Parental genotypes 2 \ (#strong(genotype_array.at(1).map(e => e.join("")).join(", "))) \ ],
       ),
     // now complete the cells with the resulting genotypes which will
     // be a combination of the alleles from the two parents. This will require
