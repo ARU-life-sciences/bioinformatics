@@ -50,6 +50,15 @@
 // add a bit to the top with my name and stuff
 // other authors can be added too.
 #let conf(title: none, authors: (), doc) = {
+  set page(
+    footer: context [
+      #{
+        if counter(page).get() == counter(page).final() {
+          align(right)[Last edited: #datetime.today().display()]
+        }
+      }
+    ]
+  )
   set align(center)
   text(17pt, title)
 
