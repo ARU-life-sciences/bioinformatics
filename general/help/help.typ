@@ -1,11 +1,15 @@
 #import "../../typst/format.typ": conf, formatter, shell
 
 #show: doc => conf(
-  title: [Getting help], authors: (
+  title: [Getting help],
+  authors: (
     (
-      name: "Max Carter-Brown", affiliation: "Anglia Ruskin University, Wellcome Sanger Institute", email: "max.carter-brown@aru.ac.uk",
+      name: "Max Carter-Brown",
+      affiliation: "Anglia Ruskin University, Wellcome Sanger Institute",
+      email: "max.carter-brown@aru.ac.uk",
     ),
-  ), doc,
+  ),
+  doc,
 )
 
 #show: doc => formatter(doc)
@@ -30,12 +34,15 @@ in which you might want to get help:
 Before we look at a specific example, I am going to walk through a fake example,
 and define some terms. I have a made up program called `fetch`.
 
-#shell(```
-fetch v1.0 - A program to fetch files from the internet
+#shell(
+  ```
+  fetch v1.0 - A program to fetch files from the internet
 
-fetch [-lh] [--verbose=low] [url, ...]
+  fetch [-lh] [--verbose=low] [url, ...]
 
-```, [After running `fetch`, we get this output.])
+  ```,
+  [After running `fetch`, we get this output.],
+)
 
 The first set of options `[-lh]` are what I call flags. They are put after the
 name of the program and alter its behaviour. For example, in this case `-h` might
@@ -46,10 +53,12 @@ you call `--verbose` by itself, there will be an error. Lastly we have what are
 called positional arguments. Usually positional arguments are at the end of the
 program call, and generally point to a file of some sort. All together:
 
-#shell(```bash
-fetch -l --verbose=high "www.example.com/file.txt"
-```, [A made up example where an optional argument `--verbose` is used, and a
-positional argument which is a URL. `-l` creates a log file of the output.],
+#shell(
+  ```bash
+  fetch -l --verbose=high "www.example.com/file.txt"
+  ```,
+  [A made up example where an optional argument `--verbose` is used, and a
+    positional argument which is a URL. `-l` creates a log file of the output.],
 )
 
 == How to get help
@@ -60,9 +69,12 @@ positional argument which is a URL. `-l` creates a log file of the output.],
 scroll through. It lists all the flags, options, and behaviour of the program.
 The output of this program can be quite overwhelming, so let's take an example.
 
-#shell(```bash
-man ls
-```, [Getting help for the `ls` command using the `man` command.])
+#shell(
+  ```bash
+  man ls
+  ```,
+  [Getting help for the `ls` command using the `man` command.],
+)
 
 The `man` page for `ls` is really long, perhaps unexpectedly for such a
 seemingly simple command. We will break down each relevant section.
@@ -76,7 +88,8 @@ also one or more positional arguments - so we can actually pass as many paths as
 we like to `ls`, that's kind of interesting.
 
 #figure(
-  image("./images/ls_man.png", width: 80%), caption: [A screenshot of `man ls` on my Mac.],
+  image("./images/ls_man.png", width: 80%),
+  caption: [A screenshot of `man ls` on my Mac.],
 )
 
 ==== Description

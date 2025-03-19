@@ -1,8 +1,8 @@
 # Plotting in R
 
-One of the great strengths of R are the plotting abilities. Here we will run through the `base` plotting. `base` plots are great for exploratory work, but as we will see perhaps later on, they can also produce publication quality plots.
+One of the great strengths of R are the plotting abilities. Here we will run through the `base` plotting. `base` plots are excellent for exploratory work (as the code to generate them is so terse), but as we will see perhaps later on, they can also produce publication quality plots.
 
-## Plotting vectors
+## Plotting vectors (i.e. 1D data)
 
 Vector plots can be useful to either plot the raw data along with an index (if the index is meaningful), or can be plotted as frequency distributions (e.g. to assess normality).
 
@@ -25,4 +25,76 @@ hist_data <- rnorm(n = 600, mean = 2, sd = 1.2)
 
 # call the hist function, it will bin and plot the data automatically for us
 hist(hist_data)
+```
+
+## Plotting bivariate data
+
+Bivariate simply means 'two variables'. It's the next step up from having a vector. It might be a `n x 2` column `matrix` or a data frame with two columns.
+
+### Bivariate numeric data
+
+It's a scatter plot generally.
+
+```{r}
+# 100 random uniformly distributed numbers
+var1 <- runif(100)
+# var2 as a function of var1
+var2 <- sqrt(var1) * runif(100)
+
+# make into data frame
+vars <- data.frame(var1, var2)
+
+# with allows us to specify the data once, and then use the column
+# names as variables
+plot(vars$var1, vars$var2)
+```
+
+### Bivariate numeric and categorical
+
+This also happens a lot. We can take a simple example by calculating the frequencies of letters used in a particular text. A barplot is often a nice idea.
+
+I introduce the `formula`
+
+```{r}
+# a little function to tabulate all letters from an input character
+# string
+freq_letters <- function(text) {
+  # split the text
+  text_as_vec <- unlist(strsplit(text, ""))
+  # and tabulate
+  tab <- as.data.frame(table(text_as_vec))
+  
+  # make sure we only have letters
+  only_letters <- tab[tab$text_as_vec %in% letters, ]
+  
+  # rename columns and rownames
+  names(only_letters) <- c("Letter", "Frequency")
+  rownames(only_letters) <- 1:nrow(only_letters)
+  # and make sure the letters are only letters as a factor
+  only_letters$Letter <- factor(only_letters$Letter, levels = letters)
+  only_letters
+}
+
+# a bit meta, but we can input the source code of `freq_letters`
+# as the text we want to process
+freq_letters_source <- as.character(list(freq_letters))
+freq_data <- freq_letters(freq_letters_source)
+
+# the actual plot call is very simple
+barplot(Frequency ~ Letter, freq_data)
+```
+
+But if we have multiple observations per category, we might want to summarise the data somehow. Boxplots are a simple way of doing this. In this example I've used a few more of `plot`'s options. In particular, I've also introduced `par` which is a function to manipulate the graphics environment and takes a bunch of key/value (e.g. `x = 1`) pairs. We can assign this to a variable, then call `par` again on this variable to restore the default parameters.
+
+I've edited the `las` (label style) to `2` to rotate the x axis labels around, and the `mar` (margins) of the plot.
+
+```{r}
+# load in the data
+barley <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv")
+# create the plot parameters
+pbox <- par(las = 2, mar=c(8,8,1,1))
+# plot the boxplot
+boxplot(yield ~ variety, data = barley, xlab = "")
+# restore default parameters
+par(pbox)
 ```

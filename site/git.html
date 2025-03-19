@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en-US">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <title>ARU Bioinformatics</title>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <header>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="../site/news.html" class="current">News</a>
+      <a href="https://github.com/ARU-life-sciences/bioinformatics"><svg class="icon" viewBox="0 0 32 32" width=20
+          height=20>
+          <path
+            d="M16 0.395c-8.836 0-16 7.163-16 16 0 7.069 4.585 13.067 10.942 15.182 0.8 0.148 1.094-0.347 1.094-0.77 0-0.381-0.015-1.642-0.022-2.979-4.452 0.968-5.391-1.888-5.391-1.888-0.728-1.849-1.776-2.341-1.776-2.341-1.452-0.993 0.11-0.973 0.11-0.973 1.606 0.113 2.452 1.649 2.452 1.649 1.427 2.446 3.743 1.739 4.656 1.33 0.143-1.034 0.558-1.74 1.016-2.14-3.554-0.404-7.29-1.777-7.29-7.907 0-1.747 0.625-3.174 1.649-4.295-0.166-0.403-0.714-2.030 0.155-4.234 0 0 1.344-0.43 4.401 1.64 1.276-0.355 2.645-0.532 4.005-0.539 1.359 0.006 2.729 0.184 4.008 0.539 3.054-2.070 4.395-1.64 4.395-1.64 0.871 2.204 0.323 3.831 0.157 4.234 1.026 1.12 1.647 2.548 1.647 4.295 0 6.145-3.743 7.498-7.306 7.895 0.574 0.497 1.085 1.47 1.085 2.963 0 2.141-0.019 3.864-0.019 4.391 0 0.426 0.288 0.925 1.099 0.768 6.354-2.118 10.933-8.113 10.933-15.18 0-8.837-7.164-16-16-16z">
+          </path>
+        </svg> GitHub</a>
+
+    </nav>
+    <h1><code class="language-bash">git</code> and GitHub</h1>
+  </header>
+
+  <main>
+    <p>Two very important technologies for modern software development. For students and academics, these are invaluable
+      tools to catalogue and develop your code. Many branches of academia which rely on software, like bioinformatics,
+      use git to version control their software, and GitHub to make it available to a wide audience. This is important
+      so other people can see what you are working on, and can lead to collaborations in longer term. In addition, many
+      journals require source code to be published, and if they don't require it, it's a good idea to do so anyway for
+      reproducibility. The link at the top right of this page will take you to the home of this website, which is
+      version controlled using <code class="language-bash">git</code> and published to the world using GitHub.
+    </p>
+
+    <p> As with many things, learning basic <code class="language-bash">git</code> is quite easy, but <a
+        href="https://xkcd.com/1597/">things get tough very
+        quickly</a>. Stick with it!</p>
+
+    <h2>Contents:</h2>
+    <ul>
+      <li><a href="#install">Installing <code class="language-bash">git</code> and joining GitHub</a></li>
+      <li><a href="#explore">Explore a repository</a></li>
+      <li><a href="#create">Creating a new repository</a></li>
+      <li><a href="#basic">Basic idea</a></li>
+      <li><a href="#readme">Adding a README</a></li>
+    </ul>
+
+
+    <div id="install">
+      <h2>Installing <code class="language-bash">git</code> and joining GitHub</h2>
+      <p>Depending on which machine you have (Windows, Mac, Linux), you can follow the instructions on the <a
+          href="https://git-scm.com/book/en/v2/Getting-Started-Installing-Git">official <code
+            class="language-bash">git</code> website</a> to
+        install it. Once installed, open up terminal on a Mac or Linux, or powershell on Windows, and type:</p>
+
+      <pre><code class="language-bash">git --version</code></pre>
+
+      <p>On Windows machines, I'd recommend installing WSL (<a
+          href="https://learn.microsoft.com/en-us/windows/wsl/install">Windows Subsystem for Linux</a>), which should
+        have
+        <code class="language-bash">git</code> installed on it already. Failing that, <code
+          class="language-bash">git</code> BASH is a good alternative. Install
+        that <a href="https://gitforwindows.org/">here</a>. Provided that you are not crippled by the security system of
+        your computer, this should be relatively easy to do.
+      </p>
+
+      <p>Once you have installed
+        <code class="language-bash">git</code>, we can look at GitHub. You can sign up for a free account on the <a
+          href="https://github.com/">GitHub website</a>. It should be very self-explanatory to sign up.
+        If you are part of ARU, please <a href="https://github.com/ARU-life-sciences">join the Life Sciences GitHub</a>.
+      </p>
+    </div>
+
+    <div id="explore">
+      <h2>Explore a repository</h2>
+      <p>Once you have signed up for GitHub, you can explore some repositories. I recommend looking at the <a
+          href="https://github.com/ARU-life-sciences/bioinformatics">Bioinformatics repository</a> on the
+        ARU-life-sciences GitHub. You can see all the files and folders.
+      </p>
+    </div>
+
+    <div id="create">
+      <h2>Creating a new repository</h2>
+      <p>There are two ways to create a new repository. You can create a new repository on GitHub and clone it to your
+        local machine, or you can create a new repository on your local machine and push it to GitHub. I recommend the
+        latter, as I think it's easier to do.</p>
+
+      <p>You firstly need to create a directory/folder on your machine. In terminal or powershell, navigate to the
+        directory and type:
+      </p>
+      <pre><code class="language-bash">git init</code></pre>
+      <p>This will create a new <code class="language-bash">git</code> repository in your current directory. This is a
+        <mark>local repository</mark>.
+        Now you can add, modify, or delete files in the directory and they can be tracked. These files
+        are not tracked by default - we have to do the work.
+      </p>
+
+      <p>Now go over to GitHub and create a new repository. It will ask for some details, so fill those in. Once you
+        click 'create repository', there will be some commands you can run to link your repository you made on your
+        computer just now, to the remote one.</p>
+
+      <p>The code will be something like the following:</p>
+      <pre><code class="language-bash">git remote add origin https://github.com/USERNAME/REPO NAME.git
+git branch -M main
+git push -u origin main</code></pre>
+
+      <p><code class="language-bash">git remote add origin</code> tells your computer where the remote repository is
+        (i.e. on GitHub). After running this, the lcoal repository is linked to the remote one.
+        <code class="language-bash">git branch -M main</code> renames the default branch from <code
+          class="language-bash">master</code> to <code class="language-bash">main</code>.
+        We will consider branches much later, but for now think of them as copies of the repository under different
+        names.
+        <code class="language-bash">git push -u origin main</code> pushes the local repository to the remote
+        one. If you run this command, it <mark>will fail</mark> as there's nothing in our repository!
+        But don't worry, we will fix this in a moment.
+      </p>
+    </div>
+
+    <div id="basic">
+      <h2>Basic idea</h2>
+      <p>We have made a blank repository, and we want to put something in it. We can create a file in the
+        directory. Do this any way you want. Here's a way I'd do it on a Unix like machine:</p>
+
+      <pre><code class="language-bash">echo "Hello, world!" &gt; hello.txt</code></pre>
+
+      <p>Now we have a simple text file with the text "Hello, world!" in it. We can add this file to the
+        "local stage" using:</p>
+
+      <pre><code class="language-bash">git add hello.txt</code></pre>
+
+      <p>This adds the file to the local stage, which is like a waiting area. We can add more files to the
+        stage if we want to. A core idea in <code class="language-bash">git</code> is that we make incremental changes
+        to our
+        repository which we can easily reason with. Adding a file to the stage is necessary, but doesn't
+        actually do anything by itself. We need to commit these changes. Commiting changes adds the change
+        to our local log file. Let's do it:</p>
+
+      <pre><code class="language-bash">git commit -m "Add hello.txt"</code></pre>
+
+      <p>The <code class="language-bash">-m</code> flag is for "message". The message is a short description
+        of the change we made, and is <mark>necessary</mark>. Please make your commit messages informative and
+        descriptive if you can.
+      </p>
+
+      <p>We have added and commited our changes to the local repository. Check the message log using
+        <code class="language-bash">git log</code>. You should see the message you just made.
+      </p>
+
+      <pre><code class="language-bash">git log</code></pre>
+
+      <p>We can now push these changes to the remote repository (i.e. GitHub) using:</p>
+
+      <pre><code class="language-bash">git push -u origin main</code></pre>
+
+      <p>The changes are now on GitHub! You can check by refreshing the page.</p>
+
+    </div>
+
+    <div id="readme">
+      <h2>Adding a README</h2>
+      <p>It's good practice to add a <code class="language-bash">README</code> file to your repository.
+        This file can contain information about the repository, such as what it's for, who made it, and how to
+        use it. This file will be displayed on the repository page on GitHub. We will switch gear and add
+        it from the website.</p>
+
+      <p>If you navigate to your repository on the GitHub website, you can click the "Add a README" button.
+        This will bring up a text editor which you can use to write your
+        <code class="language-bash">README</code>. Put something in there and save it. Notice how you will have
+        to commit the changes just like we did before. You can add an extra description if you wish. After
+        you are done, commit the changes.
+      </p>
+
+      <p>Now we have our changes committed to the remote (on GitHub), but they are not on our local machine.
+        We can pull them in using:</p>
+
+      <pre><code class="language-bash">git pull</code></pre>
+
+      <p>The changes should now be merged with your local repository. You can check using:</p>
+
+      <pre><code class="language-bash">git log</code></pre>
+
+      <p>It should show that you now have two commits.</p>
+
+      <p>And that's it! You are now a <code class="language-bash">git</code> and GitHub user. This was
+        a very simple introduction to version control. We will look at multi-user collaboration, branches,
+        and pull requests in a separate tutorial. Good luck!</p>
+
+    </div>
+
+  </main>
+
+  <footer>
+    <p>Presented by Max Carter-Brown & Jason Hodgson</p>
+  </footer>
+</body>
+
+</html>
