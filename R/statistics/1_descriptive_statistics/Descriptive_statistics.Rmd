@@ -296,7 +296,7 @@ You might be interested to know the mean value of a numeric column broken down b
 # create the summary table of mean weight and the standard deviation for each sex
 summary_table <- d %>%
   group_by(X3_Gender) %>%
-  summarise(mean_weight = mean(X6_Weight_in_kg, na.rm = TRUE), sd_weight =sd(X6_Weight_in_kg, na.rm=TRUE))
+  summarise(mean_weight = mean(X6_Weight_in_kg, na.rm = TRUE), sd_weight = sd(X6_Weight_in_kg, na.rm=TRUE))
 
 # print the table
 print(summary_table)

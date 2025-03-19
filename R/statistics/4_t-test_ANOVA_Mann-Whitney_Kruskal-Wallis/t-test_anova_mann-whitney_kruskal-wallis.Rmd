@@ -3,6 +3,7 @@ title: "T-test, ANOVA, Mann-Whitney, Kruskal Wallis"
 author: "Jason Hodgson"
 date: "2024-02-28"
 output:
+  word_document: default
   html_document:
     df_print: paged
 ---
@@ -357,4 +358,3 @@ The results show that there is no evidence for a difference in body weight assoc
 ### Step 4. Formally test and interpret the relationship between heart rate and activity level using either a ANOVA, or Kruskal-Wallis test depending upon whether heart rate is normal or not.
 
 *Insert R code and interpretation here*
-
