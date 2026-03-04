@@ -200,7 +200,7 @@
 ]
 
 // create a punnett square using the alleles from two parents
-// Use like this: punnett_square(parent1: ("A", "a"), parent2: ("A", "a"), fill: (white, white, white, red))
+// Use like this: punnett_square("Aa", "Aa")
 #let punnett_square(parent1: (str,), parent2: (str,), fill: ()) = {
 
   // if the fill is empty, set it to white
@@ -252,7 +252,7 @@
 }
 
 // Create a dihybrid Punnett square using two alleles from the parents
-// Use like this: dihybrid_punnett_square(parent1: (("A", "a"), ("B", "b")), parent2: (("A", "a"), ("B", "b")), fill: ((0, 1, red), (1, 2, white), (2, 3, white), (3, 0, white)))
+// Use like this: dihybrid_punnett_square(("Aa", "Bb"), ("Aa", "Bb"))
 #let dihybrid_punnett_square(
   parent1: ((str,),),
   parent2: ((str,),),

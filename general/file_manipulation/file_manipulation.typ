@@ -143,7 +143,7 @@ in a file, you can use the `wc` command.
   title: [Question time],
 )
 
-= Finding and quantifying repeated sequences
+= Finding and counting repeated sequences
 
 First, let's add a few more sequences to `example.fasta` so we have some meaningful data to play with.
 

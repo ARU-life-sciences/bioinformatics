@@ -28,7 +28,9 @@
 
 #text(weight: "bold")[By the end of this document, you should be able to]:
 
-+ ...
++ Be confident in using the European Bioinformatics Institute (EBI) website to run a BLAST search
++ Understand the basics of a BLAST search
++ Interpret the results of a BLAST search
 
 
 = Introduction
@@ -64,11 +66,11 @@ But what happens when there are no other proteins similar to our sequence?
 
   BTP4 itself is an exonuclease (removing nucleotides from the end of a nucleotide chain) that plays a role in viral genome replication, DNA recombination, and host DNA degradation.])
 
-= BLAST and psi-BLAST
+= BLAST
 
 *BLAST* (the Basic Local Alignment Search Tool) is a program for comparing a sequence with every member of a database of sequences and presenting you with a list of the most similar. It is very a sophisticated program with a number of parameters that can be altered to optimize the sensitivity of the search it performs.
 
-You will carry out experiments using BLAST, and a derivative of BLAST called psi-BLAST that is useful for sensitive searches to find distant similarities, to find proteins similar to BPT4 and BPT5 in the well-annotated, comprehensive sequence database "SwissProt".
+You will carry out experiments using BLAST to find proteins similar to BPT4 and BPT5 in the well-annotated, comprehensive sequence database "SwissProt".
 
 See @altschul1990basic, @altschul1997scha, and @altschul1998iterated for further information on BLAST and psi-BLAST.
 
@@ -155,7 +157,7 @@ SP:Q96YR6 MRE11_SULTO DNA double-strand bre...  51.6    4e-06
 SP:Q97WG9 MRE11_SACS2 DNA double-strand bre...  39.3    0.040
 ```
 
-The first line shows which version of the program was run (in the example above version 2.12.0+ of BLASTP). (In the output, a reference for the method is then given - we have cut it from the text above.)
+The first line shows which version of the program was run, in the example above version 2.12.0+ of BLASTP (In the output, a reference for the method is then given - we have cut it from the text above).
 
 The program then tells us which database was searched (in this case “uniprotkb_swissprot”) and how big the database is (0.5 million sequences, 206 million amino acid residues). The name and length of the Query sequence is then given, followed by the hits table.
 
