@@ -1,259 +1,361 @@
-# Basic data types in R
+---
+title: "Basic Data Types in R"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
 
-All languages have data types, so R is no exception. We will look at all of the 
-most common data types in this notebook.
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+```
 
 ## Primitive types
 
+All languages have data types, so R is no exception. We will look at all of the
+most common data types in this notebook.
+
 ### Numbers
 
-These are the most simple data types, and are used very commonly throughout all 
-R code. First we have the numbers. All numbers in R without the `L` suffix are 
-floating point numbers - aka decimals. They are of a 64 bit precision. These are
-also known as `long` numbers or `double`s.
+These are the most simple data types, and are used very commonly throughout all
+R code. All numbers in R without the `L` suffix are floating point numbers —
+aka decimals. They are of 64 bit precision. These are also known as `double`s.
 
-Typically this means we use:
-
-* 53 bits for the coefficient (52 really)
-* 11 for exponent
-* 1 for sign (+/-)
-
-So the largest number represented is:
-
-```{r}
-exponent <- 2^11 - 2^10 - 1
-# roughly with some error
-2 ^ exponent
-```
-
-And then you can have 16 digits precision after the decimal point:
-
-```{r}
-2^52
-```
-
-Anyways, here are some numbers!
-
-```{r}
-# all plain numbers in R are floats
+```{r demo-doubles, echo=TRUE}
+# all plain numbers in R are floats (doubles)
 x <- 1
-# same thing
-y <- 1.0
-# same thing
-z <- 1.
+y <- 1.0   # same thing
+z <- 1.    # also the same thing
 
+# check the type with typeof()
+typeof(x)
 ```
 
-Integers are rarer in R. They are whole numbers. They can only be created by 
-appending `L` to a number. They are of 32 bit precision. This discrepancy with
-the above floats is actually quite annoying (see https://www.r-bloggers.com/2015/06/r-in-a-64-bit-world/).
+Integers are rarer in R. They are whole numbers created by appending `L` to a
+number. They are of 32 bit precision, so they max out at 2^31 − 1.
 
-This means in R, we can only assign numbers as high as 2^31 - 1 and as low as -2^31 - 1.
-We take a bit for the +ve/-ve.
-
-```{r}
-# make the integer
+```{r demo-integer, echo=TRUE}
+# make an integer
 my_integer <- 2L
-# typeof is a function which shows the type of the object
 typeof(my_integer)
 ```
 
-### Boolean
+### Your turn: number types
 
-Boolean types are true or false types. Internally they are treated as 1's or 0's.
-They are binary types, so there are only two you can have. R calls these `logical`.
+```{r ex-numbers, exercise=TRUE, exercise.lines=6}
+# 1. Create a floating point number called `body_mass` with value 3.2
+# 2. Create an integer called `num_chromosomes` with value 46L
+# 3. Print the typeof() for each
 
-```{r}
-# all caps true or false are the values
-true <- TRUE
-false <- FALSE
-
-# you can short hand to T/F but I wouldn't
-true_again <- T
-not_true <- F
-
+body_mass <- ___
+num_chromosomes <- ___
+typeof(body_mass)
+typeof(num_chromosomes)
 ```
 
-### Characters, or strings
+```{r ex-numbers-solution}
+body_mass <- 3.2
+num_chromosomes <- 46L
+typeof(body_mass)
+typeof(num_chromosomes)
+```
 
-R has strings, which are letters stuck together. These can be thought of as 
-vectors of single letters, though R is rather annoying about strings. 
+```{r quiz-numbers, echo=FALSE}
+quiz(
+  question("What does the `L` suffix do when added to a number in R?",
+    answer("Makes it an integer", correct = TRUE),
+    answer("Makes it larger"),
+    answer("Makes it a character"),
+    answer("Makes it logical"),
+    allow_retry = TRUE
+  ),
+  question("What is the default numeric type in R (no `L` suffix)?",
+    answer("double", correct = TRUE),
+    answer("integer"),
+    answer("float"),
+    answer("long"),
+    allow_retry = TRUE
+  )
+)
+```
 
-```{r}
+### Boolean (logical)
+
+Boolean types are `TRUE` or `FALSE`. Internally they are treated as 1s and 0s.
+R calls these `logical`.
+
+```{r demo-logical, echo=TRUE}
+# all caps TRUE or FALSE
+true_val  <- TRUE
+false_val <- FALSE
+
+# you can shorthand to T/F but I wouldn't recommend it
+also_true <- T
+```
+
+```{r ex-logical, exercise=TRUE, exercise.lines=6}
+# Create a logical variable called `is_mammal` set to TRUE
+# Create a logical variable called `is_extinct` set to FALSE
+# What is TRUE + TRUE in R? (Hint: booleans are secretly 0s and 1s)
+is_mammal  <- ___
+is_extinct <- ___
+TRUE + TRUE
+```
+
+```{r ex-logical-solution}
+is_mammal  <- TRUE
+is_extinct <- FALSE
+TRUE + TRUE  # gives 2 - booleans are 1s and 0s
+```
+
+### Characters (strings)
+
+R has strings, which are letters stuck together.
+
+```{r demo-character, echo=TRUE}
 a_string <- "hello, R"
 typeof(a_string)
 ```
 
+```{r ex-character, exercise=TRUE, exercise.lines=5}
+# Create a character variable called `species` containing "Homo sapiens"
+# Print its type with typeof()
+species <- ___
+typeof(species)
+```
+
+```{r ex-character-solution}
+species <- "Homo sapiens"
+typeof(species)
+```
+
+---
+
 ## Compound types
 
-These types are a bit more complex than the primitive ones, and are composed of
-them in different formats.
+These types are composed of the primitive ones in different formats.
 
-### Vectors
+### Atomic vectors
 
-#### Atomic vectors
+Vectors are extremely common in R and are created with the `c()` function
+(which stands for **concatenate**).
 
-Vectors are extremely common in R, and you can't really be without them. They are
-created (confusingly) using the `c()` function. This stands for concatenate.
-
-```{r}
+```{r demo-vector, echo=TRUE}
 vec <- c(1, 2, 3, 4)
+vec
 ```
 
-Importantly, vectors must contain all the same types within them. If you try to 
-mix types up within a vector (which you can do), something called 'type coercion'
-will happen.
-
-```{r}
-# number, number, character(!!), number, number
-oops <- c(1, 2, "3", 4, 5)
-oops
-```
-
-All the values in `oops` are now characters, as character takes precedence over
-numbers. The full list of coercive precedence is here:
+Importantly, vectors must contain all the same type. If you mix types, **type
+coercion** happens — R converts everything to the most flexible type:
 
 `character > complex > numeric > integer > logical > raw`
 
-This means if I had a vector like this, the TRUE's will get changed into 1's.
+```{r demo-coercion, echo=TRUE}
+# mixing a character into a numeric vector
+oops <- c(1, 2, "3", 4, 5)
+oops  # everything is now a character!
 
-```{r}
-# uh oh mixing types again
+# mixing logical into numeric
 bools <- c(TRUE, TRUE, 0)
-bools
+bools  # TRUEs become 1s
 ```
 
-This behaviour is generally pretty undesirable, so try to avoid it if you can.
-There are a bunch of functions for forcing different data types. For example:
+You can force conversion with `as.*` functions:
 
-```{r}
-# force 1 into a character
-char <- as.character(1)
+```{r demo-conversion, echo=TRUE}
+char   <- as.character(1)
 char
 
-# force the character "12" into an integer
-int <- as.integer("12")
-int
+int_val <- as.integer("12")
+int_val
 ```
 
-One of the powerful things about R is that many functions, such as `as.character()`
-are applied across vectors by default. This is known as vectorisation. We'll probably
-get to this later, as it's important.
+Vectorisation means functions apply to every element automatically:
 
-```{r}
+```{r demo-vectorised, echo=TRUE}
 my_vector <- c(1, 2, 3, 4, 100)
-
 as.character(my_vector)
 ```
 
-#### Lists
+### Your turn: vectors
 
-Lists are different from vectors as they can contain elements of different types.
-This makes them much more flexible. They can also contain elements of different
-lengths - there are four 'slots' in this list below. The first three are of length
-three, and the last has a single element.
+```{r ex-vector, exercise=TRUE, exercise.lines=8}
+# 1. Create a numeric vector called `wing_lengths` with values 12.1, 15.3, 11.8, 14.0
+# 2. Create a character vector called `species_names` with 3 bird species names of your choice
+# 3. What happens when you combine them with c()? Try it.
+wing_lengths  <- c(___)
+species_names <- c(___)
 
-```{r}
-x <- list(1:3, c("a", "b", "c"), c(TRUE, TRUE, FALSE), 1)
-x
+# combine and observe coercion
+c(wing_lengths, species_names)
 ```
 
-You can even have nested lists. This makes them a bit like maps/hashmaps/associative arrays
-in other languages.
-
-```{r}
-x <- list(list(1), list(list(2)))
-x
+```{r ex-vector-hint}
+# c() takes comma-separated values
+# wing_lengths <- c(12.1, 15.3, 11.8, 14.0)
 ```
 
-Many more complicated data structures in R, like the fabled `data.frame` is actually
-just a fancy list.
+```{r ex-vector-solution}
+wing_lengths  <- c(12.1, 15.3, 11.8, 14.0)
+species_names <- c("Robin", "Sparrow", "Finch")
+c(wing_lengths, species_names)  # all become characters
+```
 
-### Important special data types
+```{r quiz-vectors, echo=FALSE}
+quiz(
+  question("What does `c()` stand for?",
+    answer("Concatenate", correct = TRUE),
+    answer("Create"),
+    answer("Column"),
+    answer("Calculate"),
+    allow_retry = TRUE
+  ),
+  question("What happens when you put a character inside a numeric vector?",
+    answer("All values become characters (type coercion)", correct = TRUE),
+    answer("The character is ignored"),
+    answer("R throws an error"),
+    answer("The character becomes 0"),
+    allow_retry = TRUE
+  )
+)
+```
 
-There are other data types I want to highlight here, matrices and data frames.
-Data frames are perhaps the most widely used data types in R, so a good understanding
-of these will help you a lot in your R quest.
+### Lists
 
-#### Factors
+Lists can contain elements of **different types and different lengths** — much more flexible than vectors.
 
-Factors are categorical variables, usually character vectors, which can only take
-on a specific set of values. They are really useful for a whole range of things,
-from modelling to plotting.
+```{r demo-list, echo=TRUE}
+# a list with numeric, character, and logical elements
+organism <- list(
+  genome_size_mb = 3200,
+  species        = "Homo sapiens",
+  is_sequenced   = TRUE
+)
+organism
+```
 
-They can also be natively sorted on the order of the levels, using `sort`, and 
-prevent the user from inputting typos - or unidentified levels - into the factor.
+```{r ex-list, exercise=TRUE, exercise.lines=8}
+# Create a list called `penguin` with:
+# - species: "Adelie"
+# - bill_length_mm: 39.1
+# - island: "Torgersen"
+# - is_adult: TRUE
+penguin <- list(
+  species        = ___,
+  bill_length_mm = ___,
+  island         = ___,
+  is_adult       = ___
+)
+penguin
+```
 
-```{r}
-# unordered, recorded months
+```{r ex-list-solution}
+penguin <- list(
+  species        = "Adelie",
+  bill_length_mm = 39.1,
+  island         = "Torgersen",
+  is_adult       = TRUE
+)
+penguin
+```
+
+### Factors
+
+Factors are categorical variables that can only take a specific set of values
+(called **levels**). They're essential for statistics and plotting.
+
+```{r demo-factor, echo=TRUE}
+# months recorded, out of order
 recorded_months <- c("Oct", "Jan", "Mar", "Sep")
 
-# all the months, in order
-month_levels <- c(
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-)
+# define the correct order
+month_levels <- c("Jan","Feb","Mar","Apr","May","Jun",
+                  "Jul","Aug","Sep","Oct","Nov","Dec")
 
-# make factor with `factor` function, and give the factor levels.
+# create factor and sort
 f <- factor(recorded_months, levels = month_levels)
-# and sort
 sort(f)
 ```
 
-#### Matrices
+```{r ex-factor, exercise=TRUE, exercise.lines=8}
+# Ecologists recorded three habitat types, out of order
+# Create a factor with levels ordered from least to most disturbed:
+# "pristine" < "degraded" < "urban"
+habitats <- c("urban", "pristine", "degraded", "urban", "pristine")
 
-These are two dimensional vectors essentially; think of a table of numbers.
-They can only be created with the `matrix` function.
+habitat_levels <- c(___, ___, ___)
 
-```{r}
-m <- matrix(1:6, ncol = 3, nrow = 2)
-m
+habitat_factor <- factor(habitats, levels = habitat_levels)
+sort(habitat_factor)
 ```
 
-Notice the `1:6` is shorthand for a range, in this case for 1 to 6, i.e `c(1, 2, 3, 4, 5, 6)`.
-Unless you are a maths/stats whiz, you probably won't come across these directly
-too much. It is worth noting that matrices do have their own special functions.
-
-```{r}
-# you can specify the 'shape' of the matrix
-# with a combination of the ncol and nrow arguments.
-m <- matrix(1:6, ncol = 3, nrow = 2)
-m2 <- matrix(1:6, ncol = 2, nrow = 3)
-
-# matrix multiplication uses this jazzy notation.
-m %*% m2
+```{r ex-factor-solution}
+habitats       <- c("urban", "pristine", "degraded", "urban", "pristine")
+habitat_levels <- c("pristine", "degraded", "urban")
+habitat_factor <- factor(habitats, levels = habitat_levels)
+sort(habitat_factor)
 ```
 
-#### Data frames
+### Data frames
 
-You can create data frames like so, using the `data.frame` function.
+Data frames are the most important compound type in R. They are tables where
+each column can have a different type, but all columns must be the same length.
 
-```{r}
-# make a data frame
+```{r demo-dataframe, echo=TRUE}
 d <- data.frame(x = 1:5, y = 4:8)
-# check out its structure
-str(d)
-
-cat("The type of the data frame is actually:\n")
-# the type of a data frame
-typeof(d)
+str(d)   # str() shows the structure - use this constantly!
+typeof(d)  # a data frame is secretly a list underneath
 ```
 
-A *very useful function* is `str`, which stands for structure. It gives an overview
-of the data structure, here we can see that there are two columns, both integers.
+```{r ex-dataframe, exercise=TRUE, exercise.lines=8}
+# Create a data frame called `penguins_mini` with:
+# - species: c("Adelie", "Chinstrap", "Gentoo")
+# - mass_kg: c(3.5, 3.7, 5.1)
+# - is_breeding: c(TRUE, FALSE, TRUE)
+# Then call str() on it
+penguins_mini <- data.frame(
+  species    = c(___),
+  mass_kg    = c(___),
+  is_breeding = c(___)
+)
+str(penguins_mini)
+```
 
-Notice that we assigned names to each of the columns, and we can refer to these
-names later on. We'll look at this when we want to index into data frames.
+```{r ex-dataframe-solution}
+penguins_mini <- data.frame(
+  species     = c("Adelie", "Chinstrap", "Gentoo"),
+  mass_kg     = c(3.5, 3.7, 5.1),
+  is_breeding = c(TRUE, FALSE, TRUE)
+)
+str(penguins_mini)
+```
 
-Data frames can have mixed types in the columns, but they all must be the same
-length.
+## Final quiz
 
-## Over to you
-
-1. What's the difference between a primitive and a compound type in R?
-2. Vectors and lists are superficially similar. What's the difference?
-3. Can you create a vector of integers?
-4. Create a data frame with a numerical column, and a character column.
-
-
-
+```{r quiz-types-final, echo=FALSE}
+quiz(
+  question("What is the key difference between a vector and a list?",
+    answer("Vectors hold one type; lists can hold mixed types", correct = TRUE),
+    answer("Lists are faster than vectors"),
+    answer("Vectors can be longer than lists"),
+    answer("There is no difference"),
+    allow_retry = TRUE
+  ),
+  question("Can a data frame have columns of different types?",
+    answer("Yes, each column can be a different type", correct = TRUE),
+    answer("No, all columns must be the same type"),
+    answer("Only if you use as.data.frame()"),
+    allow_retry = TRUE
+  ),
+  question("You have a vector `c(1, 2, 3)`. What type is it?",
+    answer("double (numeric)", correct = TRUE),
+    answer("integer"),
+    answer("character"),
+    answer("logical"),
+    allow_retry = TRUE
+  )
+)
+```

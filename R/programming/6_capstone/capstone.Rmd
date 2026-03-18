@@ -1,0 +1,400 @@
+---
+title: "Capstone Project: Penguins of Palmer Station"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 120)
+
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+penguins     <- na.omit(penguins_raw)
+```
+
+## Welcome to the Capstone!
+
+You have now covered all the core building blocks:
+
+- Variables and data types
+- Reading and manipulating data frames
+- Writing functions
+- Producing plots
+
+In this capstone you will work through a **complete, realistic data analysis**
+from start to finish using the **Palmer Penguins** dataset — morphological
+measurements of 344 penguins from three species (*Adelie*, *Chinstrap*, and
+*Gentoo*) on three Antarctic islands.
+
+**Your mission:** Describe the penguins, find patterns in their morphology,
+compare species, and produce a reproducible report in code.
+
+---
+
+## Step 1: Import and inspect the data
+
+```{r step1-demo, echo=TRUE}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+```
+
+### Exercise 1.1 — Basic inspection
+
+```{r ex-inspect, exercise=TRUE, exercise.lines=10}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+
+# Answer these questions using R:
+# 1. How many rows and columns?
+dim(___)
+
+# 2. What are the column names?
+colnames(___)
+
+# 3. What types are the columns?
+str(___)
+```
+
+```{r ex-inspect-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+dim(penguins_raw)
+colnames(penguins_raw)
+str(penguins_raw)
+```
+
+### Exercise 1.2 — How many missing values?
+
+```{r ex-missing, exercise=TRUE, exercise.lines=10}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+
+# Count NAs in each column using sapply and is.na
+# is.na(x) returns TRUE for each NA; sum() counts them
+sapply(penguins_raw, function(col) sum(___))
+```
+
+```{r ex-missing-hint}
+# is.na(col) gives TRUE/FALSE for each element
+# sum(is.na(col)) counts the NAs
+```
+
+```{r ex-missing-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+sapply(penguins_raw, function(col) sum(is.na(col)))
+```
+
+---
+
+## Step 2: Clean the data
+
+### Exercise 2.1 — Remove missing values and convert to factors
+
+```{r ex-clean, exercise=TRUE, exercise.lines=14}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+
+# 1. Remove rows with any NA values using na.omit()
+penguins <- na.omit(___)
+
+# 2. Convert species, island, and sex to factors
+penguins$species <- as.factor(penguins$___)
+penguins$island  <- as.factor(penguins$___)
+penguins$sex     <- as.factor(penguins$___)
+
+# 3. Check the result
+str(penguins)
+```
+
+```{r ex-clean-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins_raw <- read.csv(penguins_url)
+penguins <- na.omit(penguins_raw)
+penguins$species <- as.factor(penguins$species)
+penguins$island  <- as.factor(penguins$island)
+penguins$sex     <- as.factor(penguins$sex)
+str(penguins)
+```
+
+---
+
+## Step 3: Summarise the data
+
+### Exercise 3.1 — How many of each species?
+
+```{r ex-count, exercise=TRUE, exercise.lines=6}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Use table() to count penguins per species
+table(penguins$___)
+```
+
+```{r ex-count-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+table(penguins$species)
+```
+
+### Exercise 3.2 — Mean body mass per species
+
+```{r ex-mass-by-species, exercise=TRUE, exercise.lines=8}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Use tapply to compute mean body_mass_g per species
+tapply(X = penguins$___, INDEX = penguins$___, FUN = ___)
+```
+
+```{r ex-mass-by-species-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+tapply(X = penguins$body_mass_g, INDEX = penguins$species, FUN = mean)
+```
+
+### Exercise 3.3 — Multi-column summary
+
+```{r ex-summary, exercise=TRUE, exercise.lines=12}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Use sapply to get mean and SD for all four numeric measurement columns
+numeric_cols <- penguins[, c("bill_length_mm", "bill_depth_mm",
+                              "flipper_length_mm", "body_mass_g")]
+
+sapply(numeric_cols, function(col) c(mean = ___(col), sd = ___(col)))
+```
+
+```{r ex-summary-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+numeric_cols <- penguins[, c("bill_length_mm", "bill_depth_mm",
+                              "flipper_length_mm", "body_mass_g")]
+sapply(numeric_cols, function(col) c(mean = mean(col), sd = sd(col)))
+```
+
+---
+
+## Step 4: Filter the data
+
+### Exercise 4.1 — Large Gentoo penguins
+
+```{r ex-filter, exercise=TRUE, exercise.lines=10}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Filter to Gentoo penguins with body_mass_g > 5500
+is_gentoo    <- penguins$species ___ "Gentoo"
+is_large     <- penguins$body_mass_g ___ 5500
+
+big_gentoo <- penguins[is_gentoo ___ is_large, ]
+nrow(big_gentoo)
+head(big_gentoo)
+```
+
+```{r ex-filter-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+is_gentoo  <- penguins$species == "Gentoo"
+is_large   <- penguins$body_mass_g > 5500
+big_gentoo <- penguins[is_gentoo & is_large, ]
+nrow(big_gentoo)
+head(big_gentoo)
+```
+
+---
+
+## Step 5: Write a function
+
+### Exercise 5.1 — A body condition index function
+
+Body Condition Index (BCI) = `body_mass_g / flipper_length_mm`
+
+```{r ex-function, exercise=TRUE, exercise.lines=18}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Write a function called `body_condition` that:
+# - Takes a data frame with columns body_mass_g and flipper_length_mm
+# - Returns a numeric vector of BCI values (mass / flipper length)
+
+body_condition <- function(df) {
+  df$___ / df$___
+}
+
+# Apply it to the penguins data frame
+penguins$bci <- body_condition(___)
+
+# What is the mean BCI per species?
+tapply(penguins$bci, penguins$species, mean)
+```
+
+```{r ex-function-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+body_condition <- function(df) {
+  df$body_mass_g / df$flipper_length_mm
+}
+
+penguins$bci <- body_condition(penguins)
+tapply(penguins$bci, penguins$species, mean)
+```
+
+---
+
+## Step 6: Visualise
+
+### Exercise 6.1 — Distribution of bill lengths by species
+
+```{r ex-plot-1, exercise=TRUE, exercise.lines=12}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Box plot of bill_length_mm by species using ggplot2
+# Fill by species, use theme_bw()
+ggplot(data = penguins, aes(x = ___, y = ___, fill = ___)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(
+    title = "Bill length by species",
+    x     = ___,
+    y     = "Bill length (mm)"
+  ) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+```{r ex-plot-1-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+ggplot(data = penguins, aes(x = species, y = bill_length_mm, fill = species)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(
+    title = "Bill length by species",
+    x     = "Species",
+    y     = "Bill length (mm)"
+  ) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+### Exercise 6.2 — Scatter plot with species coloured
+
+```{r ex-plot-2, exercise=TRUE, exercise.lines=14}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Scatter plot: flipper_length_mm (x) vs body_mass_g (y)
+# Colour by species, add a linear trend line per species
+# Use facet_wrap by sex
+ggplot(data = penguins,
+       aes(x = flipper_length_mm, y = body_mass_g, colour = ___)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ ___) +
+  labs(title = "Flipper length vs body mass by sex",
+       x = "Flipper length (mm)", y = "Body mass (g)",
+       colour = "Species") +
+  theme_bw()
+```
+
+```{r ex-plot-2-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+ggplot(data = penguins,
+       aes(x = flipper_length_mm, y = body_mass_g, colour = species)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ sex) +
+  labs(title = "Flipper length vs body mass by sex",
+       x = "Flipper length (mm)", y = "Body mass (g)",
+       colour = "Species") +
+  theme_bw()
+```
+
+---
+
+## Step 7: Save your results
+
+### Exercise 7.1 — Write a filtered dataset
+
+```{r ex-write, exercise=TRUE, exercise.lines=14}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+
+# Filter to only Adelie penguins
+adelie <- penguins[penguins$species ___ "Adelie", ]
+
+# Write to a temp CSV (no row names)
+tmp <- tempfile(fileext = ".csv")
+write.csv(x = ___, file = tmp, row.names = ___)
+
+# Read back and confirm
+result <- read.csv(tmp)
+cat("Rows saved:", nrow(result), "\n")
+table(result$species)
+```
+
+```{r ex-write-solution}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- na.omit(read.csv(penguins_url))
+adelie <- penguins[penguins$species == "Adelie", ]
+tmp <- tempfile(fileext = ".csv")
+write.csv(x = adelie, file = tmp, row.names = FALSE)
+result <- read.csv(tmp)
+cat("Rows saved:", nrow(result), "\n")
+table(result$species)
+```
+
+---
+
+## Congratulations!
+
+You have completed a full data analysis workflow:
+
+1. **Imported** a real dataset from the web
+2. **Inspected** its structure and identified missing values
+3. **Cleaned** the data by removing NAs and fixing column types
+4. **Summarised** key variables by group using `tapply` and `sapply`
+5. **Filtered** the data with logical indexing
+6. **Wrote a function** to compute a new biological variable
+7. **Visualised** distributions and relationships with ggplot2
+8. **Saved** a filtered result to disk
+
+These are the steps of almost every real data analysis. Well done!
+
+## Final reflection quiz
+
+```{r quiz-capstone, echo=FALSE}
+quiz(
+  question("Which function removes rows with any NA values?",
+    answer("`na.omit()`", correct = TRUE),
+    answer("`remove.na()`"),
+    answer("`filter_na()`"),
+    answer("`drop_na()` (tidyverse only, not base R)",
+           message = "Correct that drop_na() exists but it's tidyverse — na.omit() is base R."),
+    allow_retry = TRUE
+  ),
+  question("You want the mean of a column, grouped by species. Which function is best?",
+    answer("`tapply()`", correct = TRUE),
+    answer("`sapply()`"),
+    answer("`apply()` with MARGIN = 2"),
+    answer("`lapply()`"),
+    allow_retry = TRUE
+  ),
+  question("In ggplot2, how do you create separate panels per sex?",
+    answer("`facet_wrap(~ sex)`", correct = TRUE),
+    answer("`panel(sex)`"),
+    answer("`aes(panel = sex)`"),
+    answer("`split_by(sex)`"),
+    allow_retry = TRUE
+  )
+)
+```

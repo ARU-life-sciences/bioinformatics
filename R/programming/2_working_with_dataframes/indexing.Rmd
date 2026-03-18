@@ -1,171 +1,311 @@
-# Indexing data
+---
+title: "Indexing Data"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
 
-## Indexing introduction
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
 
-What is indexing? In programming lingo it is the process of getting particular values out of the data. For example, we want to get the 5th row of our data frame. Or all the rows between 5 and 20. Or the third column. This may not be particularly useful by itself, but we can index using the results from expressions. Expressions allow us to both filter and sort the data.
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+```
 
-Indexing in R is very useful and necessary, but confusing. I'll stick to the very basics. If you need to go further, check ?\`[\`.
+## What is indexing?
 
-## Indexing rows
+Indexing is the process of extracting particular values from data. For example:
+- Get the 5th row
+- All rows between 5 and 20
+- The third column
+- All rows where yield > 50
 
-How do I get the 5th row?
+Indexing in R is very useful but can be confusing. We will stick to the very
+basics. If you need to go further, check out `` ?`[` ``.
 
-```{r}
-# let's get barley back
-# we can automatically convert strings to factors if we ask R to...
-# which is what we did by hand in `reading_and_viewing.Rmd`
-barley <- read.csv(file = "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv", stringsAsFactors = TRUE)
-# barley <- read.csv(file = "data/barley.csv", stringsAsFactors = TRUE)
+---
 
-# get the 5th row
+## Indexing rows and columns
+
+The general syntax is `x[i, j]` where `i` is the row index and `j` is the
+column index.
+
+```{r demo-read, echo=TRUE}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# get the 5th row (note the comma! it means "all columns")
 barley[5, ]
-
 ```
 
-Even though that's a short amount of code, there is a bit to break down. We index into data frames using `[`. Generally it works like this: `x[i, j]`, where `i` is the row index and `j` is the column index. These can be numbers, or characters if the rows or columns are named. The comma is necessary after the 5 in our example. Without it, we'd select the 5th column!
-
-Say we want the 5th row and 2nd column.
-
-```{r}
+```{r demo-row-col, echo=TRUE}
+# 5th row, 2nd column - returns a single value
 barley[5, 2]
-```
 
-Will return the value. If we want to keep the data frame structure, you have to specify that you don't want to drop the two dimensional structure.
-
-```{r}
+# keep the data frame structure with drop = FALSE
 barley[5, 2, drop = FALSE]
 ```
 
-See the difference? I don't know why R did not enable this by default but hey ho.
+The `$` operator gets a column by name and returns it as a vector:
 
-One more important and common indexing rule is `$`. `$` gets the column by name, not number. We saw this in `reading_and_viewing.Rmd`.
-
-```{r}
-# extract yield, returning a vector
+```{r demo-dollar, echo=TRUE}
+# extract yield as a vector
 yield <- barley$yield
 
-# this is equivalent to 
-yield <- barley[["yield"]]
+# equivalent using double brackets
+yield2 <- barley[["yield"]]
+
+# they are identical
+all.equal(yield, yield2)
 ```
 
-The double `[[` extracts a single element from a list/data frame. These both return vectors of `yield`, so we can index those further. Vectors can only be indexed with a single number, as they are 1-dimensional. If you try `yield[5, 2]` an error will throw.
+And you can index further into the resulting vector:
 
-```{r}
-# should be equivalent to the above where we indexed into barley.
+```{r demo-vector-index, echo=TRUE}
+# get the 5th yield value
 yield[5]
 ```
 
-I told you it was a bit confusing.
+### Your turn: basic indexing
 
-## Useful indexing
+```{r ex-index-basic, exercise=TRUE, exercise.lines=8}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
 
-It's all very well indexing into certain things manually, but the true power of indexing happens when we index based on the result from an expression. Using our new found indexing powers, we can start filtering usefully.
+# 1. Get the 52nd row of barley
+barley[___, ]
 
-Say we want to return all the rows where yield is greater than 50 bushels per acre. We want to create a logical vector of all the places where this is true first.
+# 2. Get the 3rd column by number
+barley[, ___]
+```
 
-```{r}
+```{r ex-index-basic-hint}
+# For rows: barley[row_number, ]
+# For columns: barley[, column_number]
+```
+
+```{r ex-index-basic-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+barley[52, ]
+barley[, 3]
+```
+
+```{r ex-index-name, exercise=TRUE, exercise.lines=6}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# Get the "variety" column by name (two ways: $ and [[]])
+barley$___
+barley[[___]]
+```
+
+```{r ex-index-name-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+barley$variety
+barley[["variety"]]
+```
+
+```{r quiz-indexing-1, echo=FALSE}
+quiz(
+  question("What does `barley[5, ]` return?",
+    answer("The 5th row, all columns", correct = TRUE),
+    answer("The 5th column, all rows"),
+    answer("The first 5 rows"),
+    answer("The value in row 5, column 5"),
+    allow_retry = TRUE
+  ),
+  question("What does `barley[, 3]` return?",
+    answer("The 3rd column, all rows", correct = TRUE),
+    answer("The 3rd row, all columns"),
+    answer("The first 3 columns"),
+    answer("An error"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## Filtering with logical indexing
+
+The real power of indexing comes from filtering with **logical expressions**.
+
+```{r demo-filter, echo=TRUE}
+# create a logical vector: TRUE where yield > 50
 yield_50 <- barley$yield > 50
-yield_50
+head(yield_50)  # a vector of TRUE/FALSE
+
+# use it to subset the data frame
+barley_high_yield <- barley[yield_50, ]
+nrow(barley_high_yield)
 ```
 
-So again, a bit to break down here. We first get the yield vector (`barley$yield`). We then use the greater than operator to ask for every element in the yield vector 'is this element greater than 50?'. So `>` is a vectorised function - as we touched on in a previous tutorial.
+We can also filter by a specific value:
 
-Now we can use this vector to subset our data frame!
-
-```{r}
-barley[yield_50, ]
-```
-
-We pass the logical vector into our square braces and remember to add a comma after as we are indexing into the rows.
-
-We might want to only extract rows of a certain variety. No problem, we know how to do that now.
-
-```{r}
-# the variety I want
-variety_we_want <- "Trebi"
-
-# the column and logical test
-trebi <- barley$variety == variety_we_want
-
-# and index our data frame
-trebi_data <- barley[trebi, ]
-
-# return the data
+```{r demo-filter-variety, echo=TRUE}
+# rows where variety is "Trebi"
+trebi_rows <- barley$variety == "Trebi"
+trebi_data <- barley[trebi_rows, ]
 trebi_data
 ```
 
-So there are the 12 rows which relate to yield for the `Trebi` variety. If we wanted the yields associated with `Trebi`, that's easy too.
+Combine multiple conditions with `&` (AND) and `|` (OR):
 
-```{r}
-# using our prior knowledge
-trebi_data_yield_dollar <- trebi_data$yield
-
-# or
-trebi_data_yield_braces <- trebi_data[["yield"]]
-
-# test they are equal
-all.equal(trebi_data_yield_dollar, trebi_data_yield_braces)
+```{r demo-filter-combined, echo=TRUE}
+# Trebi rows AND yield over 50
+trebi_and_high <- trebi_rows & yield_50
+barley[trebi_and_high, ]
 ```
 
-Now to do something a bit more complicated. We can combine multiple logical expressions to filter on multiple conditions. If we wanted to combine the selected variety and yield over 50 bushels per acre, we could do something like this.
+### Your turn: filtering
 
-```{r}
-# the & operator performs element-wise AND
-# that is, it checks whether both are TRUE
-trebi_and_yield_50 <- trebi & yield_50
+```{r ex-filter-1, exercise=TRUE, exercise.lines=8}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
 
-barley[trebi_and_yield_50, ]
+# Filter to rows where yield is less than 25 bushels per acre
+low_yield <- barley$yield ___ 25
+barley[low_yield, ]
 ```
 
-Sometimes we want to sort our data. If you think about this problem it's a question of generating a vector of indices which describe how the data should be reordered. Luckily, R has good functions for achieving this.
-
-In this example, I want to sort the whole data frame by yield.
-
-```{r}
-# first generate a vector of indices on yield
-sorted_yield <- order(barley$yield)
-sorted_yield
+```{r ex-filter-1-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+low_yield <- barley$yield < 25
+barley[low_yield, ]
 ```
 
-This vector basically says the first element should be in position 71 in the sorted data, the second element in position 113... and so on. Now we can index our data using this vector.
+```{r ex-filter-2, exercise=TRUE, exercise.lines=10}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
 
-```{r}
-# note we still need that comma! As we are sorting _rows_
-sorted_data_by_yield <- barley[sorted_yield, ]
+# Filter to rows from year 1932 AND site "Duluth"
+year_1932 <- barley$year ___ 1932
+duluth    <- barley$site ___ "Duluth"
 
-# just print the first few rows
-head(sorted_data_by_yield)
+barley[year_1932 ___ duluth, ]
 ```
 
-Notice that this sorts in increasing order. If we want the reverse, that's surprisingly easy. We use a function called `rev`.
-
-```{r}
-# wrap `rev` around the sorted yield, reversing the order of the 
-# vector
-sorted_data_by_yield_rev <- barley[rev(sorted_yield), ]
-
-# peek the first few rows again
-head(sorted_data_by_yield_rev)
+```{r ex-filter-2-hint}
+# == for equality, & for AND
 ```
 
-Lastly, there are specific functions to find the index of the maximum/minimum values. These can sometimes be useful - but all they are doing are returning *indexes*.
-
-```{r}
-# which.max returns which index is the max value
-# which.min does the same thing for the minimum value
-m <- which.max(barley$yield)
-m
+```{r ex-filter-2-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+year_1932 <- barley$year == 1932
+duluth    <- barley$site == "Duluth"
+barley[year_1932 & duluth, ]
 ```
 
-And index into the data frame.
-
-```{r}
-barley[m, ]
+```{r quiz-filtering, echo=FALSE}
+quiz(
+  question("What operator checks equality in R?",
+    answer("`==`", correct = TRUE),
+    answer("`=`"),
+    answer("`!=`"),
+    answer("`<-`"),
+    allow_retry = TRUE
+  ),
+  question("What does `&` do when combining two logical vectors?",
+    answer("Returns TRUE only where both are TRUE (element-wise AND)", correct = TRUE),
+    answer("Returns TRUE where either is TRUE"),
+    answer("Adds the two vectors together"),
+    answer("Combines them into a list"),
+    allow_retry = TRUE
+  )
+)
 ```
 
-## Over to you
+---
 
-1.  Get the 52nd row of the `barley` data.
-2.  Get the third column of the data frame by number *and* by name.
-3.  Order the data frame by year. First sort the `barley$year` vector, and then index the whole data frame.
-4.  Get the row of `barley` corresponding to the minimum yield.
+## Sorting data
+
+Sorting requires generating a vector of indices that describe the desired order.
+The `order()` function does this.
+
+```{r demo-sort, echo=TRUE}
+# generate sorted indices (ascending by yield)
+sorted_idx <- order(barley$yield)
+
+# use those indices to reorder the data frame
+sorted_barley <- barley[sorted_idx, ]
+head(sorted_barley)
+```
+
+For descending order, wrap with `rev()`:
+
+```{r demo-sort-desc, echo=TRUE}
+sorted_barley_desc <- barley[rev(sorted_idx), ]
+head(sorted_barley_desc)
+```
+
+Find the row with the highest or lowest value:
+
+```{r demo-which, echo=TRUE}
+# which.max returns the INDEX of the maximum value
+max_idx <- which.max(barley$yield)
+barley[max_idx, ]
+```
+
+### Your turn: sorting
+
+```{r ex-sort, exercise=TRUE, exercise.lines=8}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# Sort the data frame by year (ascending)
+year_order <- order(___)
+barley[year_order, ]
+```
+
+```{r ex-sort-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+year_order <- order(barley$year)
+barley[year_order, ]
+```
+
+```{r ex-which-min, exercise=TRUE, exercise.lines=6}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# Get the row corresponding to the MINIMUM yield
+min_idx <- ___(barley$yield)
+barley[min_idx, ]
+```
+
+```{r ex-which-min-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+min_idx <- which.min(barley$yield)
+barley[min_idx, ]
+```
+
+## Final quiz
+
+```{r quiz-indexing-final, echo=FALSE}
+quiz(
+  question("How do you sort a data frame by a column in descending order?",
+    answer("`df[rev(order(df$col)), ]`", correct = TRUE),
+    answer("`df[order(df$col, decreasing = TRUE), ]`", correct = TRUE,
+           message = "Also correct! There is more than one way."),
+    answer("`sort(df, by = df$col)`"),
+    answer("`df[sort(df$col), ]`"),
+    allow_retry = TRUE
+  ),
+  question("What does `which.max(x)` return?",
+    answer("The INDEX of the maximum value in x", correct = TRUE),
+    answer("The maximum value in x"),
+    answer("All values greater than the max"),
+    answer("A logical vector"),
+    allow_retry = TRUE
+  )
+)
+```

@@ -1,90 +1,199 @@
-# Functions
+---
+title: "Functions in R"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
 
-We have already encountered many functions in this book. We will break
-down functions further in this short note.
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+```
 
-## Ordinary functions
+## What is a function?
 
-We will work on a simple data type, the vector. Functions are called by
-wrapping an object in the function call. For example to take the mean of
-a vector of numbers:
+We have already encountered many functions in this course. A function takes
+**input** (called arguments) and produces **output**. Functions allow us to
+avoid repeating ourselves and to build reliable, reusable code.
 
-```{r}
+## Calling ordinary functions
+
+```{r demo-mean, echo=TRUE}
 # make some dummy data
 data <- c(12, 30, 2, 34, 9, 8, 64, 12, 3, 99)
 
 # take the mean
-# we call the function by naming the function and opening parentheses
-# around the object
 mean(data)
 ```
 
-Functions can have parameters. These are extra arguments which are added
-to the function call that modify the behavior of the function. In `mean`
-we see there is another argument called `na.rm`. Let's investigate.
+Functions can have **parameters** — extra arguments that modify their behaviour.
+The `na.rm` parameter in `mean()` is a good example:
 
-```{r}
-# append an NA - or Not Available. It's missing data.
-# we can tack a bit of missing data on the end using
-# the c() function.
+```{r demo-na, echo=TRUE}
+# append an NA (missing value)
 na_data <- c(data, NA)
 
-# now call mean
+# mean with NA returns NA by default!
 mean(na_data)
 ```
 
-Hang on - we got an `NA` back? This is because the default
-implementation of `mean` will always return `NA` if any `NA`'s are
-present in the data! We have to tell R to remove them explicitly.
-
-```{r}
-# pass TRUE to the na.rm parameter to remove those pesky NA values
-mean_na_rm <- mean(na_data, na.rm = TRUE)
+```{r demo-na-rm, echo=TRUE}
+# pass na.rm = TRUE to remove missing values
+mean(na_data, na.rm = TRUE)
 ```
 
-We can also call multiple functions at the same time. Say we have two
-data sets and we want to get the mean of each of them and then sum the
-results, we can do that easily.
+We can also **compose** (nest) function calls:
 
-```{r}
-# data as above
-# data 2 below
+```{r demo-compose, echo=TRUE}
 data_2 <- c(102, 3, 2, 4, 9, 2, 1, 12, 97)
 
-# sum and mean each data individually
+# sum of the two means
 sum(mean(data), mean(data_2))
 ```
 
+### Your turn: calling functions
+
+```{r ex-functions-1, exercise=TRUE, exercise.lines=8}
+# A biologist measured body masses (kg) of 5 penguins:
+masses <- c(3.1, 4.2, NA, 3.8, 5.0)
+
+# 1. Compute the mean — what happens with the NA?
+mean(masses)
+
+# 2. Now remove the NA and compute the mean
+mean(masses, na.rm = ___)
+
+# 3. What is the standard deviation? (function: sd)
+sd(masses, na.rm = ___)
+```
+
+```{r ex-functions-1-solution}
+masses <- c(3.1, 4.2, NA, 3.8, 5.0)
+mean(masses)
+mean(masses, na.rm = TRUE)
+sd(masses, na.rm = TRUE)
+```
+
+```{r ex-compose, exercise=TRUE, exercise.lines=8}
+# Compose functions: compute the range of masses (max - min)
+masses <- c(3.1, 4.2, 3.8, 5.0, 4.5)
+
+# Compute max(masses) - min(masses) in one expression
+range_val <- ___(masses) - ___(masses)
+range_val
+
+# Or use the range() function and diff()
+diff(range(masses))
+```
+
+```{r ex-compose-solution}
+masses <- c(3.1, 4.2, 3.8, 5.0, 4.5)
+range_val <- max(masses) - min(masses)
+range_val
+diff(range(masses))
+```
+
+```{r quiz-functions-1, echo=FALSE}
+quiz(
+  question("What does `na.rm = TRUE` do in `mean()`?",
+    answer("Removes NA values before computing the mean", correct = TRUE),
+    answer("Replaces NAs with 0"),
+    answer("Returns NA if any NAs are present"),
+    answer("Removes the mean from the data"),
+    allow_retry = TRUE
+  ),
+  question("What does `sum(mean(a), mean(b))` compute?",
+    answer("The sum of the mean of a and the mean of b", correct = TRUE),
+    answer("The mean of all values in a and b combined"),
+    answer("The sum of all values in a and b"),
+    answer("An error"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
 ## Special functions
 
-R has many functions you may not think are functions. One is `+`.
+R has many functions you may not think of as functions. One is `+`:
 
-```{r}
-# okay that's fine
+```{r demo-plus, echo=TRUE}
+# normal usage
 two <- 1 + 1
 
+# captured as a function with backticks
 also_two <- `+`(1, 1)
 
 all.equal(two, also_two)
 ```
 
-We can do this wizardry as `+` is a function! Usually it's called with
-one argument either side of the function. But we can 'capture' the
-function by putting it in backticks, and pass the arguments like we
-would call any other function.
+Another is `[`:
 
-Another weird function is `[`.
-
-```{r}
-# okay, fine!
-first <- data[1]
-
-# huh??
+```{r demo-bracket, echo=TRUE}
+first      <- data[1]
 also_first <- `[`(data, 1)
 
 all.equal(first, also_first)
 ```
 
-The square braces in all their forms are functions, and can be called
-like normal functions. You wouldn't want to do this though because it
-wouldn't be good programming style.
+You wouldn't write code like this in practice — it's terrible style — but it
+shows that R's syntax is built on functions all the way down.
+
+```{r quiz-special, echo=FALSE}
+quiz(
+  question("Why can `+` be called as a function in R?",
+    answer("Because `+` IS a function in R — all operators are", correct = TRUE),
+    answer("Because R converts it automatically"),
+    answer("Because of a special language extension"),
+    answer("It cannot — that code will error"),
+    allow_retry = TRUE
+  )
+)
+```
+
+## Useful built-in functions to know
+
+Here are some functions that will come up constantly:
+
+```{r demo-useful, echo=TRUE}
+x <- c(5, 2, 8, 1, 9, 3, 7)
+
+length(x)   # number of elements
+sum(x)      # sum all elements
+cumsum(x)   # cumulative sum
+sort(x)     # sort ascending
+rev(x)      # reverse order
+unique(c(1, 2, 2, 3, 3, 3))  # unique values
+table(c("A","B","A","C","B","B"))  # frequency table
+```
+
+### Your turn: practice useful functions
+
+```{r ex-useful, exercise=TRUE, exercise.lines=12}
+# DNA sequences from 6 samples
+gc_content <- c(0.48, 0.52, 0.48, 0.61, 0.55, 0.52)
+
+# 1. How many samples?
+___(gc_content)
+
+# 2. What is the mean GC content?
+___(gc_content)
+
+# 3. Sort from lowest to highest
+___(gc_content)
+
+# 4. How many unique GC values are there?
+length(unique(___))
+```
+
+```{r ex-useful-solution}
+gc_content <- c(0.48, 0.52, 0.48, 0.61, 0.55, 0.52)
+length(gc_content)
+mean(gc_content)
+sort(gc_content)
+length(unique(gc_content))
+```

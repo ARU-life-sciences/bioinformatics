@@ -1,0 +1,337 @@
+---
+title: "Reading Error Messages"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+```
+
+## Why errors are your friends
+
+Every programmer — beginner and expert alike — encounters errors constantly.
+The key skill is being able to **read** an error message and understand what it
+is telling you. R's errors are often very direct once you know how to read them.
+
+This module covers the most common errors you will encounter, what they mean,
+and how to fix them.
+
+> **Rule of thumb:** Read the *last line* of the error first. That's usually
+> the most informative part.
+
+---
+
+## Error vs Warning vs Message
+
+R has three levels of feedback:
+
+| Type | What it means |
+|------|--------------|
+| **Error** | Something went wrong; execution stopped |
+| **Warning** | Something suspicious happened; execution continued |
+| **Message** | Informational output; not a problem |
+
+```{r demo-error, echo=TRUE, error=TRUE}
+# This produces an ERROR - execution stops
+sqrt("hello")
+```
+
+```{r demo-warning, echo=TRUE, warning=TRUE}
+# This produces a WARNING - execution continues, but something is odd
+log(-1)
+```
+
+```{r demo-message, echo=TRUE, message=TRUE}
+# Messages are just informational (e.g. package loading)
+message("This is just an informational message, not an error")
+```
+
+```{r quiz-types, echo=FALSE}
+quiz(
+  question("Which type of R output stops code execution?",
+    answer("Error", correct = TRUE),
+    answer("Warning"),
+    answer("Message"),
+    answer("All three"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## Error 1: Object not found
+
+**Message:** `Error: object 'x' not found`
+
+This is the most common beginner error. It means you are trying to use a
+variable that doesn't exist in the current environment — usually because:
+- You made a typo in the variable name
+- You forgot to run the line that creates the variable
+- You created it in a different script or session
+
+```{r demo-not-found, echo=TRUE, error=TRUE}
+# We never created `speices` (note the typo!)
+mean(speices)
+```
+
+**Fix:** Check the spelling, and make sure the variable has been created.
+
+### Your turn: fix the object not found error
+
+```{r ex-not-found, exercise=TRUE, exercise.lines=6}
+# This code has a typo — fix it so it runs without error
+species_count <- c(12, 45, 8, 33, 21)
+total <- sum(species_counts)   # <-- error here!
+total
+```
+
+```{r ex-not-found-hint}
+# Look carefully at the variable name in sum() vs the one you created
+```
+
+```{r ex-not-found-solution}
+species_count <- c(12, 45, 8, 33, 21)
+total <- sum(species_count)   # fixed: removed the 's'
+total
+```
+
+---
+
+## Error 2: Could not find function
+
+**Message:** `Error: could not find function "myfunction"`
+
+This means R doesn't know about the function. Usually because:
+- You misspelled the function name
+- You forgot to load a package that provides the function
+- The function doesn't exist
+
+```{r demo-no-fn, echo=TRUE, error=TRUE}
+# calculate_mean doesn't exist — did you mean mean()?
+calculate_mean(c(1, 2, 3))
+```
+
+**Fix:** Check spelling (`?mean`, `?read.csv`). If the function is from a
+package, load it with `library(packagename)`.
+
+### Your turn: fix the function name error
+
+```{r ex-no-fn, exercise=TRUE, exercise.lines=6}
+# Fix the two function name errors below
+masses <- c(3.1, 4.2, 3.8, 5.0)
+result <- Median(masses)           # error 1
+cat("Median:", result, "\n")
+
+sd_val <- standard_deviation(masses)  # error 2
+cat("SD:", sd_val, "\n")
+```
+
+```{r ex-no-fn-hint}
+# R is case-sensitive: Median() vs median()
+# standard_deviation() doesn't exist — the base R function is sd()
+```
+
+```{r ex-no-fn-solution}
+masses <- c(3.1, 4.2, 3.8, 5.0)
+result <- median(masses)
+cat("Median:", result, "\n")
+
+sd_val <- sd(masses)
+cat("SD:", sd_val, "\n")
+```
+
+---
+
+## Error 3: Non-numeric argument to binary operator
+
+**Message:** `Error in ... : non-numeric argument to binary operator`
+
+You tried to do arithmetic on something that isn't a number.
+
+```{r demo-non-numeric, echo=TRUE, error=TRUE}
+weight <- "3.5 kg"   # stored as a string, not a number!
+weight * 2
+```
+
+**Fix:** Make sure numeric values aren't stored as characters. Use `as.numeric()`
+if needed. Check your data with `class()` or `str()`.
+
+### Your turn: fix the type error
+
+```{r ex-non-numeric, exercise=TRUE, exercise.lines=8}
+# These values are characters because they have units embedded
+# Fix the code so the mean computes correctly
+heights <- c("1.65", "1.72", "1.80", "1.58")
+
+# Convert heights to numeric first, then compute mean
+mean_height <- mean(___(heights))
+mean_height
+```
+
+```{r ex-non-numeric-solution}
+heights <- c("1.65", "1.72", "1.80", "1.58")
+mean_height <- mean(as.numeric(heights))
+mean_height
+```
+
+---
+
+## Error 4: Subscript out of bounds
+
+**Message:** `Error: subscript out of bounds`
+
+You tried to access an element at an index that doesn't exist.
+
+```{r demo-bounds, echo=TRUE, error=TRUE}
+x <- c(10, 20, 30)
+x[10]   # there is no 10th element — returns NA, not an error for vectors...
+
+# but for lists or matrices, it's an actual error:
+my_list <- list(a = 1, b = 2)
+my_list[[5]]   # no 5th element!
+```
+
+**Fix:** Check the length of your object with `length()`, `nrow()`, or `ncol()`.
+
+### Your turn: diagnose a subscript error
+
+```{r ex-bounds, exercise=TRUE, exercise.lines=8}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url)
+
+# How many rows does barley have?
+nrow(barley)
+
+# This line tries to get a row that may not exist — find the last valid row
+# and fix the index
+barley[200, ]   # does row 200 exist? Check nrow() first!
+```
+
+```{r ex-bounds-hint}
+# nrow(barley) tells you the maximum valid row index
+# If nrow is 120, valid indices are 1 to 120
+```
+
+```{r ex-bounds-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url)
+nrow(barley)   # 120 rows — so max index is 120
+barley[120, ]  # last row
+```
+
+---
+
+## Error 5: Unexpected symbol / unexpected end of input
+
+**Message:** `Error: unexpected symbol in "..."` or `unexpected end of input`
+
+R couldn't parse your code — usually a syntax error:
+- Missing a closing bracket `)`, `}`, or `]`
+- Missing a comma between arguments
+- Using `=` where you meant `==`
+
+```{r demo-syntax, echo=TRUE, error=TRUE}
+# Missing closing parenthesis
+# result <- mean(c(1, 2, 3)   # would error if uncommented
+
+# Missing comma
+result <- c(1 2 3)  # error: missing commas
+```
+
+### Your turn: fix syntax errors
+
+```{r ex-syntax, exercise=TRUE, exercise.lines=8}
+# Fix the three syntax errors in this code
+
+my_data <- c(10, 20 30, 40)
+
+if (mean(my_data > 20) {
+  cat("Mean is above 20\n")
+}
+```
+
+```{r ex-syntax-hint}
+# 1. Missing comma between 20 and 30
+# 2. The closing ) on if() is in the wrong place
+# 3. mean(my_data) > 20, not mean(my_data > 20) — different logic!
+```
+
+```{r ex-syntax-solution}
+my_data <- c(10, 20, 30, 40)   # added missing comma
+
+if (mean(my_data) > 20) {      # moved ) to after my_data, > 20 outside
+  cat("Mean is above 20\n")
+}
+```
+
+---
+
+## How to get help
+
+### 1. The `?` operator
+
+```{r demo-help, eval=FALSE}
+?mean          # opens the help page for mean()
+?read.csv      # help for read.csv
+?"["           # help for the indexing operator
+```
+
+### 2. Google the error message
+
+Copy the error message (without your specific variable names) and paste it into
+Google. Add "R" at the start. For example:
+
+> R "non-numeric argument to binary operator"
+
+Stack Overflow will have an answer almost every time.
+
+### 3. Check your variable's type
+
+When something doesn't behave as expected, always check:
+
+```{r demo-debug, echo=TRUE}
+x <- "3.14"  # looks like a number, but it's a string!
+class(x)
+is.numeric(x)
+```
+
+```{r quiz-errors-final, echo=FALSE}
+quiz(
+  question("You get `Error: object 'df' not found`. What is the most likely cause?",
+    answer("The variable `df` was never created, or was created with a different name",
+           correct = TRUE),
+    answer("The data frame is empty"),
+    answer("`df` is a reserved keyword in R"),
+    answer("You need to install a package"),
+    allow_retry = TRUE
+  ),
+  question("You get `could not find function 'ggplot'`. What should you do?",
+    answer("Run `library(ggplot2)` to load the package first", correct = TRUE),
+    answer("Reinstall R"),
+    answer("Use `ggplot::plot()` instead"),
+    answer("Check if the data frame has a column called ggplot"),
+    allow_retry = TRUE
+  ),
+  question("What is the best first step when you encounter an error message?",
+    answer("Read the error message carefully — especially the last line", correct = TRUE),
+    answer("Delete the offending line of code"),
+    answer("Restart R and try again"),
+    answer("Ask for help immediately"),
+    allow_retry = TRUE
+  ),
+  question("What function lets you check the type of an object?",
+    answer("`class()` or `typeof()`", correct = TRUE),
+    answer("`type()`"),
+    answer("`kind()`"),
+    answer("`format()`"),
+    allow_retry = TRUE
+  )
+)
+```

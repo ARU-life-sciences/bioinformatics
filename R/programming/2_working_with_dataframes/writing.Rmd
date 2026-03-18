@@ -1,51 +1,162 @@
-# Writing data
+---
+title: "Writing Data"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
 
-So far we have either created objects in R or loaded them into R using `read.csv`.
-It's essential to also write out files from R onto our computer. This allows us
-to open the file in other applications.
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+```
+
+## Writing data out of R
+
+So far we have either created objects in R or loaded them using `read.csv()`.
+It's essential to also **write files** back to disk so you can open them in
+other applications or share them with colleagues.
 
 ## Writing CSV files
 
-First we can start by loading in our data again.
+First, load and filter the data in some meaningful way. Here we keep only the
+rows where yield is below the overall mean.
 
-```{r}
-barley <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv", stringsAsFactors = TRUE)
-# barley <- read.csv("data/barley.csv", stringsAsFactors = TRUE)
-```
+```{r demo-filter, echo=TRUE}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
 
-And we can filter this data in some interesting way. I am interested this time in
-all yields less than the mean yield across the whole data set.
-
-```{r}
-# compute the mean
-# note that `mean` is actually the name of a function
-# so don't overwrite it!!
+# compute overall mean yield
 global_mean <- mean(barley$yield)
 
-# and filter our data, just like we did in `indexing`
-below_global_mean <- barley[barley$yield < global_mean, ]
+# filter to below-average rows
+below_mean <- barley[barley$yield < global_mean, ]
 
-# and let's look at the structure instead of printing everything out.
-str(below_global_mean)
-```
-Great, we've filtered the data and have only got 68 observations or rows. We can 
-write this to a file. The `write.csv` function is our friend if we want to write
-a CSV specifically. It minimally takes `x` which is the R object to write and 
-`file` which is the location of where we want to write the file.
-
-```{r}
-# simply call the write.csv function.
-write.csv(x = below_global_mean, file = "./data/below_global_mean.csv")
+str(below_mean)
 ```
 
-If we check the `data` folder, it should now have another CSV file written in to it.
+Now write this filtered dataset out:
 
-## Over to you
+```{r demo-write, echo=TRUE, eval=FALSE}
+# write.csv saves a data frame to a CSV file
+# x    = the R object to write
+# file = where to save it
+write.csv(x = below_mean, file = "data/below_global_mean.csv")
+```
 
-1. Read in `barley` and write out the first 10 lines to `./data/barley_first_10_lines.csv`
-2. Can you convert `barley.csv` to `barley.tsv` changing the commas to tabs?
+> In this interactive tutorial the file system is sandboxed, so we write to a
+> temporary file. On your own machine you would use a real path like `"data/below_global_mean.csv"`.
 
+```{r demo-write-temp, echo=TRUE}
+# write to a temp file and read it back to verify
+tmp <- tempfile(fileext = ".csv")
+write.csv(x = below_mean, file = tmp)
 
+# read it back
+verify <- read.csv(tmp)
+cat("Rows written:", nrow(verify), "\n")
+head(verify)
+```
 
+## Controlling the output
 
+Two common options to know:
 
+```{r demo-options, echo=TRUE, eval=FALSE}
+# row.names = FALSE avoids writing a redundant row number column
+write.csv(x = below_mean, file = "output.csv", row.names = FALSE)
+
+# write.table gives full control over separators
+write.table(x = below_mean, file = "output.tsv",
+            sep = "\t", row.names = FALSE)
+```
+
+### Your turn: write the first 10 rows
+
+```{r ex-write-10, exercise=TRUE, exercise.lines=12}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# 1. Extract the first 10 rows using head()
+first_10 <- head(___, n = ___)
+
+# 2. Write them to a temp file (no row names)
+tmp <- tempfile(fileext = ".csv")
+write.csv(x = ___, file = tmp, row.names = ___)
+
+# 3. Read it back and print it to verify
+read.csv(tmp)
+```
+
+```{r ex-write-10-hint}
+# head(barley, n = 10) gives first 10 rows
+# row.names = FALSE avoids an extra column
+```
+
+```{r ex-write-10-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+first_10 <- head(barley, n = 10)
+tmp <- tempfile(fileext = ".csv")
+write.csv(x = first_10, file = tmp, row.names = FALSE)
+read.csv(tmp)
+```
+
+### Your turn: convert CSV to TSV
+
+```{r ex-write-tsv, exercise=TRUE, exercise.lines=12}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# Write barley as a TSV (tab-separated) file
+# Hint: use write.table() with sep = "\t"
+tmp_tsv <- tempfile(fileext = ".tsv")
+write.table(x = barley, file = tmp_tsv, sep = ___, row.names = FALSE)
+
+# Read it back using read.table (or read.csv with sep = "\t")
+back <- read.table(tmp_tsv, sep = ___, header = ___)
+head(back)
+```
+
+```{r ex-write-tsv-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+tmp_tsv <- tempfile(fileext = ".tsv")
+write.table(x = barley, file = tmp_tsv, sep = "\t", row.names = FALSE)
+back <- read.table(tmp_tsv, sep = "\t", header = TRUE)
+head(back)
+```
+
+## Quiz
+
+```{r quiz-writing, echo=FALSE}
+quiz(
+  question("Which function writes a data frame to a CSV file?",
+    answer("`write.csv()`", correct = TRUE),
+    answer("`save.csv()`"),
+    answer("`export()`"),
+    answer("`write.table()` only"),
+    allow_retry = TRUE
+  ),
+  question("What does `row.names = FALSE` do in `write.csv()`?",
+    answer("Suppresses the automatic row number column in the output file",
+           correct = TRUE),
+    answer("Removes the column names"),
+    answer("Makes the file smaller by removing metadata"),
+    answer("Nothing — it is the default"),
+    allow_retry = TRUE
+  ),
+  question("How would you write a TSV (tab-separated) file?",
+    answer('`write.table(df, "out.tsv", sep = "\\t")`', correct = TRUE),
+    answer('`write.csv(df, "out.tsv")`'),
+    answer('`write.tsv(df, "out.tsv")`'),
+    answer('`export.tsv(df, "out.tsv")`'),
+    allow_retry = TRUE
+  )
+)
+```

@@ -1,151 +1,297 @@
-# Writing functions
+---
+title: "Writing Functions"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url)
+```
+
+## Anatomy of a function
 
 Functions have three things:
 
-1.  The body - the actual code inside
-2.  The formals - the list of arguments given to the function
-3.  The environment - the location of all of the functions variables
+1. The **body** — the actual code inside
+2. The **formals** — the list of arguments given to the function
+3. The **environment** — the location of all the function's variables
 
-We will talk about the body and the formals, but probably not the environment until later - that's a more complex subject. Basically a function takes an optional input, and produces a visible output (usually).
+A function takes an optional input and produces a visible output.
 
 ## How to write a function
 
-All functions are initiated with the `function` keyword. You can have functions on single lines - I don't recommend this syntax usually, but for very short functions it is fine.
+All functions are initiated with the `function` keyword. Short functions can go
+on a single line:
 
-```{r}
-# make a function which adds one to the input
+```{r demo-single-line, echo=TRUE}
 add_one <- function(x) x + 1
-
 add_one(100)
 ```
 
-If your function is on more than one line, you will need curly braces to 'wrap' the whole function nicely. By default, the last expression in the function body is the return of the whole function.
+Multi-line functions need curly braces. The **last expression** in the body is
+automatically returned:
 
-```{r}
+```{r demo-multi-line, echo=TRUE}
 add_one_multiply_2 <- function(x) {
-  # add one
-  add_one <- x + 1
-  # multiply by two
-  # the last line of the function is the return value
-  add_one * 2
+  add_one   <- x + 1
+  add_one * 2  # this is the return value
 }
 
 add_one_multiply_2(100)
 ```
 
-Functions don't have to have any arguments.
+### Your turn: write a simple function
 
-```{r}
-# create a function
-cat_dir <- function() {
-  # list.files() is a handy function
-  # to list all the files in the directory you are in
-  files <- list.files(".")
-  
-  # loop over the files - it's a vector of file names
-  for (file in files) {
-    # print them to the terminal
-    # and put a newline at the end
-    cat(file, "\n")
-  }
+```{r ex-simple-fn, exercise=TRUE, exercise.lines=10}
+# Write a function called `gc_percent` that:
+# 1. Takes a GC content as a decimal (e.g. 0.52)
+# 2. Returns it multiplied by 100 (i.e. as a percentage)
+
+gc_percent <- function(x) {
+  ___
 }
 
-# call our function
-cat_dir()
+gc_percent(0.52)  # should return 52
+gc_percent(0.35)  # should return 35
 ```
 
-On the other hand, functions can have default values in the arguments. See this example.
+```{r ex-simple-fn-solution}
+gc_percent <- function(x) {
+  x * 100
+}
 
-```{r}
-# create function - then pass 'key/value' pairs in arguments
-hello_name <- function(name = "Max") {
-  # paste is useful for merging strings
-  # there's a whole section later on string manipulation
+gc_percent(0.52)
+gc_percent(0.35)
+```
+
+### Your turn: a multi-step function
+
+```{r ex-multi-fn, exercise=TRUE, exercise.lines=14}
+# Write a function called `bmi` that computes Body Mass Index
+# BMI = mass_kg / height_m^2
+# It should accept two arguments: mass_kg and height_m
+
+bmi <- function(mass_kg, height_m) {
+  ___
+}
+
+bmi(70, 1.75)   # ~22.9
+bmi(90, 1.80)   # ~27.8
+```
+
+```{r ex-multi-fn-hint}
+# BMI formula: mass / height^2
+# Use ^ or ** for powers in R
+```
+
+```{r ex-multi-fn-solution}
+bmi <- function(mass_kg, height_m) {
+  mass_kg / height_m^2
+}
+
+bmi(70, 1.75)
+bmi(90, 1.80)
+```
+
+---
+
+## Default parameter values
+
+Functions can have default values. These are used when the caller does not
+supply that argument:
+
+```{r demo-defaults, echo=TRUE}
+hello_name <- function(name = "World") {
   paste("Hello,", name)
 }
 
-# the default is to say hello to me
-hi_max <- hello_name()
-# but if I have to, I can say hello to Jason
-hi_jason <- hello_name(name = "Jason")
-
-# return the outputs
-hi_max
-hi_jason
+hello_name()         # uses default
+hello_name("Jason")  # overrides default
 ```
 
-## Control flow
+### Your turn: defaults
 
-You can't get very far in programming without controlling the flow of information through the program. In programming terms these are the conditional statements. The `if... else` clauses. I've left this until now because control flow is most often used in functions. The syntax in general is:
+```{r ex-defaults, exercise=TRUE, exercise.lines=14}
+# Write a function called `summarise_gc` that:
+# - Takes a numeric vector `gc_values`
+# - Takes a `digits` argument defaulting to 2
+# - Returns the mean GC content rounded to `digits` decimal places
 
-```{r}
-# our fake condition evaluates to true
+summarise_gc <- function(gc_values, digits = ___) {
+  round(mean(gc_values), digits = ___)
+}
+
+samples <- c(0.481, 0.523, 0.609, 0.547)
+summarise_gc(samples)         # uses default: 2 digits
+summarise_gc(samples, digits = 4)  # 4 decimal places
+```
+
+```{r ex-defaults-solution}
+summarise_gc <- function(gc_values, digits = 2) {
+  round(mean(gc_values), digits = digits)
+}
+
+samples <- c(0.481, 0.523, 0.609, 0.547)
+summarise_gc(samples)
+summarise_gc(samples, digits = 4)
+```
+
+---
+
+## Control flow: if / else
+
+You can't get very far in programming without controlling the flow of
+information. The `if...else` clause is the main tool.
+
+```{r demo-if-else, echo=TRUE}
 CONDITION <- TRUE
 
-# so we go down the true branch here
 if (CONDITION) {
-  TRUE
+  "went down the TRUE branch"
 } else {
-  # not the else branch!
-  FALSE
+  "went down the FALSE branch"
 }
 ```
 
-The syntax is very similar to other C style programming languages.
+A practical example — testing whether an argument is missing:
 
-```{r}
-# if statements are useful to test input parameters
-
+```{r demo-missing, echo=TRUE}
 any_Rmd_files <- function(file_path) {
-  # here we are testing if the file path parameter is missing
-  # if it is
   if (missing(file_path)) {
-    # we give a warning
-    warning("You did not input a file list, defaulting to `.`\n")
-    # and assing our new file path
+    warning("No path given — defaulting to current directory\n")
     file_path <- "."
   }
-  
-  # now we can use the file path, if it was missing, it was
-  # edited
   files <- list.files(file_path)
-  
-  # and these are our indexing rules we covered
-  # we logically index into our files, if they end with Rmd
-  # we keep them
   files[endsWith(files, "Rmd")]
 }
 
 any_Rmd_files()
 ```
 
-`if` statements therefore don't have to have an `else` branch. But in many cases it makes sense to do so. As with functions, `if...else` statements can be on a single line. Sometimes it's easier to reason with this way.
+Single-line `if...else`:
 
-```{r}
-# we can make a quick and dirty test for a number being even
+```{r demo-even-odd, echo=TRUE}
 is_even <- function(x) {
-  # the modulo function (%%) gives the remainder after division.
   if (x %% 2 == 0) "even" else "odd"
 }
 
 is_even(3)
+is_even(8)
 ```
 
-For the last bit on control flow, we can have a look at the `ifelse` function. It's rather useful.
+### Your turn: if / else
 
-```{r}
-# begin by loading barley
-barley <- read.csv("../2_working_with_dataframes/data/barley.csv")
+```{r ex-ifelse, exercise=TRUE, exercise.lines=14}
+# Write a function called `classify_gc` that:
+# - Takes a GC content decimal value
+# - Returns "low" if < 0.4, "high" if > 0.6, "normal" otherwise
 
-# take the yield column again
+classify_gc <- function(gc) {
+  if (gc < ___) {
+    "low"
+  } else if (gc > ___) {
+    "high"
+  } else {
+    ___
+  }
+}
+
+classify_gc(0.35)   # low
+classify_gc(0.50)   # normal
+classify_gc(0.68)   # high
+```
+
+```{r ex-ifelse-solution}
+classify_gc <- function(gc) {
+  if (gc < 0.4) {
+    "low"
+  } else if (gc > 0.6) {
+    "high"
+  } else {
+    "normal"
+  }
+}
+
+classify_gc(0.35)
+classify_gc(0.50)
+classify_gc(0.68)
+```
+
+---
+
+## Vectorised `ifelse()`
+
+`ifelse()` applies a condition element-wise across a whole vector:
+
+```{r demo-ifelse-vec, echo=TRUE}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url)
+
 yield <- barley$yield
 
-# assign high and low yield based on mean value
-high_or_low_yield <- ifelse(yield < mean(yield), yes = "low", no = "high")
+# label each row as high or low yield
+high_or_low <- ifelse(yield < mean(yield), yes = "low", no = "high")
 
-# assign this back to our data in a new column
-barley$high_or_low_yield <- high_or_low_yield
-
-# check the first few rows
+barley$yield_category <- high_or_low
 head(barley)
+```
+
+### Your turn: vectorised ifelse
+
+```{r ex-vec-ifelse, exercise=TRUE, exercise.lines=12}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url)
+
+# Use ifelse() to create a new column `era`:
+# "early" for year 1931, "late" for 1932
+barley$era <- ifelse(barley$year == ___, yes = "early", no = "late")
+
+# Check the result
+table(barley$era)
+head(barley[, c("year", "era")])
+```
+
+```{r ex-vec-ifelse-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url)
+barley$era <- ifelse(barley$year == 1931, yes = "early", no = "late")
+table(barley$era)
+head(barley[, c("year", "era")])
+```
+
+## Final quiz
+
+```{r quiz-writing-fns, echo=FALSE}
+quiz(
+  question("What is returned by a function by default?",
+    answer("The result of the last expression in the function body", correct = TRUE),
+    answer("NULL"),
+    answer("The first expression"),
+    answer("Nothing — you must use `return()`"),
+    allow_retry = TRUE
+  ),
+  question("What does `missing(x)` return inside a function?",
+    answer("TRUE if the caller did not supply `x`", correct = TRUE),
+    answer("TRUE if `x` is NA"),
+    answer("TRUE if `x` is NULL"),
+    answer("The value of `x`"),
+    allow_retry = TRUE
+  ),
+  question("What is the difference between `if()` and `ifelse()`?",
+    answer("`if()` works on a single value; `ifelse()` is vectorised (works on whole vectors)",
+           correct = TRUE),
+    answer("`ifelse()` is faster but otherwise identical"),
+    answer("`if()` is vectorised; `ifelse()` is not"),
+    answer("There is no difference"),
+    allow_retry = TRUE
+  )
+)
 ```

@@ -1,10 +1,25 @@
-# Variables in R
+---
+title: "Variables in R"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+```
+
+## What is a variable?
 
 Variables are the building blocks of code. They are a very simple statement of
 assignment. They are really for setting apart a block of memory in your computer
-so you can access the variable later. Use the `<-` to assign a value to a variable.
+so you can access the variable later. Use `<-` to assign a value to a variable.
 
-```{r}
+```{r demo-assign, echo=TRUE}
 # assigning a value 1 to x
 x <- 1
 # returning x
@@ -13,12 +28,12 @@ x
 
 We can assign as much as we like.
 
-```{r}
+```{r demo-overwrite, echo=TRUE}
 # x is 1 and y is 2
 x <- 1
 y <- 2
 
-# over write x to 5
+# overwrite x to 5
 x <- 5
 
 # return x
@@ -27,29 +42,118 @@ x
 
 Now we can start building a simple program.
 
-```{r}
+```{r demo-program, echo=TRUE}
 # assign x to 1 and y to 5
 x <- 1
 y <- 5
 
 # multiply x and y together
-# referencing the variables we just created
 z <- x * y
 
-# return z
 # the cat function prints text to the terminal
-# functions are called with the function name
-# followed by parentheses with optional arguments inside
 cat("The value of z is:", z)
 ```
 
-## Over to you
+### Your turn: assign a variable
 
-1. Create a variable called `first` and assign it a numerical value
-2. Create a second variable called `second` and assign it another numerical value
-3. Multiply your two variables together
-4. Are there other ways to assign to variables in R? For help type `` ?`<-` ``
-in the console.
+Fill in the blank (`___`) to assign the number `7` to a variable called `num_species`.
 
+```{r ex-assign, exercise=TRUE, exercise.lines=4}
+# assign 7 to num_species
+num_species <- ___
+num_species
+```
 
+```{r ex-assign-hint-1}
+# The assignment operator in R is <-
+# num_species <- ???
+```
 
+```{r ex-assign-solution}
+num_species <- 7
+num_species
+```
+
+### Your turn: multiply two variables
+
+Create two variables and multiply them together.
+
+```{r ex-multiply, exercise=TRUE, exercise.lines=7}
+# Create a variable called `gc_content` with value 0.52
+# Create a variable called `genome_length` with value 3200000
+# Multiply them and store the result in `gc_count`
+gc_content <- ___
+genome_length <- ___
+gc_count <- ___
+gc_count
+```
+
+```{r ex-multiply-hint-1}
+# Use <- to assign each variable, then * to multiply
+```
+
+```{r ex-multiply-hint-2}
+gc_content <- 0.52
+genome_length <- 3200000
+gc_count <- gc_content * genome_length
+```
+
+```{r ex-multiply-solution}
+gc_content <- 0.52
+genome_length <- 3200000
+gc_count <- gc_content * genome_length
+gc_count
+```
+
+## Quick check
+
+```{r quiz-variables, echo=FALSE}
+quiz(
+  question("Which operator do you use to assign a variable in R?",
+    answer("`<-`", correct = TRUE),
+    answer("`=>`"),
+    answer("`==`"),
+    answer("`->`"),
+    allow_retry = TRUE,
+    random_answer_order = TRUE
+  ),
+  question("What does this code print? `x <- 3; x <- 10; x`",
+    answer("10", correct = TRUE, message = "Correct! The second assignment overwrites the first."),
+    answer("3"),
+    answer("13"),
+    answer("An error"),
+    allow_retry = TRUE
+  ),
+  question("What does the `cat()` function do?",
+    answer("Prints text to the console", correct = TRUE),
+    answer("Creates a vector"),
+    answer("Assigns a variable"),
+    answer("Counts elements"),
+    allow_retry = TRUE
+  )
+)
+```
+
+## Explore further
+
+4. Are there other ways to assign to variables in R? For help, type `` ?`<-` ``
+   in the console and read the help page.
+
+```{r ex-explore, exercise=TRUE, exercise.lines=5}
+# Try using = for assignment (it works too, but is less idiomatic)
+# Try using -> for right-to-left assignment
+# Which style does R documentation use?
+
+```
+
+```{r ex-explore-solution}
+# = also works for assignment
+x = 5
+x
+
+# -> assigns in the opposite direction
+10 -> y
+y
+
+# R convention strongly prefers <- for clarity
+```

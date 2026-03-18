@@ -1,112 +1,253 @@
-# Classes
+---
+title: "Classes in R"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
 
-Classes are extended data types either defined by the people who maintain R, or us, the humble users. There are at least three different ways of defining classes in R (`s3`, `s4`, `Reference classes`). We only look at `s3` here, as they are the most simple (if a bit weird).
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+```
+
+## What are classes?
+
+Classes are extended data types either defined by the people who maintain R, or
+us, the humble users. There are at least three different ways of defining classes
+in R (`S3`, `S4`, `Reference classes`). We only look at `S3` here, as they are
+the most simple (if a bit weird).
+
+> **Note:** This is a relatively advanced topic. Don't worry if it doesn't fully
+> click right away — revisit it once you're comfortable with functions and data frames.
 
 ## Built-in classes
 
-A good example of a class is `data.frame`, which we will see is a glorified `list` with extra attributes.
+A good example is `data.frame`, which is a glorified `list` with extra attributes.
 
-```{r}
-# making a data frame
+```{r demo-df-class, echo=TRUE}
 d <- data.frame(a = 1:10, b = 11:20, c = 21:30)
-# we can check the class with class()
-dcl <- class(d)
-cat("The class of data frame is:", dcl, "\n")
-# check the type of this data frame
-typd <- typeof(d)
-cat("The type of a data frame is:", typd, "\n")
+
+# class() tells you what class an object is
+cat("Class:", class(d), "\n")
+# typeof() tells you the underlying storage type
+cat("Type:", typeof(d), "\n")
 ```
 
-We can see all of the so-called 'methods' associated with this class. Methods are functions which have specific behavior based on the class of object they are called on.
+We can see all the methods associated with a class — these are functions that
+behave differently depending on what object you pass to them.
 
-```{r}
-methods(class = class(d))
+```{r demo-df-methods, echo=TRUE}
+# list all methods defined for data.frame
+methods(class = "data.frame")
 ```
 
-There are actually loads of functions which have specific behavior when called on `data.frame` - that's interesting.
+The `plot()` function is a good example of a **generic** function. Call it on a
+`data.frame` and it tries to plot every pair of columns:
 
-```{r}
-# we produce quite a weird plot which attempts to plot each pairwise
-# combination of columns
+```{r demo-plot-df, echo=TRUE}
 plot(d)
 ```
 
-However if we have another class which implements the `plot` method, such as `table`, we can see the difference. So even though the function call is the same (`plot()`) the results from the function depend on the class of the object the function is being called on. This is good to keep in mind as you go through your R journey, as otherwise some function calls might catch you off guard.
+But call `plot()` on a `table` and you get a bar chart:
 
-```{r}
-# table is a useful function that makes frequency tables in R
-methods(class = "table")
-
-# sample 30 numbers from the range 1:1000
-s <- sample(letters[1:10], 30, replace = TRUE)
-# create a frequency table of the letters
+```{r demo-plot-table, echo=TRUE}
+# sample 30 letters from a-j
+s   <- sample(letters[1:10], 30, replace = TRUE)
 tab <- table(s)
-# and plot
 plot(tab)
 ```
 
-## Making our own classes
+Same function name (`plot`), completely different behaviour — because the class
+of the input is different. This is called **polymorphism**.
 
-While the in built classes are useful and interesting, we can also create our own classes. I think this is quite an advanced topic, and pretty abstract. Therefore this section will be brief, and I suggest come back to this later in the course. I've put it here because they are data types, and they are important.
+### Your turn: exploring classes
 
-Classes are best created using `structure`.
-
-```{r, warning = FALSE}
-# this is one way of doing it
-# it's really a wrapper around a vector
-red <- structure(c(), class = "red")
-
-# it's better to provide what's called a constructor function
-# which is used to create the object.
-red <- function(vec) {
-  if (!is.numeric(vec) & !is.vector(vec)) stop("input should be a numeric vector")
-  
-  structure(vec, class = "red")
-}
-
-# now we can call our new class!
-vec <- c(1, 3, 2, 5, 3, 4, 5)
-
-# should print out the class
-red(vec)
+```{r ex-class-explore, exercise=TRUE, exercise.lines=8}
+# 1. Create a numeric vector called `lengths` with values 1 through 10
+# 2. Check its class with class()
+# 3. Check its type with typeof()
+# 4. How many methods does the "numeric" class have? (use length(methods(...)))
+lengths_vec <- 1:10
+class(___)
+typeof(___)
+length(methods(class = ___))
 ```
 
-And we can make a generic method like this. Again, this is pretty advanced stuff, and many people never make classes. They are a lovely way to organise your code though. We can make specific methods like this.
+```{r ex-class-explore-hint}
+# class() and typeof() take the variable name
+# methods(class = "numeric") lists all methods for numerics
+```
 
-```{r}
-# I just made this up, so roll with it
-plot.red <- function(red) {
-  # inside our method, we are calling the generic
-  # plot function, plot.default
-  plot.default(
-    # the data on the x
-    red,
-    # randomly reordered data on the y
-    red[sample(length(red), length(red))],
-    # obviously colour everything red
-    col = "red",
-    # control the size of the points based
-    # on the value of the point, and scale
-    cex = red / 100,
-    # remove x, y axes and labels
-    xaxt = "n",
-    yaxt = "n",
-    ylab = "",
-    xlab = "",
-    bty = "n"
+```{r ex-class-explore-solution}
+lengths_vec <- 1:10
+class(lengths_vec)
+typeof(lengths_vec)
+length(methods(class = "numeric"))
+```
+
+```{r quiz-classes-1, echo=FALSE}
+quiz(
+  question("What does `class()` return for a `data.frame`?",
+    answer('"data.frame"', correct = TRUE),
+    answer('"list"'),
+    answer('"numeric"'),
+    answer('"table"'),
+    allow_retry = TRUE
+  ),
+  question("Two objects have different classes but you call the same function on both and get different results. What is this called?",
+    answer("Polymorphism", correct = TRUE),
+    answer("Coercion"),
+    answer("Recursion"),
+    answer("Indexing"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## Making our own classes
+
+While built-in classes are useful, we can also create our own. Classes are best
+created using `structure()`. It's conventional to also write a **constructor
+function** that validates input and builds the object for you.
+
+```{r demo-custom-class, echo=TRUE}
+# Constructor function for a "dna_sequence" class
+dna_sequence <- function(seq) {
+  # validate: only allow A, T, G, C characters
+  valid <- all(strsplit(toupper(seq), "")[[1]] %in% c("A","T","G","C"))
+  if (!valid) stop("Sequence must only contain A, T, G, C")
+
+  structure(
+    list(sequence = toupper(seq),
+         length   = nchar(seq)),
+    class = "dna_sequence"
   )
 }
 
-# make up some data, 50 numbers from the range 1:1000
-red_data <- red(sample(1:1000, 50))
-
-# and call the generic plot function again!
-plot(red_data)
+# Create an instance
+my_gene <- dna_sequence("ATGCATGC")
+my_gene
 ```
 
-## Over to you
+Now let's define a `print` method so it displays nicely:
 
-1.  List all the methods in the `formula` class.
-2.  How many are there? Hint: use the `length` function.
-3.  Create a new class with a class name of your choice.
-4.  Implement a generic function for your class.
+```{r demo-print-method, echo=TRUE}
+# Methods are named: generic.classname
+print.dna_sequence <- function(x, ...) {
+  cat("DNA Sequence\n")
+  cat("  Length:", x$length, "bp\n")
+  cat("  Seq:   ", x$sequence, "\n")
+}
+
+print(my_gene)
+```
+
+And a `summary` method that computes GC content:
+
+```{r demo-summary-method, echo=TRUE}
+summary.dna_sequence <- function(object, ...) {
+  seq    <- strsplit(object$sequence, "")[[1]]
+  gc     <- sum(seq %in% c("G","C")) / length(seq)
+  cat("GC content:", round(gc * 100, 1), "%\n")
+}
+
+summary(my_gene)
+```
+
+### Your turn: explore the custom class
+
+```{r ex-custom-class, exercise=TRUE, exercise.lines=10, exercise.setup="demo-summary-method"}
+# Create a new dna_sequence object with the sequence "GCGCATTATGC"
+# Then call print() and summary() on it
+my_seq <- dna_sequence(___)
+print(___)
+summary(___)
+```
+
+```{r ex-custom-class-solution}
+my_seq <- dna_sequence("GCGCATTATGC")
+print(my_seq)
+summary(my_seq)
+```
+
+### Your turn: build your own class
+
+This is a stretch challenge — have a go, and revisit it later if it's too tricky right now.
+
+```{r ex-build-class, exercise=TRUE, exercise.lines=30}
+# Build a class called "species" that stores:
+#   - name (character): the species name
+#   - kingdom (character): "animal", "plant", "fungi", etc.
+#   - endangered (logical): whether it is endangered
+
+# 1. Write a constructor function `species()`
+# 2. Write a print.species() method
+# 3. Create an instance and print it
+
+species <- function(name, kingdom, endangered) {
+  structure(
+    list(name = ___, kingdom = ___, endangered = ___),
+    class = "species"
+  )
+}
+
+print.species <- function(x, ...) {
+  cat("Species:", ___, "\n")
+  cat("Kingdom:", ___, "\n")
+  cat("Endangered:", ___, "\n")
+}
+
+lion <- species("Panthera leo", "animal", TRUE)
+print(lion)
+```
+
+```{r ex-build-class-solution}
+species <- function(name, kingdom, endangered) {
+  structure(
+    list(name = name, kingdom = kingdom, endangered = endangered),
+    class = "species"
+  )
+}
+
+print.species <- function(x, ...) {
+  cat("Species:", x$name, "\n")
+  cat("Kingdom:", x$kingdom, "\n")
+  cat("Endangered:", x$endangered, "\n")
+}
+
+lion <- species("Panthera leo", "animal", TRUE)
+print(lion)
+```
+
+## Final quiz
+
+```{r quiz-classes-final, echo=FALSE}
+quiz(
+  question("How do you name an S3 method for the `print` generic on a class called `myclass`?",
+    answer("`print.myclass`", correct = TRUE),
+    answer("`myclass.print`"),
+    answer("`method_print_myclass`"),
+    answer("`print@myclass`"),
+    allow_retry = TRUE
+  ),
+  question("What function do you use to list all methods for a class?",
+    answer("`methods(class = ...)`", correct = TRUE),
+    answer("`list.methods(...)`"),
+    answer("`class.methods(...)`"),
+    answer("`show.methods(...)`"),
+    allow_retry = TRUE
+  ),
+  question("What does `structure(obj, class = 'myclass')` do?",
+    answer("Attaches a class attribute to obj", correct = TRUE),
+    answer("Creates a new object from scratch"),
+    answer("Checks if obj is the right type"),
+    answer("Converts obj to a list"),
+    allow_retry = TRUE
+  )
+)
+```

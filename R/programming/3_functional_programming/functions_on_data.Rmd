@@ -1,105 +1,257 @@
-# Using functions on data frames
+---
+title: "Using Functions on Data Frames"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
 
-Given that we have already looked at indexing in data frames, we have already used functions on data frames! Here we will look at other functions to apply on data frames. For example:
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
 
--   How do I compute the a function on a column?
+cats_url   <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
 
--   How do I compute the same function across several columns at once?
-
--   How do I compute across rows?
-
--   If the data is grouped, how do I execute functions on each group?
-
-These are roughly ordered in increasing complexity.
-
-## Functions on columns in a data frame
-
-We have already covered this - but as a reminder.
-
-```{r}
-# load the cats data
-cats <- read.csv("https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv", stringsAsFactors = TRUE)
+cats   <- read.csv(cats_url,   stringsAsFactors = TRUE)
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
 ```
 
-## Functions on multiple columns in a data frame
+## Overview
 
-Sometimes we want to summarise several columns at the same time. It would be tedious to try and do this by hand for each one, and it would introduce errors. Less code `<-` better.
+Given that we have already looked at indexing in data frames, we have already
+used functions on data frames! Here we will look at higher-level functions that
+let us apply operations across columns, rows, or groups without writing loops.
 
-```{r}
-# what are the columns to extract?
-bwt_and_hwt <- c("Bwt", "Hwt")
-# index on the column names
-bwt_and_hwt_data <- cats[, bwt_and_hwt]
+The four core functions are:
 
-# now the fun bit
-lapply(X = bwt_and_hwt_data, FUN = mean)
+| Function   | What it does |
+|-----------|------|
+| `lapply()` | Apply a function over a list/columns → returns a **list** |
+| `sapply()` | Same as lapply, but **simplifies** the output |
+| `apply()`  | Apply over rows or columns of a **matrix/data frame** |
+| `tapply()` | Apply over **groups** defined by a factor |
+
+---
+
+## Functions on multiple columns: `lapply` and `sapply`
+
+```{r demo-load-cats, echo=TRUE}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
+str(cats)
 ```
 
-So what does this mean? `lapply` stands for 'list apply', or apply a function over elements of a list. Because we know that data frames are lists, `lapply` will treat each column as a separate list, and iterate over them. It also returns the result as a list. You also have to supply the function to `lapply` - above we gave the `mean` function. But we can very well supply our own. What if we wanted both the mean and the standard deviation?
+Compute the mean of multiple columns at once using `lapply`:
 
-```{r}
-# bit more complex
-lapply(
-  X = bwt_and_hwt_data,
-  # apply the functions mean and sd, but put them in a
-  # list
-  FUN = function(e) list(mean = mean(e), sd = sd(e))
-)
+```{r demo-lapply, echo=TRUE}
+# select the two numeric columns
+numeric_cols <- cats[, c("Bwt", "Hwt")]
+
+# apply mean to each column — returns a list
+lapply(X = numeric_cols, FUN = mean)
 ```
 
-The output is a bit of a complicated nested list. It's usually easier to use `sapply` which is a wrapper around `lapply` that simplifies the output data structure. Here it makes a little `matrix`.
+`sapply` simplifies the output to a named vector or matrix:
 
-```{r}
+```{r demo-sapply, echo=TRUE}
+sapply(X = numeric_cols, FUN = mean)
+```
+
+Pass a custom function to compute multiple statistics at once:
+
+```{r demo-sapply-custom, echo=TRUE}
 sapply(
-  X = bwt_and_hwt_data,
-  # apply the functions mean and sd, but put them in a
-  # list
-  FUN = function(e) list(mean = mean(e), sd = sd(e))
+  X   = numeric_cols,
+  FUN = function(col) c(mean = mean(col), sd = sd(col), n = length(col))
 )
 ```
 
-## Functions on rows in a data frame
+### Your turn: lapply and sapply
 
-In R, generally things are set up to compute over columns. It's a much easier and more common use case. You can apply functions on rows though, using `apply`.
+```{r ex-lapply, exercise=TRUE, exercise.lines=12}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
 
-```{r}
-# correct for units
-bwt_and_hwt_data$Bwt <- bwt_and_hwt_data$Bwt * 1000
+numeric_cols <- cats[, c("Bwt", "Hwt")]
 
-# use apply, MARGIN = 1 means operate over rows
-sum_bwt_hwt <- apply(X = bwt_and_hwt_data, MARGIN = 1, FUN = sum)
+# 1. Use sapply to get the MEDIAN of each numeric column
+sapply(X = numeric_cols, FUN = ___)
 
-bwt_and_hwt_data$sum <- sum_bwt_hwt
-
-head(bwt_and_hwt_data)
+# 2. Use sapply with a custom function to get both min and max
+sapply(X = numeric_cols, FUN = function(col) c(min = ___, max = ___))
 ```
 
-The use of `apply` is a bit overkill here. We can just use the columns. `apply` is more useful when there are many columns that you want to run a function over.
-
-```{r}
-# The above is equivalent to
-bwt_and_hwt_data$sum <- bwt_and_hwt_data$Bwt + bwt_and_hwt_data$Hwt
-
-# however over more than two columns... it can be useful
-# pass other arguments to the FUN, just as comma separated arguments
-# at the end.
-apply(X = cats, MARGIN = 1, FUN = paste, collapse = ",")[1]
+```{r ex-lapply-solution}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
+numeric_cols <- cats[, c("Bwt", "Hwt")]
+sapply(X = numeric_cols, FUN = median)
+sapply(X = numeric_cols, FUN = function(col) c(min = min(col), max = max(col)))
 ```
 
-## Functions over groups
-
-The `cats` data frame only has one group - sex. So we will use this simple two level factor as our grouping variable. We can look at the average body weight across the sexes using `tapply`.
-
-```{r}
-sex <- cats$Sex
-body_weight <- cats$Bwt
-
-# use tapply
-tapply(X = body_weight, INDEX = sex, FUN = mean)
+```{r quiz-apply-1, echo=FALSE}
+quiz(
+  question("What is the difference between `lapply` and `sapply`?",
+    answer("`lapply` always returns a list; `sapply` tries to simplify to a vector or matrix",
+           correct = TRUE),
+    answer("`sapply` is for lists only; `lapply` works on any object"),
+    answer("They are identical — one is just an alias"),
+    answer("`lapply` is faster than `sapply`"),
+    allow_retry = TRUE
+  )
+)
 ```
 
-`sex` here will be forced into a `factor` which is R's internal representation of a collection of known items. Every factor will have a number of 'levels' which are the values a factor can take.
+---
 
-## A note on (probably) better packages
+## Functions over rows: `apply`
 
-The above uses the most basic functionality in R to achieve our results. Even a cursory search of the questions above will lead to a wide variety of answers - many of them from the 'tidyverse' or 'data.table'. Each has their own syntax and quirks. We will delve later on in the course specifically to these packages to see how they work.
+In R, operations are naturally column-oriented. But `apply()` with `MARGIN = 1`
+operates over rows:
+
+```{r demo-apply-rows, echo=TRUE}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
+
+# convert body weight to grams to match heart weight units
+bwt_hwt <- data.frame(
+  Bwt_g = cats$Bwt * 1000,
+  Hwt_g = cats$Hwt
+)
+
+# MARGIN = 1 means apply over rows
+# here: sum Bwt and Hwt for each animal
+row_sums <- apply(X = bwt_hwt, MARGIN = 1, FUN = sum)
+head(row_sums)
+```
+
+`MARGIN = 2` applies over columns (equivalent to `sapply`):
+
+```{r demo-apply-cols, echo=TRUE}
+apply(X = bwt_hwt, MARGIN = 2, FUN = mean)
+```
+
+### Your turn: apply
+
+```{r ex-apply, exercise=TRUE, exercise.lines=14}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
+
+bwt_hwt <- data.frame(Bwt_g = cats$Bwt * 1000, Hwt_g = cats$Hwt)
+
+# 1. Compute the range (max - min) of each ROW using apply
+#    Hint: diff(range(x)) gives the range of a vector
+row_ranges <- apply(X = bwt_hwt, MARGIN = ___, FUN = function(x) diff(range(x)))
+head(row_ranges)
+
+# 2. Compute the standard deviation of each COLUMN
+apply(X = bwt_hwt, MARGIN = ___, FUN = sd)
+```
+
+```{r ex-apply-solution}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
+bwt_hwt <- data.frame(Bwt_g = cats$Bwt * 1000, Hwt_g = cats$Hwt)
+row_ranges <- apply(X = bwt_hwt, MARGIN = 1, FUN = function(x) diff(range(x)))
+head(row_ranges)
+apply(X = bwt_hwt, MARGIN = 2, FUN = sd)
+```
+
+---
+
+## Functions over groups: `tapply`
+
+`tapply()` applies a function to subsets of a vector defined by a grouping
+factor. This is very common in biological analyses.
+
+```{r demo-tapply, echo=TRUE}
+cats_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/cats.csv"
+cats <- read.csv(cats_url, stringsAsFactors = TRUE)
+
+# mean body weight by sex
+tapply(X = cats$Bwt, INDEX = cats$Sex, FUN = mean)
+```
+
+```{r demo-tapply-barley, echo=TRUE}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# mean yield per site
+tapply(X = barley$yield, INDEX = barley$site, FUN = mean)
+```
+
+### Your turn: tapply
+
+```{r ex-tapply, exercise=TRUE, exercise.lines=12}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# 1. Compute the MAXIMUM yield per variety
+tapply(X = ___, INDEX = barley$variety, FUN = ___)
+```
+
+```{r ex-tapply-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+tapply(X = barley$yield, INDEX = barley$variety, FUN = max)
+```
+
+```{r ex-tapply-2, exercise=TRUE, exercise.lines=12}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+
+# 2. Compute mean yield per YEAR
+#    Which year had higher average yield?
+tapply(X = barley$yield, INDEX = ___, FUN = mean)
+```
+
+```{r ex-tapply-2-solution}
+barley_url <- "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/programming/2_working_with_dataframes/data/barley.csv"
+barley <- read.csv(barley_url, stringsAsFactors = TRUE)
+tapply(X = barley$yield, INDEX = barley$year, FUN = mean)
+```
+
+---
+
+## A note on the tidyverse and data.table
+
+The functions above use base R. In practice, many R users use the
+**tidyverse** (`dplyr`, `tidyr`) or **data.table** for data manipulation —
+both offer more readable and often faster alternatives. We will cover these
+later in the course.
+
+For now, the base R `*apply` family is worth knowing because:
+- It requires no additional packages
+- The concepts transfer directly to understanding tidyverse operations
+- It appears everywhere in existing R code
+
+## Final quiz
+
+```{r quiz-apply-final, echo=FALSE}
+quiz(
+  question("Which function applies a function over each group defined by a factor?",
+    answer("`tapply()`", correct = TRUE),
+    answer("`lapply()`"),
+    answer("`apply()`"),
+    answer("`mapply()`"),
+    allow_retry = TRUE
+  ),
+  question("In `apply(X, MARGIN, FUN)`, what does `MARGIN = 2` mean?",
+    answer("Apply over columns", correct = TRUE),
+    answer("Apply over rows"),
+    answer("Apply over the 2nd element only"),
+    answer("Apply twice"),
+    allow_retry = TRUE
+  ),
+  question("Which apply function is best for computing a summary statistic across multiple columns?",
+    answer("`sapply()` or `lapply()`", correct = TRUE),
+    answer("`tapply()`"),
+    answer("`apply()` with MARGIN = 1"),
+    answer("A for loop"),
+    allow_retry = TRUE
+  )
+)
+```

@@ -1,0 +1,388 @@
+---
+title: "Advanced Plots with ggplot2"
+output:
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+tutorial_options(exercise.timelimit = 60)
+
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- read.csv(penguins_url)
+penguins <- na.omit(penguins)  # drop rows with missing values for simplicity
+```
+
+## Why ggplot2?
+
+Base R plots are great for quick exploration. **ggplot2** is great for
+*everything else*. It produces beautiful, publication-ready figures with a
+consistent, powerful grammar. It is one of the most downloaded R packages of all
+time, and is the standard plotting tool in modern R.
+
+Install it (run this once on your machine):
+
+```{r install-ggplot, eval=FALSE}
+install.packages("ggplot2")
+```
+
+```{r load-ggplot, eval=FALSE}
+library(ggplot2)
+```
+
+---
+
+## The grammar of graphics
+
+ggplot2 is based on a **grammar of graphics**. Every plot is built from:
+
+| Layer | What it is |
+|-------|------------|
+| **data** | The data frame containing your variables |
+| **aes()** | Aesthetic mappings — which column maps to x, y, colour, size, etc. |
+| **geom_*()** | Geometric objects — points, lines, bars, boxes, etc. |
+| **labs()** | Labels — title, axis labels |
+| **theme_*()** | The overall look of the plot |
+
+The key insight: you build a plot by **adding layers** with `+`.
+
+---
+
+## Our dataset: Palmer Penguins
+
+We will use the **Palmer Penguins** dataset — measurements of three penguin
+species on islands near Palmer Station, Antarctica.
+
+```{r demo-penguins, echo=TRUE}
+penguins_url <- "https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv"
+penguins <- read.csv(penguins_url)
+penguins <- na.omit(penguins)
+
+str(penguins)
+```
+
+---
+
+## Scatter plots: `geom_point()`
+
+```{r demo-scatter, echo=TRUE}
+ggplot(data = penguins, aes(x = bill_length_mm, y = bill_depth_mm)) +
+  geom_point()
+```
+
+Add colour by species — just map `colour = species` in `aes()`:
+
+```{r demo-scatter-colour, echo=TRUE}
+ggplot(data = penguins,
+       aes(x = bill_length_mm, y = bill_depth_mm, colour = species)) +
+  geom_point(size = 2, alpha = 0.7) +
+  labs(
+    title  = "Bill dimensions of three penguin species",
+    x      = "Bill length (mm)",
+    y      = "Bill depth (mm)",
+    colour = "Species"
+  ) +
+  theme_bw()
+```
+
+### Your turn: scatter plot
+
+```{r ex-scatter, exercise=TRUE, exercise.lines=12}
+# Plot flipper_length_mm (x) vs body_mass_g (y)
+# Colour points by island
+# Add informative labels and theme_minimal()
+
+ggplot(data = penguins,
+       aes(x = ___, y = ___, colour = ___)) +
+  geom_point(size = 2, alpha = 0.7) +
+  labs(
+    title  = ___,
+    x      = ___,
+    y      = ___,
+    colour = "Island"
+  ) +
+  ___()
+```
+
+```{r ex-scatter-hint}
+# aes(x = flipper_length_mm, y = body_mass_g, colour = island)
+# theme_minimal() is a clean theme
+```
+
+```{r ex-scatter-solution}
+ggplot(data = penguins,
+       aes(x = flipper_length_mm, y = body_mass_g, colour = island)) +
+  geom_point(size = 2, alpha = 0.7) +
+  labs(
+    title  = "Flipper length vs body mass by island",
+    x      = "Flipper length (mm)",
+    y      = "Body mass (g)",
+    colour = "Island"
+  ) +
+  theme_minimal()
+```
+
+```{r quiz-scatter, echo=FALSE}
+quiz(
+  question("In ggplot2, what does `aes()` do?",
+    answer("Maps data columns to visual properties (x, y, colour, size, etc.)",
+           correct = TRUE),
+    answer("Sets fixed colours for all points"),
+    answer("Defines the axis limits"),
+    answer("Adds axis labels"),
+    allow_retry = TRUE
+  ),
+  question("How do you add layers in ggplot2?",
+    answer("With the `+` operator", correct = TRUE),
+    answer("With the `|>` pipe"),
+    answer("By calling multiple plot functions"),
+    answer("With commas inside ggplot()"),
+    allow_retry = TRUE
+  )
+)
+```
+
+---
+
+## Histograms: `geom_histogram()`
+
+```{r demo-hist, echo=TRUE}
+ggplot(data = penguins, aes(x = body_mass_g)) +
+  geom_histogram(bins = 30, fill = "steelblue", colour = "white") +
+  labs(title = "Distribution of penguin body mass",
+       x = "Body mass (g)", y = "Count") +
+  theme_bw()
+```
+
+Overlay histograms for each species using `fill = species` and `alpha` for
+transparency:
+
+```{r demo-hist-species, echo=TRUE}
+ggplot(data = penguins, aes(x = body_mass_g, fill = species)) +
+  geom_histogram(bins = 25, alpha = 0.6, position = "identity") +
+  labs(title = "Body mass distribution by species",
+       x = "Body mass (g)", y = "Count", fill = "Species") +
+  theme_bw()
+```
+
+### Your turn: histogram
+
+```{r ex-hist, exercise=TRUE, exercise.lines=10}
+# Plot a histogram of flipper_length_mm, coloured by species
+# Use alpha = 0.6 and position = "identity" for overlapping histograms
+
+ggplot(data = penguins, aes(x = ___, fill = ___)) +
+  geom_histogram(bins = 25, alpha = ___, position = "identity") +
+  labs(title = "Flipper length distribution by species",
+       x = "Flipper length (mm)", y = "Count") +
+  theme_bw()
+```
+
+```{r ex-hist-solution}
+ggplot(data = penguins, aes(x = flipper_length_mm, fill = species)) +
+  geom_histogram(bins = 25, alpha = 0.6, position = "identity") +
+  labs(title = "Flipper length distribution by species",
+       x = "Flipper length (mm)", y = "Count") +
+  theme_bw()
+```
+
+---
+
+## Box plots: `geom_boxplot()`
+
+```{r demo-boxplot, echo=TRUE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Body mass by species",
+       x = "Species", y = "Body mass (g)") +
+  theme_bw() +
+  theme(legend.position = "none")  # legend is redundant here
+```
+
+Add the raw data points on top of the boxplot with `geom_jitter()`:
+
+```{r demo-jitter, echo=TRUE}
+ggplot(data = penguins, aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot(alpha = 0.4, outlier.shape = NA) +
+  geom_jitter(aes(colour = species), width = 0.2, size = 1, alpha = 0.6) +
+  labs(title = "Body mass by species (with raw data)",
+       x = "Species", y = "Body mass (g)") +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+### Your turn: box plot
+
+```{r ex-boxplot, exercise=TRUE, exercise.lines=12}
+# Plot bill_length_mm by island, coloured by island
+# Add jittered raw points on top
+
+ggplot(data = penguins, aes(x = ___, y = ___, fill = ___)) +
+  geom_boxplot(alpha = 0.4, outlier.shape = NA) +
+  geom_jitter(aes(colour = ___), width = 0.2, size = 1.5, alpha = 0.6) +
+  labs(title = "Bill length by island",
+       x = "Island", y = "Bill length (mm)") +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+```{r ex-boxplot-solution}
+ggplot(data = penguins, aes(x = island, y = bill_length_mm, fill = island)) +
+  geom_boxplot(alpha = 0.4, outlier.shape = NA) +
+  geom_jitter(aes(colour = island), width = 0.2, size = 1.5, alpha = 0.6) +
+  labs(title = "Bill length by island",
+       x = "Island", y = "Bill length (mm)") +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+---
+
+## Bar plots: `geom_bar()` and `geom_col()`
+
+`geom_bar()` counts rows automatically. `geom_col()` uses pre-computed heights.
+
+```{r demo-bar, echo=TRUE}
+# count penguins per species per island
+ggplot(data = penguins, aes(x = island, fill = species)) +
+  geom_bar(position = "dodge") +  # side-by-side bars
+  labs(title = "Number of penguins per island by species",
+       x = "Island", y = "Count", fill = "Species") +
+  theme_bw()
+```
+
+### Your turn: bar plot
+
+```{r ex-bar, exercise=TRUE, exercise.lines=10}
+# Make a bar chart of penguin counts by sex, coloured by species
+# Use position = "stack" for stacked bars
+
+ggplot(data = penguins, aes(x = ___, fill = ___)) +
+  geom_bar(position = ___) +
+  labs(title = "Penguin counts by sex",
+       x = "Sex", y = "Count", fill = "Species") +
+  theme_bw()
+```
+
+```{r ex-bar-solution}
+ggplot(data = penguins, aes(x = sex, fill = species)) +
+  geom_bar(position = "stack") +
+  labs(title = "Penguin counts by sex",
+       x = "Sex", y = "Count", fill = "Species") +
+  theme_bw()
+```
+
+---
+
+## Faceting: small multiples
+
+Faceting splits a plot into panels — one per level of a variable. This is one
+of ggplot2's most powerful features.
+
+```{r demo-facet, echo=TRUE}
+ggplot(data = penguins,
+       aes(x = bill_length_mm, y = bill_depth_mm, colour = sex)) +
+  geom_point(size = 1.5, alpha = 0.7) +
+  facet_wrap(~ species) +
+  labs(title = "Bill dimensions by species and sex",
+       x = "Bill length (mm)", y = "Bill depth (mm)",
+       colour = "Sex") +
+  theme_bw()
+```
+
+### Your turn: faceting
+
+```{r ex-facet, exercise=TRUE, exercise.lines=12}
+# Scatter plot of flipper_length_mm vs body_mass_g
+# Colour by sex, and facet by ISLAND (not species this time)
+
+ggplot(data = penguins,
+       aes(x = flipper_length_mm, y = body_mass_g, colour = sex)) +
+  geom_point(size = 1.5, alpha = 0.7) +
+  facet_wrap(~ ___) +
+  labs(title = "Flipper length vs body mass by island",
+       x = "Flipper length (mm)", y = "Body mass (g)") +
+  theme_bw()
+```
+
+```{r ex-facet-solution}
+ggplot(data = penguins,
+       aes(x = flipper_length_mm, y = body_mass_g, colour = sex)) +
+  geom_point(size = 1.5, alpha = 0.7) +
+  facet_wrap(~ island) +
+  labs(title = "Flipper length vs body mass by island",
+       x = "Flipper length (mm)", y = "Body mass (g)") +
+  theme_bw()
+```
+
+---
+
+## Adding trend lines: `geom_smooth()`
+
+```{r demo-smooth, echo=TRUE}
+ggplot(data = penguins,
+       aes(x = flipper_length_mm, y = body_mass_g, colour = species)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = TRUE) +  # linear model with confidence band
+  labs(title = "Flipper length vs body mass with linear trend",
+       x = "Flipper length (mm)", y = "Body mass (g)",
+       colour = "Species") +
+  theme_bw()
+```
+
+---
+
+## Saving plots
+
+```{r demo-save, eval=FALSE}
+# ggsave saves the last plot by default
+# Change width, height, and dpi for different outputs
+
+my_plot <- ggplot(data = penguins,
+                  aes(x = species, y = body_mass_g, fill = species)) +
+  geom_boxplot() +
+  theme_bw()
+
+ggsave("penguins_boxplot.pdf", plot = my_plot, width = 8, height = 5)
+ggsave("penguins_boxplot.png", plot = my_plot, width = 8, height = 5, dpi = 300)
+```
+
+## Final quiz
+
+```{r quiz-ggplot-final, echo=FALSE}
+quiz(
+  question("Which ggplot2 geom would you use for a scatter plot?",
+    answer("`geom_point()`", correct = TRUE),
+    answer("`geom_scatter()`"),
+    answer("`geom_dot()`"),
+    answer("`geom_xy()`"),
+    allow_retry = TRUE
+  ),
+  question("What does `facet_wrap(~ species)` do?",
+    answer("Creates a separate panel for each level of `species`", correct = TRUE),
+    answer("Colours points by species"),
+    answer("Filters to only show species"),
+    answer("Wraps the legend around the species names"),
+    allow_retry = TRUE
+  ),
+  question("How do you add a linear trend line with a confidence band?",
+    answer('`geom_smooth(method = "lm", se = TRUE)`', correct = TRUE),
+    answer('`geom_line(method = "lm")`'),
+    answer('`geom_trend(type = "linear")`'),
+    answer('`stat_smooth(ci = TRUE)`'),
+    allow_retry = TRUE
+  ),
+  question("In ggplot2, where do you define that point colour should vary by a variable?",
+    answer("Inside `aes()`, e.g. `aes(colour = my_variable)`", correct = TRUE),
+    answer("Inside `geom_point()`, e.g. `geom_point(colour = my_variable)`"),
+    answer("In `labs(colour = my_variable)`"),
+    answer("In `theme(colour = my_variable)`"),
+    allow_retry = TRUE
+  )
+)
+```
