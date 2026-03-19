@@ -1,0 +1,195 @@
+---
+title: "Study Design and the Role of Statistics"
+author: "Max Carter-Brown"
+date: "2026-03-19"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+library(ggplot2)
+```
+
+# Why does study design matter?
+
+Statistics cannot rescue a badly designed study. The choices made *before* you collect any data — what to measure, how many samples to take, how to assign treatments — determine what conclusions you can validly draw. This module introduces the language and principles of good study design so that the statistical tests in subsequent modules make sense in context.
+
+> **Common misconception:** If a statistical test gives p \< 0.05, the result is meaningful. A significant p-value only tells you the result is unlikely under the null hypothesis. A biased or underpowered study can produce significant results that are meaningless, unrepeatable, or both.
+
+# Hypotheses
+
+Every study begins with a question, which becomes a **hypothesis** — a testable, falsifiable statement about the world.
+
+-   **Null hypothesis (H₀)**: No effect, no difference, no relationship. The default assumption.
+-   **Alternative hypothesis (H₁)**: Something is going on. **What you expect to find**.
+
+**Example:** H₀: Mean height does not differ between males and females. H₁: Mean height differs between males and females.
+
+You never *prove* H₁. You accumulate evidence *against* H₀ until it becomes implausible.
+
+## One-tailed vs two-tailed tests
+
+A **two-tailed** test asks "is there any difference?" (H₁: μ₁ ≠ μ₂). A **one-tailed** test asks "is group A specifically larger/smaller?" (H₁: μ₁ \> μ₂). One-tailed tests have more power but require a strong directional prediction made *before* looking at the data. Using a one-tailed test to rescue a borderline two-tailed result is **p-hacking**.
+
+# Types of variables
+
+| Type | Description | Example | Appropriate test |
+|---------------|------------------|---------------|------------------------|
+| **Continuous** | Any real number | Height, weight, temperature | t-test, ANOVA, regression |
+| **Count** | Non-negative integers | Heart rate (bpm), cell counts | Poisson GLM |
+| **Binary** | Two outcomes | Smoker (yes/no) | Chi-squared, logistic regression |
+| **Ordinal** | Ordered categories | Activity level (low/medium/high) | Mann-Whitney, Kruskal-Wallis, advanced (ordinal) GLM |
+| **Nominal** | Unordered categories | Blood group (A/B/AB/O) | Chi-squared, advanced (multinomial) GLM |
+
+Identifying your variable types *before* analysis determines your statistical approach.
+
+# Independent vs dependent variables
+
+-   **Independent variable (predictor, X)**: What you control or measure as a potential cause.
+-   **Dependent variable (response, Y)**: What you measure as a potential effect.
+
+"Height predicts weight" → height = X, weight = Y.
+
+Keep this distinction clear. Regression and ANOVA are asymmetric: swapping X and Y gives a different model.
+
+# Types of study
+
+## Observational studies
+
+You measure variables as they are — no manipulation. Examples: surveys, cohort studies, case-control studies.
+
+-   **Advantage**: Can study relationships in natural populations.
+-   **Limitation**: Cannot establish causation. Confounders may explain any observed association.
+
+## Experimental studies
+
+You **randomly assign** participants to treatment and control groups.
+
+-   **Advantage**: Randomisation balances confounders across groups, allowing causal inference.
+-   **Limitation**: Often impractical, expensive, or unethical for many biological questions.
+
+> "Correlation does not imply causation" — but randomised experiments can.
+
+# Confounding variables
+
+A **confounder** is a variable that is associated with both the independent and dependent variable, creating a spurious apparent relationship.
+
+```{r confounding-simulation}
+set.seed(42)
+n <- 200
+
+# True causal structure: age → height AND age → weight
+# There is no direct causal path from height to weight here
+age    <- rnorm(n, mean = 20, sd = 3)
+height <- 150 + 0.5 * age + rnorm(n, sd = 8)
+weight <- 40  + 0.8 * age + rnorm(n, sd = 10)
+
+cor_hw <- round(cor(height, weight), 2)
+cat("Correlation between height and weight:", cor_hw, "\n")
+cat("(Even though neither directly causes the other — age causes both)\n")
+
+cor_aw <- round(cor(age, weight), 2)
+cat("Stronger correlation between age and weight:", cor_aw, "\n")
+```
+
+The lesson: a strong correlation between height and weight here is entirely driven by age. Without measuring age, you would wrongly conclude height and weight are directly related.
+
+# Sample size and statistical power
+
+**Power** is the probability of detecting a real effect when one exists. Low power leads to: - Failing to detect real effects (**Type II errors**, false negatives) - Inflated effect size estimates in the studies that *do* detect effects (the "winner's curse")
+
+Power depends on three things:
+
+| Factor        | Effect on power |
+|---------------|-----------------|
+| Sample size ↑ | Power ↑         |
+| Effect size ↑ | Power ↑         |
+| Variability ↑ | Power ↓         |
+
+```{r power-simulation}
+# Simulate detecting a mean difference of d standard deviations
+set.seed(42)
+
+simulate_power <- function(n, delta, n_sims = 500) {
+  # delta = true difference in means (in SDs)
+  p_vals <- replicate(n_sims, {
+    a <- rnorm(n, mean = 0,     sd = 1)
+    b <- rnorm(n, mean = delta, sd = 1)
+    t.test(a, b)$p.value
+  })
+  mean(p_vals < 0.05)
+}
+
+results <- expand.grid(n = c(10, 30, 50, 100), delta = c(0.2, 0.5, 0.8))
+results$power <- mapply(simulate_power, results$n, results$delta)
+results$delta <- factor(results$delta, labels = c("Small (d=0.2)", "Medium (d=0.5)", "Large (d=0.8)"))
+
+ggplot(results, aes(x = n, y = power, colour = delta, group = delta)) +
+  geom_line(linewidth = 1) + geom_point(size = 2) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", colour = "grey40") +
+  scale_colour_manual(values = c("tomato", "steelblue", "darkgreen")) +
+  xlab("Sample size per group") + ylab("Power (probability of detecting the effect)") +
+  labs(colour = "Effect size", caption = "Dashed line = 80% power (conventional minimum)") +
+  theme_bw()
+```
+
+For a medium effect, you need roughly **n = 50 per group** to reach 80% power. Small effects require much larger samples. This is why a non-significant result from a small study is almost uninterpretable — the study may simply have been too small to detect the effect. The more (random) samples, the better!
+
+# The p-value: what it is and what it is not
+
+The p-value is the probability of observing data as extreme as yours (or more extreme) **if the null hypothesis were true**.
+
+| The p-value IS                     | The p-value IS NOT         |
+|------------------------------------|----------------------------|
+| A measure of compatibility with H₀ | The probability H₀ is true |
+| Affected by sample size            | A measure of effect size   |
+| One piece of evidence              | A binary verdict on truth  |
+
+Always report effect sizes and confidence intervals alongside p-values.
+
+------------------------------------------------------------------------
+
+# Exercises
+
+## Question 1. Identify variable types
+
+For each variable in the class data, identify whether it is continuous, count, binary, ordinal, or nominal.
+
+```{r load-data}
+d <- read.csv(
+  "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/form-1__anthropometrics.csv",
+  header = TRUE, stringsAsFactors = TRUE
+)
+names(d)
+```
+
+*Write your answers here*
+
+## Question 2. Formulate hypotheses
+
+Write null and alternative hypotheses (H₀ and H₁) for the following research questions:
+
+a.  Does body temperature differ between smokers and non-smokers?
+b.  Is BMI associated with systolic blood pressure?
+c.  Does activity level affect heart rate?
+
+*Write your answers here*
+
+## Question 3. Identify the independent and dependent variables in each question above.
+
+*Write your answers here*
+
+## Question 4. Confounding
+
+For question (a) above — does sex confound the relationship between smoking and body temperature? Explain in one sentence why or why not.
+
+*Write your answer here*
+
+## Challenge Question 5. Power calculation
+
+Using the simulation code above, estimate what sample size per group you would need to have 80% power to detect a small effect (d = 0.2). Report your answer and explain your reasoning.
+
+*Insert R code and interpretation here*

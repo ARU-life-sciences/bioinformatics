@@ -1,0 +1,170 @@
+---
+title: "Which Statistical Test?"
+author: "Max Carter-Brown"
+date: "2026-03-19"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document is a **quick-reference guide** — keep it open while working through the other modules and when completing your assessed portfolio.
+
+# The decision framework
+
+Choosing the right test requires answering four questions in order:
+
+1.  **What type is my response (dependent) variable?** Continuous, count, binary, ordinal?
+2.  **How many groups am I comparing?** (or: is this a relationship between two continuous variables?)
+3.  **Are the groups paired?** (same individuals measured twice, or matched pairs?)
+4.  **Is the data normally distributed?**
+
+# Decision table
+
+| Response variable | Groups | Paired? | Normal? | Test | Effect size |
+|----|----|----|----|----|----|
+| Continuous | 1 group vs. fixed value | No | Yes | One-sample t-test | Cohen's d |
+| Continuous | 2 groups | No | Yes | Independent t-test | Cohen's d |
+| Continuous | 2 groups | No | No | Mann-Whitney U | Rank-biserial r |
+| Continuous | 2 groups | Yes | Yes | Paired t-test | Cohen's d |
+| Continuous | 2 groups | Yes | No | Wilcoxon signed-rank | Rank-biserial r |
+| Continuous | 3+ groups | — | Yes | ANOVA | η² (eta-squared) |
+| Continuous | 3+ groups | — | No | Kruskal-Wallis | η² |
+| Continuous | Two continuous variables | — | Both normal | Pearson's correlation | r, r² |
+| Continuous | Two continuous variables | — | One/both non-normal | Spearman's correlation | ρ, ρ² |
+| Continuous | Predict Y from X(s) | — | Continuous Y | Linear regression / Gaussian GLM | R², pseudo-R² |
+| Count | Predict Y from X(s) | — | Count Y | Poisson GLM | Pseudo-R² |
+| Binary | Two categorical variables | — | — | Chi-squared / Fisher's exact | Cramér's V |
+| Binary | Predict Y from X(s) | — | Binary Y | Binomial GLM (logistic regression) | Pseudo-R² |
+| Any | Multiple studies pooled | — | — | Meta-analysis | Pooled SMD, I² |
+
+# Decision flowchart
+
+```         
+What is your response (Y) variable?
+│
+├── CATEGORICAL (binary, nominal, ordinal)
+│   └── Are you comparing observed vs. expected counts?
+│       ├── Yes → Chi-squared test (or Fisher's if cells < 5)
+│       │         Effect size: Cramér's V
+│       └── No  → Chi-squared / Fisher's exact for two categorical variables
+│
+├── CONTINUOUS (or count data)
+│   └── Are you asking about RELATIONSHIPS or GROUP DIFFERENCES?
+│       │
+│       ├── RELATIONSHIP (two continuous variables)
+│       │   └── Both normal? → Pearson's r
+│       │       One/both non-normal? → Spearman's ρ
+│       │       Want to predict Y from X? → Linear regression
+│       │
+│       └── GROUP DIFFERENCES
+│           └── How many groups?
+│               │
+│               ├── 2 groups
+│               │   └── Paired measurements?
+│               │       ├── Yes → Paired t-test (normal) / Wilcoxon signed-rank (non-normal)
+│               │       └── No  → t-test (normal) / Mann-Whitney U (non-normal)
+│               │
+│               └── 3+ groups
+│                   └── ANOVA (normal) / Kruskal-Wallis (non-normal)
+│
+└── COUNT DATA
+    └── Poisson GLM
+```
+
+# Checking normality
+
+Always check normality *before* choosing parametric vs. non-parametric tests. Use both:
+
+1.  **Visual check**: histogram with binwidth ≈ SD/3. Does it look bell-shaped?
+2.  **Shapiro-Wilk test**: `shapiro.test()`. p \> 0.05 = consistent with normality.
+
+> **Important:** Shapiro-Wilk has low power with small samples (n \< 30). A non-significant result with n = 15 does *not* confirm normality. Rely more on the histogram with small samples.
+
+```{r normality-examples}
+library(ggplot2)
+set.seed(42)
+
+normal_data    <- rnorm(100, mean = 50, sd = 10)
+skewed_data    <- rexp(100, rate = 0.1)
+bimodal_data   <- c(rnorm(50, mean = 40, sd = 5), rnorm(50, mean = 60, sd = 5))
+
+par(mfrow = c(1, 3))
+hist(normal_data,  main = "Normal",  xlab = "Value", col = "steelblue", breaks = 15)
+hist(skewed_data,  main = "Skewed",  xlab = "Value", col = "tomato",    breaks = 15)
+hist(bimodal_data, main = "Bimodal", xlab = "Value", col = "darkgreen", breaks = 15)
+par(mfrow = c(1, 1))
+
+cat("Shapiro-Wilk:\n")
+cat("Normal  p =", round(shapiro.test(normal_data)$p.value,  4), "\n")
+cat("Skewed  p =", round(shapiro.test(skewed_data)$p.value,  4), "\n")
+cat("Bimodal p =", round(shapiro.test(bimodal_data)$p.value, 4), "\n")
+```
+
+# Effect sizes — quick reference
+
+Always report an effect size. A p-value tells you whether an effect exists; an effect size tells you how large it is.
+
+| Test | Effect size | Interpretation |
+|----|----|----|
+| t-test | Cohen's d | 0.2 small, 0.5 medium, 0.8 large |
+| Mann-Whitney | Rank-biserial r | 0.1 small, 0.3 medium, 0.5 large |
+| ANOVA / Kruskal-Wallis | η² (eta-squared) | 0.01 small, 0.06 medium, 0.14 large |
+| Chi-squared | Cramér's V | \< 0.1 negligible, 0.1–0.3 weak, 0.3–0.5 moderate, \> 0.5 strong |
+| Pearson/Spearman | r (correlation) | 0.1 weak, 0.3 moderate, 0.5 strong |
+| Regression | R² | proportion of variance explained |
+| GLM | McFadden's pseudo-R² | proportion of deviance explained |
+| Meta-analysis | Pooled SMD | 0.2 small, 0.5 medium, 0.8 large |
+
+# Reporting p-values
+
+-   **p \< 0.001**: report as p \< 0.001 (not p = 0.000)
+-   **p = 0.042**: report to 3 decimal places
+-   **p \> 0.05**: report as p = \_\_\_ (not "ns" alone); include the actual value
+-   Always accompany with test statistic, degrees of freedom, and effect size
+
+**Template (t-test):** \> *"Males were significantly taller than females (t(df) = value, p = value, Cohen's d = value)."*
+
+**Template (chi-squared):** \> *"There was a significant association between sex and smoking status (χ²(df) = value, p = value, Cramér's V = value)."*
+
+**Template (correlation):** \> *"Height was significantly positively correlated with weight (Pearson's r(df) = value, p = value)."*
+
+**Template (regression):** \> *"Height significantly predicted weight (β = value, F(df1, df2) = value, p = value, R² = value)."*
+
+------------------------------------------------------------------------
+
+# Quick practice
+
+```{r load-data}
+d <- read.csv(
+  "https://raw.githubusercontent.com/ARU-life-sciences/bioinformatics/main/R/statistics/data/form-1__anthropometrics.csv",
+  header = TRUE, stringsAsFactors = TRUE
+)
+```
+
+For each question below, (a) state which test to use and why, (b) run the test, (c) report the result in a sentence.
+
+## Question 1
+
+Does body temperature (`X13_Body_temp_celsius`) differ between smokers and non-smokers (`X8_Smoker`)?
+
+*Insert R code and answer here*
+
+## Question 2
+
+Is there a relationship between age (`X4_Age_in_years`) and systolic blood pressure (`X14_Systolic_blood_pre`)?
+
+*Insert R code and answer here*
+
+## Question 3
+
+Is blood group (`X9_Blood_group`) independent of sex (`X3_Gender`)?
+
+*Insert R code and answer here*
+
+## Question 4
+
+Does activity level (`X7_Activity_Level_NAS`) affect BMI? First create a BMI column.
+
+*Insert R code and answer here*
